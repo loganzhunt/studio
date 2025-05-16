@@ -1,14 +1,25 @@
-import * as React from 'react';
 import type { Facet, FacetName } from '@/types';
 import { Atom, Brain, Zap, Heart, BookOpen, Globe, Target, HelpCircle } from 'lucide-react';
+import * as React from 'react';
+import type { LucideIcon } from 'lucide-react';
 
 // Helper to ensure all props are passed to LucideIcon if it's used directly.
 // This is mostly for type consistency if we mix LucideIcon and custom SVGs.
-const IconWrapper = (IconComponent: React.ComponentType<React.SVGProps<SVGSVGElement>>): React.FC<React.SVGProps<SVGSVGElement>> => {
-  return (props: React.SVGProps<SVGSVGElement>): JSX.Element => {
-    return <IconComponent {...props} />;
+const IconWrapper = (IconComponent: React.ComponentType<React.SVGProps<SVGSVGElement>>)
+  : React.FC<React.SVGProps<SVGSVGElement>> =>
+{
+  const WrappedComponent: React.FC<React.SVGProps<SVGSVGElement>> = (props) => {
+    // Changed to React.createElement to avoid JSX parsing issues in .ts file
+    return React.createElement(IconComponent, props);
   };
+
+  // Set a display name for better debugging in React DevTools
+  const componentName = (IconComponent as any).displayName || (IconComponent as any).name || 'Component';
+  WrappedComponent.displayName = `IconWrapper(${componentName})`;
+
+  return WrappedComponent;
 };
+
 
 export const FACET_NAMES: FacetName[] = [
   "Ontology", 
@@ -81,4 +92,6 @@ export const FACETS: Record<FacetName, Facet> = {
 
 export const getFacetByName = (name: FacetName): Facet => FACETS[name];
 
-export const DEFAULT_FACET_ICON: React.FC<React.SVGProps<SVGSVGElement>> = IconWrapper(HelpCircle);
+// Ensuring DEFAULT_FACET_ICON also uses the IconWrapper and is typed correctly.
+// LucideIcon type might be more specific than React.FC, so we use React.FC for the type here.
+export const DEFAULT_FACET_ICON: React.FC<React.SVGProps<SVGSVGElement>> = IconWrapper(HelpCircle as LucideIcon);
