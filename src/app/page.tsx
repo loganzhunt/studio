@@ -29,21 +29,8 @@ export default function HomePage() {
   ];
 
   return (
-    <div className="flex flex-col min-h-screen">
-      {/* Header Section */}
-      <header className="py-4 border-b border-border/30">
-        <div className="container mx-auto flex justify-between items-center">
-          <Icons.logo className="h-10 w-auto" />
-          <nav className="space-x-4">
-            <Button variant="ghost" asChild>
-              <Link href="/dashboard">Dashboard</Link>
-            </Button>
-            <Button variant="default" asChild>
-              <Link href="/assessment">Begin Assessment</Link>
-            </Button>
-          </nav>
-        </div>
-      </header>
+    <div className="flex flex-col"> {/* Removed min-h-screen, as RootLayout handles it */}
+      {/* Header Section Removed - Global header will take its place */}
 
       <main className="flex-1">
         {/* Hero Section */}

@@ -40,15 +40,6 @@
     --chart-4: hsl(var(--domain-axiology));
     --chart-5: hsl(var(--domain-mythology));
     /* Need to define more chart colors if more than 5 are used simultaneously or use domain colors directly */
-
-    --sidebar-background: 220 20% 7%;
-    --sidebar-foreground: 220 10% 75%;
-    --sidebar-primary: hsl(var(--primary));
-    --sidebar-primary-foreground: hsl(var(--primary-foreground));
-    --sidebar-accent: hsl(var(--accent));
-    --sidebar-accent-foreground: hsl(var(--accent-foreground));
-    --sidebar-border: 220 15% 20%;
-    --sidebar-ring: hsl(var(--ring));
   }
 }
 

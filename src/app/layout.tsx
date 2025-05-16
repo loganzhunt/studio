@@ -1,16 +1,17 @@
 
 import type {Metadata} from 'next';
-import { Geist, Geist_Mono } from 'next/font/google'; // Corrected import from 'next/font/google'
+import { Geist, Geist_Mono } from 'next/font/google';
 import './globals.css';
 import { Toaster } from "@/components/ui/toaster";
 import { WorldviewProvider } from "@/contexts/worldview-context";
+import { Header } from "@/components/layout/header"; // Import the new Header
 
-const geistSans = Geist({ // Corrected instantiation
+const geistSans = Geist({
   variable: '--font-geist-sans',
   subsets: ['latin'],
 });
 
-const geistMono = Geist_Mono({ // Corrected instantiation
+const geistMono = Geist_Mono({
   variable: '--font-geist-mono',
   subsets: ['latin'],
 });
@@ -27,9 +28,12 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className="dark">
-      <body className={`${geistSans.variable} ${geistMono.variable} antialiased bg-background text-foreground`}>
+      <body className={`${geistSans.variable} ${geistMono.variable} antialiased bg-background text-foreground flex flex-col min-h-screen`}>
         <WorldviewProvider>
-          {children}
+          <Header /> {/* Add the global Header */}
+          <div className="flex-grow"> {/* This div will ensure footer (if any) stays at bottom */}
+            {children}
+          </div>
           <Toaster />
         </WorldviewProvider>
       </body>
