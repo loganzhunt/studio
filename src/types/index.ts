@@ -1,4 +1,5 @@
 import type { LucideIcon } from 'lucide-react';
+import type { Icons } from '@/components/icons'; // Import Icons type
 
 export type FacetName = 
   | "Ontology" 
@@ -63,7 +64,7 @@ export interface WorldviewContextType {
 export type NavItem = {
   title: string;
   href: string;
-  icon?: LucideIcon;
+  icon?: keyof typeof Icons; // Changed from LucideIcon
   disabled?: boolean;
   external?: boolean;
   label?: string;
