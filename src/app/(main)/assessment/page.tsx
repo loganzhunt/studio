@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
@@ -11,7 +11,8 @@ import { FACETS, FACET_NAMES } from '@/config/facets';
 import type { FacetName } from '@/types';
 import { Icons } from '@/components/icons';
 import { useWorldview } from '@/hooks/use-worldview';
-import { useRouter } from 'next/navigation'; // For navigation after completion
+import { useRouter } from 'next/navigation';
+import { useToast } from '@/hooks/use-toast'; // Import useToast
 
 const LIKERT_SCALE_OPTIONS = [
   { value: 1, label: "Strongly Disagree" },
@@ -23,8 +24,10 @@ const LIKERT_SCALE_OPTIONS = [
 
 export default function AssessmentPage() {
   const [currentFacetIndex, setCurrentFacetIndex] = useState(0);
-  const { assessmentAnswers, updateAssessmentAnswer, calculateDomainScores, domainScores: contextDomainScores } = useWorldview();
+  const { assessmentAnswers, updateAssessmentAnswer, calculateDomainScores } = useWorldview();
   const router = useRouter();
+  const { toast } = useToast(); // Initialize useToast
+  const [isProcessing, setIsProcessing] = useState(false); // For button disabling
 
   const currentFacetName = FACET_NAMES[currentFacetIndex];
   const currentFacet = FACETS[currentFacetName];
@@ -39,26 +42,56 @@ export default function AssessmentPage() {
     });
   }, [assessmentAnswers, currentFacet, currentFacetName]);
 
-  const handleNext = () => {
-    if (!areAllCurrentQuestionsAnswered) {
-      alert("Please answer all questions in this section before proceeding.");
+  const handleNext = async () => { // Make it async if you plan more async ops inside
+    if (!areAllCurrentQuestionsAnswered && currentFacetIndex < totalFacets - 1) {
+      toast({
+        title: "Incomplete Section",
+        description: "Please answer all questions in this section before proceeding.",
+        variant: "destructive",
+      });
       return;
     }
 
+    setIsProcessing(true);
+
     if (currentFacetIndex < totalFacets - 1) {
       setCurrentFacetIndex(currentFacetIndex + 1);
+      // Answers are persisted on change via context, so no explicit action needed here
+      // for immediate persistence before navigating sections.
+      setTimeout(() => setIsProcessing(false), 300); // Re-enable button after a short delay
     } else {
-      // Last facet, calculate scores and save
-      const calculatedScores = calculateDomainScores(); // This updates context AND returns scores
-      localStorage.setItem("metaPrismAssessmentScores", JSON.stringify(calculatedScores));
-      alert("Assessment Complete! Your scores have been calculated and saved. You will now be taken to the results page.");
-      router.push('/results'); 
+      // Last facet, "Finish Assessment"
+      router.push('/results'); // Navigate immediately
+
+      // Perform scoring and final localStorage save in the background
+      setTimeout(() => {
+        try {
+          const calculatedScores = calculateDomainScores(); // Updates context scores & triggers context's persist
+          localStorage.setItem("metaPrismAssessmentScores", JSON.stringify(calculatedScores));
+          
+          toast({
+            title: "Assessment Complete!",
+            description: "Your scores have been calculated and saved. Redirecting to results...",
+          });
+          // setIsProcessing(false); // Button is no longer on this page
+        } catch (error) {
+          console.error("Error during background score calculation/saving:", error);
+          toast({
+            title: "Scoring Error",
+            description: "There was an issue calculating or saving your scores. Your answers are saved, you can try viewing results later or retaking the assessment.",
+            variant: "destructive",
+          });
+          // setIsProcessing(false); // Button is no longer on this page
+        }
+      }, 0); // setTimeout with 0ms pushes it to the event loop after navigation
     }
   };
 
   const handlePrevious = () => {
     if (currentFacetIndex > 0) {
+      setIsProcessing(true);
       setCurrentFacetIndex(currentFacetIndex - 1);
+      setTimeout(() => setIsProcessing(false), 300);
     }
   };
 
@@ -68,7 +101,6 @@ export default function AssessmentPage() {
   };
 
   if (!currentFacet) {
-    // Should not happen if FACET_NAMES and FACETS are correctly configured
     return <div>Loading facet information...</div>;
   }
 
@@ -88,7 +120,7 @@ export default function AssessmentPage() {
           <Progress value={progress} className="w-full mt-4 h-3" />
         </CardHeader>
         <CardContent className="space-y-8">
-          <form>
+          <form onSubmit={(e) => { e.preventDefault(); handleNext(); }}> {/* Allow Enter to submit form */}
             {currentFacet.questions.map((question, index) => (
               <div 
                 key={index} 
@@ -114,23 +146,30 @@ export default function AssessmentPage() {
                 </RadioGroup>
               </div>
             ))}
+             {/* Hidden submit button to allow form submission on Enter key press */}
+             <button type="submit" disabled={isProcessing} className="hidden"></button>
           </form>
         </CardContent>
         <CardFooter className="flex justify-between mt-6">
-          <Button variant="outline" size="lg" onClick={handlePrevious} disabled={currentFacetIndex === 0}>
+          <Button variant="outline" size="lg" onClick={handlePrevious} disabled={currentFacetIndex === 0 || isProcessing}>
             <Icons.chevronRight className="mr-2 h-5 w-5 rotate-180" /> Previous
           </Button>
           <Button 
             size="lg" 
             onClick={handleNext} 
-            disabled={!areAllCurrentQuestionsAnswered && currentFacetIndex < totalFacets -1} // Allow finish even if not all answered on last page for now, but next is blocked
-            className={!areAllCurrentQuestionsAnswered && currentFacetIndex < totalFacets -1 ? "opacity-50 cursor-not-allowed" : ""}
+            disabled={isProcessing || (!areAllCurrentQuestionsAnswered && currentFacetIndex < totalFacets - 1)}
+            className={cn(
+              (!areAllCurrentQuestionsAnswered && currentFacetIndex < totalFacets - 1) && "opacity-60 cursor-not-allowed",
+              isProcessing && "opacity-70"
+            )}
           >
+            {isProcessing && <Icons.loader className="mr-2 h-5 w-5 animate-spin" />}
             {currentFacetIndex === totalFacets - 1 ? 'Finish Assessment' : 'Next'}
-            <Icons.chevronRight className="ml-2 h-5 w-5" />
+            {currentFacetIndex < totalFacets - 1 && <Icons.chevronRight className="ml-2 h-5 w-5" />}
           </Button>
         </CardFooter>
       </Card>
     </div>
   );
 }
+
