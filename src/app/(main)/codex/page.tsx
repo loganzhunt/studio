@@ -464,3 +464,281 @@ const newRawCodexDataBatch = [
     "tags": ["archetypal", "courage", "strength", "mastery"]
   }
 ];
+
+
+// Helper Functions (defined above the component)
+const getDominantFacet = (scores: DomainScore[]): FacetName => {
+  if (!scores || scores.length === 0) return FACET_NAMES[0]; // Default
+  return scores.reduce((prev, current) => (prev.score > current.score) ? prev : current).facetName || FACET_NAMES[0];
+};
+
+const mapRawDataToCodexEntries = (rawData: any[]): CodexEntry[] => {
+  return rawData.map((item: any) => {
+    const domainScoresArray: DomainScore[] = FACET_NAMES.map(facetKey => {
+      let score = 0.5; // Default score
+      if (item.domainScores && typeof item.domainScores === 'object') {
+        const capitalizedScore = item.domainScores[facetKey as FacetName];
+        const lowercaseKey = facetKey.toLowerCase();
+        // The type assertion `as keyof typeof item.domainScores` might be too broad if keys are mixed.
+        // A more direct check or consistent key casing in raw data is safer.
+        const lowercaseScore = item.domainScores[lowercaseKey]; 
+
+        if (typeof capitalizedScore === 'number') {
+          score = capitalizedScore;
+        } else if (typeof lowercaseScore === 'number') {
+          score = lowercaseScore;
+        }
+      }
+      return { facetName: facetKey, score: Math.max(0, Math.min(1, Number(score))) };
+    });
+
+    const processedFacetSummaries: { [K_FacetName in FacetName]?: string } = {};
+    const rawSummaries = item.facetSummary || item.facetSummaries;
+    if (rawSummaries && typeof rawSummaries === 'object') {
+      for (const facetKey of FACET_NAMES) {
+        const capitalizedSummary = rawSummaries[facetKey as FacetName];
+        const lowercaseKey = facetKey.toLowerCase();
+        // Similar to scores, direct check or consistent casing.
+        const lowercaseSummary = rawSummaries[lowercaseKey];
+        
+        if (typeof capitalizedSummary === 'string') {
+          processedFacetSummaries[facetKey] = capitalizedSummary;
+        } else if (typeof lowercaseSummary === 'string') {
+          processedFacetSummaries[facetKey] = lowercaseSummary;
+        }
+      }
+    }
+
+    const tags = Array.isArray(item.tags) ? item.tags : [];
+    let category: CodexEntry['category'] = 'custom';
+    const lowerCaseTags = tags.map(t => typeof t === 'string' ? t.toLowerCase() : '');
+
+    if (lowerCaseTags.includes('philosophical') || lowerCaseTags.includes('philosophy')) category = 'philosophical';
+    else if (lowerCaseTags.includes('religious') || lowerCaseTags.includes('faith')) category = 'religious';
+    else if (lowerCaseTags.includes('archetypal') || lowerCaseTags.includes('archetype')) category = 'archetypal';
+    else if (lowerCaseTags.includes('mystical')) category = 'philosophical'; // Or a new 'mystical' category
+    else if (lowerCaseTags.includes('scientific')) category = 'philosophical'; // Or a new 'scientific' category
+    else if (lowerCaseTags.includes('cultural')) category = 'custom'; // Or a new 'cultural' category
+    else if (lowerCaseTags.includes('indigenous')) category = 'custom'; // Or a new 'indigenous' category
+    
+
+    return {
+      id: item.name.toLowerCase().replace(/\s+/g, '_'),
+      title: item.name,
+      summary: item.summary,
+      domainScores: domainScoresArray,
+      facetSummaries: processedFacetSummaries,
+      category,
+      tags: tags,
+      isArchetype: lowerCaseTags.includes('archetypal'),
+      createdAt: new Date().toISOString(),
+    };
+  });
+};
+
+
+export default function CodexPage() {
+  const [searchTerm, setSearchTerm] = useState('');
+  const [sortBy, setSortBy] = useState('name_asc');
+  const [activeCategory, setActiveCategory] = useState<CodexEntry['category'] | 'all'>('all');
+  const [selectedEntry, setSelectedEntry] = useState<CodexEntry | null>(null);
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+
+  const initialMappedEntries = useMemo(() => {
+    const allRawData: any[] = [...existingRawCodexData];
+    const existingNames = new Set(existingRawCodexData.map(entry => entry.name.toLowerCase()));
+    
+    newRawCodexDataBatch.forEach(newEntry => {
+      if (newEntry && typeof newEntry.name === 'string' && !existingNames.has(newEntry.name.toLowerCase())) {
+        allRawData.push(newEntry);
+        existingNames.add(newEntry.name.toLowerCase()); // Add to set to prevent duplicates from within the batch itself if any
+      }
+    });
+    return mapRawDataToCodexEntries(allRawData);
+  }, []);
+
+
+  const filteredAndSortedEntries = useMemo(() => {
+    let entries = [...initialMappedEntries];
+
+    // Filter by category
+    if (activeCategory !== 'all') {
+      entries = entries.filter(entry => entry.category === activeCategory);
+    }
+
+    // Filter by search term
+    if (searchTerm) {
+      entries = entries.filter(entry =>
+        entry.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        entry.summary?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (entry.tags && entry.tags.some(tag => tag.toLowerCase().includes(searchTerm.toLowerCase())))
+      );
+    }
+
+    // Sort entries
+    switch (sortBy) {
+      case 'name_asc':
+        entries.sort((a, b) => a.title.localeCompare(b.title));
+        break;
+      case 'name_desc':
+        entries.sort((a, b) => b.title.localeCompare(a.title));
+        break;
+      // Add more sort options if needed (e.g., by dominant facet, date created)
+    }
+    return entries;
+  }, [initialMappedEntries, searchTerm, sortBy, activeCategory]);
+
+  const handleOpenDrawer = (entry: CodexEntry) => {
+    setSelectedEntry(entry);
+    setIsDrawerOpen(true);
+  };
+
+  const categories: (CodexEntry['category'] | 'all')[] = ['all', 'philosophical', 'religious', 'archetypal', 'custom'];
+
+  // CodexCard component defined inside CodexPage
+  const CodexCard = ({ entry }: { entry: CodexEntry }) => {
+    const dominantFacet = getDominantFacet(entry.domainScores);
+    const titleColor = getFacetColorHsl(dominantFacet);
+    
+    return (
+      <Card className="flex flex-col overflow-hidden glassmorphic-card hover:shadow-primary/20 transition-shadow duration-300 h-full">
+        <CardHeader>
+          <CardTitle className="text-xl" style={{ color: titleColor }}>{entry.title}</CardTitle>
+          <CardDescription className="h-16 line-clamp-3 text-xs">{entry.summary}</CardDescription>
+        </CardHeader>
+        <CardContent className="flex-grow flex flex-col justify-center items-center">
+          <TriangleChart scores={entry.domainScores} width={180} height={156} className="!p-0 !bg-transparent !shadow-none !backdrop-blur-none mb-3" />
+          {/* Tags were previously here, now hidden */}
+        </CardContent>
+        <CardFooter className="p-4 border-t border-border/30 mt-auto">
+          <Button variant="outline" size="sm" className="w-full" onClick={() => handleOpenDrawer(entry)}>
+            Facet Details <Icons.chevronRight className="ml-1 h-4 w-4" />
+          </Button>
+        </CardFooter>
+      </Card>
+    );
+  };
+
+
+  return (
+    <div className="container mx-auto py-8">
+      <header className="mb-8 text-center">
+        <h1 className="text-4xl font-bold mb-2">The Codex</h1>
+        <p className="text-xl text-muted-foreground">
+          Explore a library of worldviews, archetypes, and philosophical systems.
+        </p>
+      </header>
+
+      {/* Filters and Search Bar */}
+      <div className="mb-8 p-4 glassmorphic-card rounded-lg">
+        <div className="flex flex-col md:flex-row gap-4 items-center">
+          <Input
+            type="search"
+            placeholder="Search Codex (name, summary, tags)..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="flex-grow bg-background/70"
+          />
+          <div className="flex items-center gap-2">
+            <span className="text-sm text-muted-foreground">Sort by:</span>
+            <Select value={sortBy} onValueChange={setSortBy}>
+              <SelectTrigger className="w-[180px] bg-background/70">
+                <SelectValue placeholder="Sort by..." />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="name_asc">Name (A-Z)</SelectItem>
+                <SelectItem value="name_desc">Name (Z-A)</SelectItem>
+                {/* <SelectItem value="dominant_facet">Dominant Facet</SelectItem> */}
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
+        <div className="mt-4 flex flex-wrap gap-2 justify-center">
+          {categories.map(category => (
+            <Button
+              key={category}
+              variant={activeCategory === category ? "default" : "outline"}
+              size="sm"
+              onClick={() => setActiveCategory(category)}
+              className="capitalize"
+            >
+              {category}
+            </Button>
+          ))}
+        </div>
+      </div>
+      
+      {filteredAndSortedEntries.length > 0 ? (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          {filteredAndSortedEntries.map((entry) => (
+            <CodexCard key={entry.id} entry={entry} />
+          ))}
+        </div>
+      ) : (
+        <div className="text-center py-12">
+          <Icons.search className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
+          <p className="text-xl text-muted-foreground">No entries match your criteria.</p>
+        </div>
+      )}
+
+
+      {/* Details Drawer */}
+      {selectedEntry && (
+        <Sheet open={isDrawerOpen} onOpenChange={setIsDrawerOpen}>
+          <SheetContent className="w-full max-w-md sm:max-w-lg md:max-w-xl lg:max-w-2xl p-0 glassmorphic-card !bg-card/80 backdrop-blur-xl" side="right">
+            <ScrollArea className="h-full">
+              <div className="p-6">
+                <SheetHeader className="mb-6">
+                  <div className="flex justify-between items-start">
+                    <div>
+                      <SheetTitle className="text-3xl mb-1" style={{color: getFacetColorHsl(getDominantFacet(selectedEntry.domainScores))}}>
+                        {selectedEntry.title}
+                      </SheetTitle>
+                      <SheetDescription className="text-base capitalize">{selectedEntry.category} Worldview</SheetDescription>
+                    </div>
+                    <SheetClose asChild>
+                      <Button variant="ghost" size="icon" className="rounded-full">
+                        <Icons.close className="h-5 w-5" />
+                      </Button>
+                    </SheetClose>
+                  </div>
+                </SheetHeader>
+                
+                <p className="mb-6 text-muted-foreground leading-relaxed">{selectedEntry.summary}</p>
+
+                <div className="space-y-4 mb-6">
+                  <h3 className="text-xl font-semibold text-foreground mb-3 border-b border-border/30 pb-2">Facet Breakdown</h3>
+                  {FACET_NAMES.map(facetName => {
+                    const scoreObj = selectedEntry.domainScores.find(ds => ds.facetName === facetName);
+                    const score = scoreObj ? scoreObj.score : 0;
+                    const facetSummary = selectedEntry.facetSummaries?.[facetName] || `Detailed insights into ${selectedEntry.title}'s approach to ${facetName.toLowerCase()}...`;
+                    
+                    return (
+                      <div key={facetName} className="p-4 rounded-md border border-border/30 bg-background/40">
+                        <div className="flex justify-between items-center mb-1">
+                          <h4 className="text-lg font-semibold" style={{color: getFacetColorHsl(facetName)}}>
+                            {facetName}
+                          </h4>
+                          <span className="text-sm font-bold" style={{color: getFacetColorHsl(facetName)}}>{Math.round(score * 100)}%</span>
+                        </div>
+                        <p className="text-xs text-muted-foreground italic mb-1">{FACETS[facetName].tagline}</p>
+                        <p className="text-sm text-muted-foreground">{facetSummary}</p>
+                      </div>
+                    );
+                  })}
+                </div>
+                
+                <Button variant="link" asChild className="p-0 text-primary">
+                  <Link href={`/codex/${selectedEntry.id}`}>
+                    View Full Deep-Dive for {selectedEntry.title} <Icons.chevronRight className="ml-1 h-4 w-4" />
+                  </Link>
+                </Button>
+              </div>
+            </ScrollArea>
+          </SheetContent>
+        </Sheet>
+      )}
+    </div>
+  );
+}
+
