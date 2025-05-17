@@ -17,7 +17,7 @@ import { FACETS, FACET_NAMES } from "@/config/facets";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription, SheetClose } from "@/components/ui/sheet";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Badge } from '@/components/ui/badge';
-import { getFacetColorHsl } from '@/lib/colors'; // Moved from here
+import { getFacetColorHsl } from '@/lib/colors';
 
 
 // --- Data Definitions ---
@@ -436,37 +436,96 @@ const newRawCodexDataBatch = [
     "facetSummary": { "ontology": "Only the natural world exists.", "epistemology": "Reason and science guide knowledge.", "praxeology": "Action pursues human flourishing.", "axiology": "Human welfare and autonomy are highest values.", "mythology": "Myth is cultural heritage.", "cosmology": "The universe is natural and knowable.", "teleology": "Purpose is human-created." },
     "tags": ["philosophical", "secular", "ethics"]
   },
-    // Archetype data
   {
-    "name": "The Sage Archetype",
-    "summary": "Represents wisdom, knowledge, and truth. The Sage seeks understanding and enlightenment through introspection and learning.",
-    "domainScores": FACET_NAMES.reduce((acc, name) => {
-        acc[name as FacetName] = name === "Epistemology" ? 0.9 : (name === "Ontology" ? 0.8 : Math.random() * 0.5 + 0.2); // Ensure scores are between 0.2 and 0.7 for non-dominant, or higher for dominant
-        return acc;
-    }, {} as Record<FacetName, number>),
-    "facetSummary": FACET_NAMES.reduce((acc, name) => {
-        acc[name as FacetName] = `The Sage's approach to ${name.toLowerCase()} emphasizes deep understanding and intellectual clarity.`;
-        return acc;
-    }, {} as Record<FacetName, string>),
-    "tags": ["archetypal", "wisdom", "knowledge"]
+    "name": "Shinto",
+    "summary": "The indigenous spirituality of Japan, centering on reverence for kami (spirits) in nature and ancestral tradition.",
+    "facetScores": {
+      "ontology": 0.7, "epistemology": 0.5, "praxeology": 0.8, "axiology": 0.7, "mythology": 0.9, "cosmology": 0.6, "teleology": 0.6
+    },
+    "facetSummaries": {
+      "ontology": "World inhabited by kami (sacred presences) in all things.", "epistemology": "Knowledge comes from tradition and ritual experience.", "praxeology": "Practice is honoring kami and preserving purity.", "axiology": "Respect, purity, and harmony are core values.", "mythology": "Myth shapes the spiritual and social order.", "cosmology": "Cosmos is interconnected and animated.", "teleology": "Purpose is harmonious living with nature and ancestors."
+    },
+    "tags": ["religious", "indigenous", "japanese"] // Added tags
   },
   {
-    "name": "The Hero Archetype",
-    "summary": "Represents the drive for mastery and competence. The Hero strives to prove their worth through courageous acts.",
-     "domainScores": FACET_NAMES.reduce((acc, name) => {
-        acc[name as FacetName] = name === "Praxeology" ? 0.9 : (name === "Teleology" ? 0.8 : Math.random() * 0.5 + 0.2);
-        return acc;
-    }, {} as Record<FacetName, number>),
-    "facetSummary": FACET_NAMES.reduce((acc, name) => {
-        acc[name as FacetName] = `The Hero's path in ${name.toLowerCase()} involves decisive action, overcoming challenges, and striving for achievement.`;
-        return acc;
-    }, {} as Record<FacetName, string>),
-    "tags": ["archetypal", "courage", "strength", "mastery"]
+    "name": "Sikhism",
+    "summary": "A monotheistic Indian religion founded by Guru Nanak, teaching devotion, equality, and service.",
+    "facetScores": {
+      "ontology": 0.9, "epistemology": 0.8, "praxeology": 0.9, "axiology": 0.9, "mythology": 0.7, "cosmology": 0.7, "teleology": 0.9
+    },
+    "facetSummaries": {
+      "ontology": "One divine reality pervades all.", "epistemology": "Truth revealed by Guru and selfless living.", "praxeology": "Service, justice, and devotion are central practices.", "axiology": "Equality and compassion guide ethics.", "mythology": "Stories of Gurus guide moral vision.", "cosmology": "Creation as divine play (lila).", "teleology": "Union with God is life’s goal."
+    },
+    "tags": ["religious", "monotheistic", "indian"] // Added tags
+  },
+  // Note: Stoicism is already present; merge logic should handle.
+  // {
+  //   "name": "Stoicism", 
+  //   "summary": "A Greco-Roman philosophy teaching virtue, self-control, and alignment with nature's order.",
+  //   "facetScores": { "ontology": 0.7, "epistemology": 0.8, "praxeology": 1.0, "axiology": 0.9, "mythology": 0.3, "cosmology": 0.8, "teleology": 1.0 },
+  //   "facetSummaries": { "ontology": "Nature is rational and ordered.", "epistemology": "Wisdom comes through reason and reflection.", "praxeology": "Virtue is practiced through self-mastery.", "axiology": "Virtue is the highest good.", "mythology": "Myth is subordinate to philosophy.", "cosmology": "World is a living, rational organism.", "teleology": "Goal is to live in harmony with nature." }
+  // },
+  // Note: Sufism is already present; merge logic should handle.
+  // {
+  //   "name": "Sufism",
+  //   "summary": "The mystical dimension of Islam, focusing on direct experience of God through love and devotion.",
+  //   "facetScores": { "ontology": 0.9, "epistemology": 0.8, "praxeology": 0.8, "axiology": 0.9, "mythology": 0.9, "cosmology": 0.8, "teleology": 1.0 },
+  //   "facetSummaries": { "ontology": "God is the only true reality.", "epistemology": "Truth found in direct mystical experience.", "praxeology": "Practice is remembrance (dhikr) and love.", "axiology": "Love and selfless devotion are highest values.", "mythology": "Poetry and parable express divine realities.", "cosmology": "Creation is a reflection of God’s beauty.", "teleology": "Aim is annihilation of the self in God (fana)." }
+  // },
+  // Note: Taoism is already present; merge logic should handle.
+  // {
+  //   "name": "Taoism",
+  //   "summary": "An ancient Chinese tradition emphasizing harmony with the Tao (the Way), simplicity, and naturalness.",
+  //   "facetScores": { "ontology": 0.8, "epistemology": 0.7, "praxeology": 0.8, "axiology": 0.8, "mythology": 0.8, "cosmology": 0.8, "teleology": 0.8 },
+  //   "facetSummaries": { "ontology": "Reality is a dynamic, living process (Tao).", "epistemology": "Wisdom comes from contemplation and experience.", "praxeology": "Action flows from non-action (wu wei).", "axiology": "Simplicity, spontaneity, and humility are valued.", "mythology": "Myths illustrate cosmic order and paradox.", "cosmology": "Yin and yang structure all phenomena.", "teleology": "Goal is harmony and balance with Tao." }
+  // },
+  {
+    "name": "Transhumanism",
+    "summary": "A movement advocating for transforming the human condition via advanced technology, reason, and science.",
+    "facetScores": {
+      "ontology": 0.3, "epistemology": 0.9, "praxeology": 0.9, "axiology": 0.7, "mythology": 0.2, "cosmology": 0.5, "teleology": 0.9
+    },
+    "facetSummaries": {
+      "ontology": "Reality is material and technologically malleable.", "epistemology": "Knowledge expands through science and innovation.", "praxeology": "Ethics guide responsible enhancement.", "axiology": "Human flourishing and intelligence are values.", "mythology": "Myth is repurposed for scientific narrative.", "cosmology": "Universe is a frontier for exploration.", "teleology": "Aim is transcending biological limitations."
+    },
+    "tags": ["philosophical", "futurism", "technology"] // Added tags
+  },
+  // Note: Unitarian Universalism is already present; merge logic should handle.
+  // {
+  //   "name": "Unitarian Universalism",
+  //   "summary": "A pluralistic, open faith affirming freedom of belief and valuing wisdom from all traditions.",
+  //   "facetScores": { "ontology": 0.5, "epistemology": 0.7, "praxeology": 0.8, "axiology": 0.9, "mythology": 0.5, "cosmology": 0.5, "teleology": 0.7 },
+  //   "facetSummaries": { "ontology": "Reality is interpreted diversely.", "epistemology": "Truth is sought through many sources.", "praxeology": "Ethics pursue justice and compassion.", "axiology": "Dignity, equity, and community are values.", "mythology": "Myth is honored for its insight.", "cosmology": "Many cosmologies coexist.", "teleology": "Purpose is self-actualization and service." }
+  // },
+  {
+    "name": "Wicca",
+    "summary": "A modern pagan religion honoring nature, cycles, and the divine feminine and masculine.",
+    "facetScores": {
+      "ontology": 0.7, "epistemology": 0.6, "praxeology": 0.8, "axiology": 0.8, "mythology": 0.9, "cosmology": 0.7, "teleology": 0.7
+    },
+    "facetSummaries": {
+      "ontology": "Nature is sacred and divine.", "epistemology": "Knowledge arises from experience and ritual.", "praxeology": "Practice involves ritual, magic, and attunement.", "axiology": "Balance, harm none, and celebrate life.", "mythology": "Myth cycles (Wheel of the Year) guide practice.", "cosmology": "World is cyclical and interconnected.", "teleology": "Purpose is harmony with nature’s cycles."
+    },
+    "tags": ["pagan", "nature", "spiritual"] // Added tags
   }
+  // Note: Zoroastrianism is already present; merge logic should handle.
+  // {
+  //   "name": "Zoroastrianism",
+  //   "summary": "An ancient Persian faith centering on duality between truth and falsehood, light and darkness.",
+  //   "facetScores": { "ontology": 0.7, "epistemology": 0.6, "praxeology": 0.9, "axiology": 0.9, "mythology": 0.7, "cosmology": 0.7, "teleology": 0.9 },
+  //   "facetSummaries": { "ontology": "Reality is dual: truth (asha) and falsehood (druj).", "epistemology": "Knowledge is revealed by the divine.", "praxeology": "Ethical action upholds truth and order.", "axiology": "Purity and honesty are supreme values.", "mythology": "Myth enacts cosmic struggle.", "cosmology": "Cosmos is battleground for light and dark.", "teleology": "Purpose is triumph of light." }
+  // }
+  // Note: Animism is already present; merge logic should handle.
+  // {
+  //   "name": "Animism",
+  //   "summary": "A worldview in which all beings and phenomena possess spirit or agency.",
+  //   "facetScores": { "ontology": 0.8, "epistemology": 0.5, "praxeology": 0.7, "axiology": 0.8, "mythology": 1.0, "cosmology": 0.8, "teleology": 0.8 },
+  //   "facetSummaries": { "ontology": "All entities are animate, ensouled.", "epistemology": "Knowledge comes from participation and relation.", "praxeology": "Respect and reciprocity guide conduct.", "axiology": "Kinship and harmony with nature are values.", "mythology": "Myth recounts relations among beings.", "cosmology": "Cosmos is alive and interconnected.", "teleology": "Purpose is sustaining balance." }
+  // }
 ];
 
 
-// Helper Functions (defined above the component)
+// --- Helper Functions (defined above the component) ---
 const getDominantFacet = (scores: DomainScore[]): FacetName => {
   if (!scores || scores.length === 0) return FACET_NAMES[0]; // Default
   return scores.reduce((prev, current) => (prev.score > current.score) ? prev : current).facetName || FACET_NAMES[0];
@@ -479,8 +538,6 @@ const mapRawDataToCodexEntries = (rawData: any[]): CodexEntry[] => {
       if (item.domainScores && typeof item.domainScores === 'object') {
         const capitalizedScore = item.domainScores[facetKey as FacetName];
         const lowercaseKey = facetKey.toLowerCase();
-        // The type assertion `as keyof typeof item.domainScores` might be too broad if keys are mixed.
-        // A more direct check or consistent key casing in raw data is safer.
         const lowercaseScore = item.domainScores[lowercaseKey]; 
 
         if (typeof capitalizedScore === 'number') {
@@ -493,12 +550,11 @@ const mapRawDataToCodexEntries = (rawData: any[]): CodexEntry[] => {
     });
 
     const processedFacetSummaries: { [K_FacetName in FacetName]?: string } = {};
-    const rawSummaries = item.facetSummary || item.facetSummaries;
+    const rawSummaries = item.facetSummary || item.facetSummaries; // Handle both possible keys
     if (rawSummaries && typeof rawSummaries === 'object') {
       for (const facetKey of FACET_NAMES) {
         const capitalizedSummary = rawSummaries[facetKey as FacetName];
         const lowercaseKey = facetKey.toLowerCase();
-        // Similar to scores, direct check or consistent casing.
         const lowercaseSummary = rawSummaries[lowercaseKey];
         
         if (typeof capitalizedSummary === 'string') {
@@ -570,8 +626,8 @@ export default function CodexPage() {
     if (searchTerm) {
       entries = entries.filter(entry =>
         entry.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        entry.summary?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        (entry.tags && entry.tags.some(tag => tag.toLowerCase().includes(searchTerm.toLowerCase())))
+        (entry.summary && entry.summary.toLowerCase().includes(searchTerm.toLowerCase())) ||
+        (entry.tags && entry.tags.some(tag => typeof tag === 'string' && tag.toLowerCase().includes(searchTerm.toLowerCase())))
       );
     }
 
@@ -741,4 +797,3 @@ export default function CodexPage() {
     </div>
   );
 }
-
