@@ -2,17 +2,18 @@
 "use client";
 
 import { useState, useMemo } from 'react';
-import { TriangleChart } from "@/components/visualization/TriangleChart"; // Updated import
+import { TriangleChart } from "@/components/visualization/TriangleChart";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Icons } from "@/components/icons";
-import type { CodexEntry, FacetName, DomainScore } from "@/types"; // CodexEntry can represent an Archetype too
+import type { CodexEntry, FacetName, DomainScore } from "@/types";
 import { FACETS, FACET_NAMES } from "@/config/facets";
 import Link from "next/link";
 import { useWorldview } from "@/hooks/use-worldview";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription, SheetClose } from "@/components/ui/sheet";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { getFacetColorHsl } from '@/lib/colors'; // For coloring titles and labels
+import { getFacetColorHsl } from '@/lib/colors';
+import { Badge } from '@/components/ui/badge';
 
 // --- Helper Functions (can be moved to a lib if used elsewhere) ---
 const getDominantFacet = (scores: DomainScore[]): FacetName => {
@@ -20,74 +21,96 @@ const getDominantFacet = (scores: DomainScore[]): FacetName => {
   return scores.reduce((prev, current) => (prev.score > current.score) ? prev : current).facetName || FACET_NAMES[0];
 };
 
-// Dummy data for Archetypes - ensure it matches CodexEntry structure for consistency
-// Added facetSummaries (optional) and tags for better drawer display
-const dummyArchetypes: CodexEntry[] = [
+const rawArchetypeData = [
   {
-    id: "the_sage",
-    title: "The Sage",
-    summary: "Represents wisdom, knowledge, and truth. The Sage seeks understanding and enlightenment through introspection and learning.",
-    domainScores: FACET_NAMES.map(name => ({ facetName: name, score: name === "Epistemology" ? 0.9 : (name === "Ontology" ? 0.8 : Math.random() * 0.5 + 0.2) })),
-    category: "archetypal",
-    isArchetype: true,
-    createdAt: new Date().toISOString(),
-    tags: ["wisdom", "knowledge", "truth"],
-    facetSummaries: FACET_NAMES.reduce((acc, name) => {
-      acc[name] = `The Sage's approach to ${name.toLowerCase()} emphasizes deep understanding and rational inquiry.`;
-      if (name === "Epistemology") acc[name] = "Knowledge is pursued through rigorous study and reflection.";
-      if (name === "Ontology") acc[name] = "Reality is understood through layers of meaning and insight.";
-      return acc;
-    }, {} as Record<FacetName, string>),
+    "name": "The Philosopher",
+    "summary": "Seeker of wisdom, driven to question, analyze, and understand the world in depth.",
+    "facetScores": { "ontology": 0.8, "epistemology": 1.0, "praxeology": 0.7, "axiology": 0.7, "mythology": 0.6, "cosmology": 0.7, "teleology": 0.8 },
+    "facetSummaries": { "ontology": "Ponders the nature of existence and reality.", "epistemology": "Values reason, inquiry, and deep questioning.", "praxeology": "Acts through contemplation and intellectual exploration.", "axiology": "Prioritizes truth and understanding.", "mythology": "Finds meaning in stories of wisdom seekers.", "cosmology": "Sees the cosmos as a realm for discovery.", "teleology": "Purpose is lifelong learning and enlightenment." }
   },
   {
-    id: "the_explorer",
-    title: "The Explorer",
-    summary: "Embodies freedom, adventure, and discovery. The Explorer seeks new experiences and pushes boundaries to find authenticity.",
-    domainScores: FACET_NAMES.map(name => ({ facetName: name, score: name === "Praxeology" ? 0.85 : (name === "Cosmology" ? 0.75 : Math.random() * 0.5 + 0.2) })),
-    category: "archetypal",
-    isArchetype: true,
-    createdAt: new Date().toISOString(),
-    tags: ["freedom", "adventure", "discovery"],
-    facetSummaries: FACET_NAMES.reduce((acc, name) => {
-      acc[name] = `The Explorer engages ${name.toLowerCase()} with a spirit of curiosity and boundary-pushing.`;
-      if (name === "Praxeology") acc[name] = "Action is driven by the pursuit of new horizons and experiences.";
-      if (name === "Cosmology") acc[name] = "The universe is a vast territory waiting to be charted and understood.";
-      return acc;
-    }, {} as Record<FacetName, string>),
+    "name": "The Mystic",
+    "summary": "Seeks union with the transcendent through direct experience, intuition, and spiritual practice.",
+    "facetScores": { "ontology": 0.9, "epistemology": 0.8, "praxeology": 0.7, "axiology": 0.8, "mythology": 0.8, "cosmology": 0.7, "teleology": 1.0 },
+    "facetSummaries": { "ontology": "Reality is ultimately spiritual and unified.", "epistemology": "Direct experience and inner knowing are trusted.", "praxeology": "Practice is devotion, meditation, contemplation.", "axiology": "Values unity, compassion, transcendence.", "mythology": "Draws inspiration from mystical stories.", "cosmology": "Sees the cosmos as alive with spirit.", "teleology": "Purpose is awakening to divine union." }
   },
   {
-    id: "the_lover",
-    title: "The Lover",
-    summary: "Represents connection, intimacy, and passion. The Lover seeks harmony in relationships and appreciates beauty and sensuality.",
-    domainScores: FACET_NAMES.map(name => ({ facetName: name, score: name === "Axiology" ? 0.9 : (name === "Mythology" ? 0.8 : Math.random() * 0.5 + 0.2) })),
-    category: "archetypal",
-    isArchetype: true,
-    createdAt: new Date().toISOString(),
-    tags: ["connection", "intimacy", "passion"],
-    facetSummaries: FACET_NAMES.reduce((acc, name) => {
-      acc[name] = `The Lover values ${name.toLowerCase()} through connection, empathy, and aesthetic appreciation.`;
-      if (name === "Axiology") acc[name] = "The highest values are found in love, beauty, and harmonious relationships.";
-      if (name === "Mythology") acc[name] = "Stories of deep connection and union resonate with the Lover archetype.";
-      return acc;
-    }, {} as Record<FacetName, string>),
+    "name": "The Scientist",
+    "summary": "Explores the world through observation, experiment, and logical analysis.",
+    "facetScores": { "ontology": 0.2, "epistemology": 1.0, "praxeology": 0.8, "axiology": 0.6, "mythology": 0.2, "cosmology": 0.6, "teleology": 0.5 },
+    "facetSummaries": { "ontology": "Assumes a material, testable reality.", "epistemology": "Values empirical evidence above all.", "praxeology": "Experiments and theorizes to uncover truth.", "axiology": "Finds value in discovery and progress.", "mythology": "Sees myth as metaphor for human inquiry.", "cosmology": "Explores a vast, natural universe.", "teleology": "Purpose is expanding knowledge." }
   },
-   {
-    id: "the_creator",
-    title: "The Creator",
-    summary: "Driven by imagination and the desire to innovate. The Creator seeks to bring something new into existence and values self-expression.",
-    domainScores: FACET_NAMES.map(name => ({ facetName: name, score: name === "Mythology" ? 0.88 : (name === "Teleology" ? 0.78 : Math.random() * 0.5 + 0.2) })),
-    category: "archetypal",
-    isArchetype: true,
-    createdAt: new Date().toISOString(),
-    tags: ["imagination", "innovation", "expression"],
-    facetSummaries: FACET_NAMES.reduce((acc, name) => {
-      acc[name] = `The Creator manifests new forms and ideas within the realm of ${name.toLowerCase()}.`;
-      if (name === "Mythology") acc[name] = "New narratives and symbolic forms are brought forth through creative acts.";
-      if (name === "Teleology") acc[name] = "Purpose is found in the act of creation and leaving a unique mark on the world.";
-      return acc;
-    }, {} as Record<FacetName, string>),
+  {
+    "name": "The Sage",
+    "summary": "Seeks timeless wisdom and inner peace, often serving as a guide for others.",
+    "facetScores": { "ontology": 0.8, "epistemology": 0.9, "praxeology": 0.7, "axiology": 0.9, "mythology": 0.7, "cosmology": 0.7, "teleology": 0.9 },
+    "facetSummaries": { "ontology": "Sees reality as ultimately unified and knowable.", "epistemology": "Knowledge is attained through study and self-mastery.", "praxeology": "Acts with restraint and careful consideration.", "axiology": "Wisdom and benevolence are highest values.", "mythology": "Connects to archetypal stories of wise elders.", "cosmology": "Finds harmony in the cosmic order.", "teleology": "Purpose is sharing wisdom for the greater good." }
+  },
+  {
+    "name": "The Hero",
+    "summary": "Embraces challenge, transformation, and the quest for meaning through courageous action.",
+    "facetScores": { "ontology": 0.7, "epistemology": 0.6, "praxeology": 1.0, "axiology": 0.8, "mythology": 0.9, "cosmology": 0.6, "teleology": 0.9 },
+    "facetSummaries": { "ontology": "Reality is shaped through struggle and transformation.", "epistemology": "Learning comes from experience and adversity.", "praxeology": "Acts with bravery and resolve.", "axiology": "Honor, integrity, and sacrifice are key values.", "mythology": "Inspired by the hero’s journey archetype.", "cosmology": "Sees the cosmos as a stage for meaningful quests.", "teleology": "Purpose is overcoming obstacles and actualizing potential." }
+  },
+  {
+    "name": "The Alchemist",
+    "summary": "Transmutes the ordinary into the extraordinary, seeking transformation and integration.",
+    "facetScores": { "ontology": 0.8, "epistemology": 0.7, "praxeology": 0.8, "axiology": 0.8, "mythology": 0.9, "cosmology": 0.7, "teleology": 1.0 },
+    "facetSummaries": { "ontology": "Reality is ever-changing and transformable.", "epistemology": "Seeks hidden knowledge and correspondences.", "praxeology": "Engages in symbolic acts of transformation.", "axiology": "Integration, balance, and growth are valued.", "mythology": "Guided by symbols of death and rebirth.", "cosmology": "Finds cosmic cycles reflected in all things.", "teleology": "Purpose is to achieve inner and outer wholeness." }
+  },
+  {
+    "name": "The Rebel",
+    "summary": "Questions authority and the status quo, seeking freedom, authenticity, and new possibilities.",
+    "facetScores": { "ontology": 0.5, "epistemology": 0.7, "praxeology": 0.9, "axiology": 0.7, "mythology": 0.8, "cosmology": 0.4, "teleology": 0.8 },
+    "facetSummaries": { "ontology": "Challenges accepted views of reality.", "epistemology": "Seeks alternative ways of knowing.", "praxeology": "Acts independently and disrupts norms.", "axiology": "Values freedom, autonomy, and truth.", "mythology": "Draws inspiration from trickster figures.", "cosmology": "Sees the cosmos as open to change.", "teleology": "Purpose is to challenge and catalyze transformation." }
+  },
+  {
+    "name": "The Healer",
+    "summary": "Devoted to restoration, wholeness, and alleviating suffering in self and others.",
+    "facetScores": { "ontology": 0.7, "epistemology": 0.6, "praxeology": 0.8, "axiology": 0.9, "mythology": 0.8, "cosmology": 0.7, "teleology": 0.8 },
+    "facetSummaries": { "ontology": "Sees all beings as interconnected.", "epistemology": "Intuitive and experiential ways of knowing.", "praxeology": "Acts with compassion and skill.", "axiology": "Values empathy, healing, and service.", "mythology": "Guided by stories of healers and wounded ones.", "cosmology": "Cosmos as a field for restoration.", "teleology": "Purpose is the restoration of balance." }
+  },
+  {
+    "name": "The Pilgrim",
+    "summary": "Journeys through life seeking meaning, spiritual growth, and transformative experiences.",
+    "facetScores": { "ontology": 0.6, "epistemology": 0.7, "praxeology": 0.8, "axiology": 0.8, "mythology": 0.8, "cosmology": 0.7, "teleology": 0.9 },
+    "facetSummaries": { "ontology": "Sees life as a sacred journey.", "epistemology": "Learns from diverse experiences and cultures.", "praxeology": "Embraces change and new directions.", "axiology": "Values discovery, humility, and openness.", "mythology": "Inspired by pilgrimage and quest stories.", "cosmology": "Cosmos as a path of unfolding.", "teleology": "Purpose is to grow and evolve." }
   }
 ];
+
+const mapRawArchetypeToCodexEntry = (raw: any): CodexEntry => {
+  const domainScoresArray: DomainScore[] = FACET_NAMES.map(facetKey => {
+    const score = (raw.facetScores && typeof raw.facetScores === 'object' && typeof raw.facetScores[facetKey.toLowerCase()] === 'number')
+      ? raw.facetScores[facetKey.toLowerCase()]
+      : 0.5; // Default score
+    return { facetName: facetKey, score: Math.max(0, Math.min(1, Number(score))) };
+  });
+
+  const processedFacetSummaries: { [K_FacetName in FacetName]?: string } = {};
+  if (raw.facetSummaries && typeof raw.facetSummaries === 'object') {
+    for (const facetKey of FACET_NAMES) {
+      const summary = raw.facetSummaries[facetKey.toLowerCase()];
+      if (typeof summary === 'string') {
+        processedFacetSummaries[facetKey] = summary;
+      }
+    }
+  }
+
+  return {
+    id: raw.name.toLowerCase().replace(/\s+/g, '_'),
+    title: raw.name,
+    summary: raw.summary,
+    domainScores: domainScoresArray,
+    facetSummaries: processedFacetSummaries,
+    category: "archetypal",
+    isArchetype: true,
+    createdAt: new Date().toISOString(),
+    tags: [raw.name.toLowerCase().replace(/\s+/g, '_'), "archetype"],
+  };
+};
+
+const dummyArchetypes: CodexEntry[] = rawArchetypeData.map(mapRawArchetypeToCodexEntry);
+
 
 // Placeholder for similarity calculation
 const calculateSimilarity = (userScores: DomainScore[], archetypeScores: DomainScore[]): number => {
@@ -160,6 +183,13 @@ export default function ArchetypesPage() {
         </CardHeader>
         <CardContent className="flex-grow flex flex-col justify-center items-center">
           <TriangleChart scores={archetype.domainScores} width={180} height={156} className="!p-0 !bg-transparent !shadow-none !backdrop-blur-none mb-3" />
+           {archetype.tags && archetype.tags.length > 0 && (
+            <div className="flex flex-wrap gap-1 justify-center mt-2">
+              {archetype.tags.slice(0, 2).map(tag => ( // Show max 2 tags
+                <Badge key={tag} variant="secondary" className="text-xs">{tag}</Badge>
+              ))}
+            </div>
+          )}
         </CardContent>
         <CardFooter className="p-4 border-t border-border/30 mt-auto">
           <Button variant="outline" size="sm" className="w-full" onClick={() => handleOpenDrawer(archetype)}>
@@ -194,7 +224,6 @@ export default function ArchetypesPage() {
                 <Icons.sparkles className="w-10 h-10 text-primary mb-2" />
                 <p className="text-2xl font-bold text-primary">{Math.round(highestSimilarity)}%</p>
                 <p className="text-muted-foreground">Exploratory Alignment</p>
-                {/* <Button variant="link" size="sm" className="mt-2">How is this calculated?</Button> */}
               </div>
               <div className="flex flex-col items-center">
                 <h3 className="text-lg font-semibold mb-2">{closestArchetype.title}</h3>
@@ -256,6 +285,7 @@ export default function ArchetypesPage() {
                   {FACET_NAMES.map(facetName => {
                     const scoreObj = selectedArchetype.domainScores.find(ds => ds.facetName === facetName);
                     const score = scoreObj ? scoreObj.score : 0;
+                    const facetConfig = FACETS[facetName];
                     const facetSummary = selectedArchetype.facetSummaries?.[facetName] || `Insights into how ${selectedArchetype.title} relates to ${facetName.toLowerCase()}...`;
                     
                     return (
@@ -266,19 +296,12 @@ export default function ArchetypesPage() {
                           </h4>
                           <span className="text-sm font-bold" style={{color: getFacetColorHsl(facetName)}}>{Math.round(score * 100)}%</span>
                         </div>
-                        <p className="text-xs text-muted-foreground italic mb-1">{FACETS[facetName].tagline}</p>
+                        <p className="text-xs text-muted-foreground italic mb-1">{facetConfig.tagline}</p>
                         <p className="text-sm text-muted-foreground">{facetSummary}</p>
                       </div>
                     );
                   })}
                 </div>
-                
-                {/* Archetypes might not have a unique deep-dive page like codex entries, so this link can be conditional or removed */}
-                {/* <Button variant="link" asChild className="p-0 text-primary">
-                  <Link href={`/codex/${selectedArchetype.id}`}> 
-                    View Full Deep-Dive (if applicable) <Icons.chevronRight className="ml-1 h-4 w-4" />
-                  </Link>
-                </Button> */}
               </div>
             </ScrollArea>
           </SheetContent>
@@ -287,6 +310,3 @@ export default function ArchetypesPage() {
     </div>
   );
 }
-
-
-    
