@@ -12,6 +12,10 @@ import { FACETS } from "@/config/facets";
 // Insight Summary View: Dynamic Domain Feedback component
 function DomainFeedbackBar({ facetName, score, anchorLeft, anchorRight }: { facetName: string, score: number, anchorLeft: string, anchorRight: string }) {
   const facetConfig = FACETS[facetName as keyof typeof FACETS];
+  if (!facetConfig) { // Added safety check for facetConfig
+    console.warn(`DomainFeedbackBar: Facet configuration for ${facetName} not found.`);
+    return null;
+  }
   return (
     <div className="mb-4 p-3 rounded-md border border-border bg-card/50">
       <div className="flex justify-between items-center mb-1">
@@ -36,13 +40,16 @@ function DomainFeedbackBar({ facetName, score, anchorLeft, anchorRight }: { face
 export default function ResultsPage() {
   const { domainScores, activeProfile } = useWorldview();
 
-  if (!domainScores || domainScores.length === 0) {
+  // Check if scores are present and if at least one score is not the default (0)
+  const hasMeaningfulScores = domainScores && domainScores.length > 0 && domainScores.some(ds => ds.score !== 0);
+
+  if (!hasMeaningfulScores) {
     return (
       <div className="flex flex-col items-center justify-center h-[calc(100vh-10rem)] text-center">
         <Icons.search className="w-16 h-16 text-muted-foreground mb-4" />
         <h2 className="text-2xl font-semibold mb-2">No Results Yet</h2>
         <p className="text-muted-foreground mb-4">
-          Complete the assessment to see your worldview signature.
+          Complete the assessment to see your worldview signature. Your results will appear here once calculated.
         </p>
         <Button asChild>
           <Link href="/assessment">Start Assessment</Link>
