@@ -12,7 +12,8 @@ import type { FacetName } from '@/types';
 import { Icons } from '@/components/icons';
 import { useWorldview } from '@/hooks/use-worldview';
 import { useRouter } from 'next/navigation';
-import { useToast } from '@/hooks/use-toast'; // Import useToast
+import { useToast } from '@/hooks/use-toast';
+import { cn } from "@/lib/utils"; // Ensure this import is present
 
 const LIKERT_SCALE_OPTIONS = [
   { value: 1, label: "Strongly Disagree" },
@@ -26,8 +27,8 @@ export default function AssessmentPage() {
   const [currentFacetIndex, setCurrentFacetIndex] = useState(0);
   const { assessmentAnswers, updateAssessmentAnswer, calculateDomainScores } = useWorldview();
   const router = useRouter();
-  const { toast } = useToast(); // Initialize useToast
-  const [isProcessing, setIsProcessing] = useState(false); // For button disabling
+  const { toast } = useToast();
+  const [isProcessing, setIsProcessing] = useState(false);
 
   const currentFacetName = FACET_NAMES[currentFacetIndex];
   const currentFacet = FACETS[currentFacetName];
@@ -42,7 +43,7 @@ export default function AssessmentPage() {
     });
   }, [assessmentAnswers, currentFacet, currentFacetName]);
 
-  const handleNext = async () => { // Make it async if you plan more async ops inside
+  const handleNext = async () => {
     if (!areAllCurrentQuestionsAnswered && currentFacetIndex < totalFacets - 1) {
       toast({
         title: "Incomplete Section",
@@ -56,24 +57,19 @@ export default function AssessmentPage() {
 
     if (currentFacetIndex < totalFacets - 1) {
       setCurrentFacetIndex(currentFacetIndex + 1);
-      // Answers are persisted on change via context, so no explicit action needed here
-      // for immediate persistence before navigating sections.
-      setTimeout(() => setIsProcessing(false), 300); // Re-enable button after a short delay
+      setTimeout(() => setIsProcessing(false), 300); 
     } else {
-      // Last facet, "Finish Assessment"
-      router.push('/results'); // Navigate immediately
+      router.push('/results'); 
 
-      // Perform scoring and final localStorage save in the background
       setTimeout(() => {
         try {
-          const calculatedScores = calculateDomainScores(); // Updates context scores & triggers context's persist
+          const calculatedScores = calculateDomainScores(); 
           localStorage.setItem("metaPrismAssessmentScores", JSON.stringify(calculatedScores));
           
           toast({
             title: "Assessment Complete!",
             description: "Your scores have been calculated and saved. Redirecting to results...",
           });
-          // setIsProcessing(false); // Button is no longer on this page
         } catch (error) {
           console.error("Error during background score calculation/saving:", error);
           toast({
@@ -81,9 +77,8 @@ export default function AssessmentPage() {
             description: "There was an issue calculating or saving your scores. Your answers are saved, you can try viewing results later or retaking the assessment.",
             variant: "destructive",
           });
-          // setIsProcessing(false); // Button is no longer on this page
         }
-      }, 0); // setTimeout with 0ms pushes it to the event loop after navigation
+      }, 0); 
     }
   };
 
@@ -120,7 +115,7 @@ export default function AssessmentPage() {
           <Progress value={progress} className="w-full mt-4 h-3" />
         </CardHeader>
         <CardContent className="space-y-8">
-          <form onSubmit={(e) => { e.preventDefault(); handleNext(); }}> {/* Allow Enter to submit form */}
+          <form onSubmit={(e) => { e.preventDefault(); handleNext(); }}>
             {currentFacet.questions.map((question, index) => (
               <div 
                 key={index} 
@@ -146,7 +141,6 @@ export default function AssessmentPage() {
                 </RadioGroup>
               </div>
             ))}
-             {/* Hidden submit button to allow form submission on Enter key press */}
              <button type="submit" disabled={isProcessing} className="hidden"></button>
           </form>
         </CardContent>
@@ -172,4 +166,3 @@ export default function AssessmentPage() {
     </div>
   );
 }
-
