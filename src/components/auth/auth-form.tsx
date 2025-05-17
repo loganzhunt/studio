@@ -23,7 +23,7 @@ export function AuthForm() {
   const { 
     isAuthModalOpen, 
     closeAuthModal, 
-    signInLocally, // Updated to local sign-in
+    signInLocally,
     currentUser
   } = useWorldview();
   const { toast } = useToast();
@@ -34,6 +34,7 @@ export function AuthForm() {
 
   React.useEffect(() => {
     if (currentUser && isAuthModalOpen) {
+      // If user becomes current (e.g. successful local sign in) while modal is open, close it.
       closeAuthModal();
     }
   }, [currentUser, isAuthModalOpen, closeAuthModal]);
@@ -46,8 +47,9 @@ export function AuthForm() {
     }
     setIsSubmitting(true);
     try {
-      signInLocally(name, email);
-      // Modal closure is handled by useEffect above or by signInLocally directly
+      signInLocally(name, email); // Context handles setting user and localStorage
+      // Modal closure should ideally be handled by useEffect watching currentUser or by signInLocally if it's guaranteed to update context state synchronously.
+      // For now, explicit closeAuthModal() is removed here as useEffect above should handle it.
     } catch (error: any) {
       toast({
         title: "Sign-in Error",
@@ -61,9 +63,11 @@ export function AuthForm() {
   const onOpenChange = (open: boolean) => {
     if (!open) {
       closeAuthModal();
-      setName("");
+      setName(""); // Reset form fields when modal is closed
       setEmail("");
     }
+    // If opening, isAuthModalOpen from context should already be true.
+    // This handler primarily manages closure.
   };
 
   return (
@@ -116,7 +120,7 @@ export function AuthForm() {
               />
             </div>
             <Button type="submit" className="w-full h-10" disabled={isSubmitting}>
-              {isSubmitting ? <Icons.spinner className="animate-spin mr-2" /> : null}
+              {isSubmitting ? <Icons.loader className="animate-spin mr-2" /> : null}
               Sign In (Local Demo)
             </Button>
           </form>
@@ -129,12 +133,4 @@ export function AuthForm() {
       </DialogContent>
     </Dialog>
   );
-}
-
-// Placeholder for Icons.spinner if not already defined
-if (!Icons.spinner) {
-  Icons.spinner = Icons.loader; // Assuming loader is an alias for a spinner
-}
-if (!Icons.loader) { // Define loader if it's not available, for spinner fallback
-  Icons.loader = () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="2" x2="12" y2="6"></line><line x1="12" y1="18" x2="12" y2="22"></line><line x1="4.93" y1="4.93" x2="7.76" y2="7.76"></line><line x1="16.24" y1="16.24" x2="19.07" y2="19.07"></line><line x1="2" y1="12" x2="6" y2="12"></line><line x1="18" y1="12" x2="22" y2="12"></line><line x1="4.93" y1="19.07" x2="7.76" y2="16.24"></line><line x1="16.24" y1="7.76" x2="19.07" y2="4.93"></line></svg>;
 }

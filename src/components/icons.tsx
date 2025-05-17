@@ -1,3 +1,4 @@
+
 import type { LucideIcon } from 'lucide-react';
 import {
   Home,
@@ -8,7 +9,7 @@ import {
   Sparkles,
   Wand2,
   Bookmark,
-  Info,
+  Info as LucideInfo, // Aliased import
   Settings,
   ChevronDown,
   ChevronRight,
@@ -35,6 +36,9 @@ import {
   List,
   BarChart3,
   ChevronsUpDown,
+  User,
+  LogOut,
+  Loader2,
 } from 'lucide-react';
 
 export type Icon = LucideIcon;
@@ -61,11 +65,11 @@ export const Icons = {
   results: BarChart3,
   dashboard: LayoutGrid,
   codex: Library,
-  facet: Triangle, // Generic facet icon
+  facet: Triangle, 
   archetypes: Users,
   builder: Wand2,
   saved: Bookmark,
-  about: Info,
+  about: LucideInfo,      // Use aliased import
   settings: Settings,
   chevronDown: ChevronDown,
   chevronRight: ChevronRight,
@@ -92,4 +96,8 @@ export const Icons = {
   list: List,
   sort: ChevronsUpDown,
   sparkles: Sparkles,
+  user: User,
+  logout: LogOut,
+  loader: Loader2, 
+  info: LucideInfo, // Use aliased import
 };
