@@ -16,7 +16,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Badge } from '@/components/ui/badge';
 import { getBandColor } from '@/lib/colors'; // For coloring title and drawer facets
 
-// Raw data for Codex entries (existing + new batch, merged)
+// Raw data for Codex entries
 const existingRawCodexData = [
   {
     "name": "Platonism",
@@ -178,19 +178,6 @@ const newRawCodexDataBatch = [
       "ontology": "Reality consists of atoms and void; the material world is primary.", "epistemology": "Knowledge is attained through sensory experience and logical inference.", "praxeology": "Wise action seeks the highest pleasure and lowest pain.", "axiology": "Pleasure is the greatest good, especially intellectual and social pleasure.", "mythology": "Myths are allegories or projections of natural phenomena.", "cosmology": "The cosmos operates according to natural laws.", "teleology": "Life’s goal is a tranquil mind and body."
     },
     "tags": ["philosophical", "ethics", "hedonism"]
-  },
-  // Note: Existentialism is already present, will be skipped by merge logic if name matches exactly
-  // Updated Existentialism entry from new batch:
-  {
-    "name": "Existentialism", // Name is the same, so it will be skipped if exact match by merge
-    "summary": "A philosophical movement emphasizing individual existence, freedom, and the search for authentic meaning in an indifferent universe.",
-    "domainScores": {
-      "ontology": 0.4, "epistemology": 0.5, "praxeology": 0.8, "axiology": 0.7, "mythology": 0.5, "cosmology": 0.2, "teleology": 0.9
-    },
-    "facetSummary": {
-      "ontology": "Existence precedes essence; reality is absurd, contingent.", "epistemology": "Truth emerges through subjective, lived experience.", "praxeology": "Freedom requires personal responsibility and authentic action.", "axiology": "Values are created through choices and commitments.", "mythology": "Mythic motifs reflect the individual’s struggle for meaning.", "cosmology": "The universe is indifferent to human concerns.", "teleology": "Purpose must be constructed by the individual."
-    },
-    "tags": ["philosophical", "modern", "authenticity"]
   },
   {
     "name": "Gnosticism",
@@ -368,18 +355,6 @@ const newRawCodexDataBatch = [
     },
     "tags": ["spiritual", "philosophical", "divinity"]
   },
-  // Platonism is already present
-  {
-    "name": "Platonism", // This is a duplicate name, merge logic should handle it (prefer existing one)
-    "summary": "A worldview centered on the existence of eternal Forms or Ideas as the ultimate reality.",
-    "domainScores": {
-      "ontology": 1.0, "epistemology": 0.8, "praxeology": 0.7, "axiology": 0.9, "mythology": 0.7, "cosmology": 0.9, "teleology": 0.9
-    },
-    "facetSummary": {
-      "ontology": "Eternal Forms or Ideas are the ultimate reality.", "epistemology": "Knowledge is recollection of the Forms.", "praxeology": "Virtue is alignment with the Good.", "axiology": "Truth, beauty, and goodness are supreme values.", "mythology": "Myths veil metaphysical truths.", "cosmology": "Cosmos mirrors the world of Forms.", "teleology": "Goal is ascent to the vision of the Good."
-    },
-    "tags": ["philosophical", "idealism", "classical"]
-  },
   {
     "name": "Postmodernism",
     "summary": "A skeptical and critical orientation challenging grand narratives, objectivity, and stable meaning.",
@@ -435,39 +410,310 @@ const newRawCodexDataBatch = [
     },
     "tags": ["spiritual", "indigenous", "healing"]
   },
-  // Stoicism is already present
-  {
-    "name": "Stoicism", // This is a duplicate name
-    "summary": "An ancient philosophy teaching acceptance of fate, virtue as the only good, and living in accord with nature’s order.",
-    "domainScores": {
-      "ontology": 0.7, "epistemology": 0.8, "praxeology": 1.0, "axiology": 1.0, "mythology": 0.2, "cosmology": 0.7, "teleology": 0.9
-    },
-    "facetSummary": {
-      "ontology": "The cosmos is rational and governed by logos.", "epistemology": "Wisdom is understanding what is and isn’t in our control.", "praxeology": "Virtue is living in accord with nature.", "axiology": "Virtue is the sole good.", "mythology": "Myths serve as moral exemplars.", "cosmology": "The world is a living organism.", "teleology": "Aim is ataraxia—serene acceptance."
-    },
-    "tags": ["philosophical", "ethics", "resilience"]
-  },
-  {
-    "name": "Sufism", // Already present as "Mystical Sufism", new one has different scores/summary but same name "Sufism"
-    "summary": "The mystical dimension of Islam, focused on the direct experience of divine love and unity.",
-    "domainScores": {
-      "ontology": 0.9, "epistemology": 0.7, "praxeology": 0.8, "axiology": 0.8, "mythology": 0.9, "cosmology": 0.8, "teleology": 1.0
-    },
-    "facetSummary": {
-      "ontology": "Reality is unity—God alone is real.", "epistemology": "Knowledge is attained by unveiling the heart.", "praxeology": "Practice is remembrance (dhikr) and love.", "axiology": "Love and surrender are supreme values.", "mythology": "Myth and poetry express mystical truths.", "cosmology": "The universe is a reflection of divine beauty.", "teleology": "Purpose is reunion with the Beloved."
-    },
-    "tags": ["mystical", "islamic", "love"]
-  },
-  // Taoism is already present
-  {
-    "name": "Taoism", // This is a duplicate name
-    "summary": "An ancient Chinese tradition teaching harmony with the Tao—the natural way of the universe.",
-    "domainScores": {
-      "ontology": 0.8, "epistemology": 0.6, "praxeology": 0.8, "axiology": 0.7, "mythology": 0.7, "cosmology": 0.9, "teleology": 0.8
-    },
-    "facetSummary": {
-      "ontology": "All arises from and returns to the Tao.", "epistemology": "Wisdom is intuitive, non-conceptual.", "praxeology": "Non-action (wu wei) achieves harmony.", "axiology": "Simplicity, humility, and balance are valued.", "mythology": "Myth guides action without force.", "cosmology": "Nature is an unfolding process.", "teleology": "Aim is effortless alignment with the Tao."
-    },
-    "tags": ["spiritual", "eastern", "nature"]
+];
+// The `mapRawDataToCodexEntries` function handles the merging of `existingRawCodexData` and `newRawCodexDataBatch`.
+// It also ensures that `domainScores` are correctly formatted as `DomainScore[]` and `facetSummaries` keys are capitalized.
+
+
+// Function to calculate dominant facet for coloring title
+const getDominantFacet = (scores: DomainScore[]): FacetName | null => {
+  if (!scores || scores.length === 0) return null;
+  let dominantFacet = scores[0].facetName;
+  let maxScore = scores[0].score;
+  for (let i = 1; i < scores.length; i++) {
+    if (scores[i].score > maxScore) {
+      maxScore = scores[i].score;
+      dominantFacet = scores[i].facetName;
+    }
   }
-]
+  return dominantFacet;
+};
+
+// Helper to get HSL color string for a facet
+const getFacetColorHsl = (facetName: FacetName | null): string => {
+  if (!facetName) return `hsl(var(--foreground))`;
+  const facetConfig = FACETS[facetName];
+  return facetConfig ? `hsl(var(${facetConfig.colorVariable.slice(2)}))` : `hsl(var(--foreground))`;
+};
+
+
+// CodexCard component
+function CodexCard({ entry, onOpenDrawer }: { entry: CodexEntry, onOpenDrawer: (entry: CodexEntry) => void }) {
+  const dominantFacet = getDominantFacet(entry.domainScores);
+  const titleColor = getFacetColorHsl(dominantFacet);
+
+  return (
+    <Card 
+      className="codex-card-compact glassmorphic-card flex flex-col overflow-hidden hover:shadow-primary/20 transition-shadow duration-300"
+      tabIndex={0}
+      onClick={() => onOpenDrawer(entry)}
+      onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && onOpenDrawer(entry)}
+      role="button"
+      aria-label={`View details for ${entry.title}`}
+    >
+      <CardHeader className="pb-3">
+        <CardTitle className="text-xl" style={{ color: titleColor }}>{entry.title}</CardTitle>
+        <CardDescription className="text-xs capitalize">{entry.category}</CardDescription>
+      </CardHeader>
+      <CardContent className="flex-grow flex flex-col justify-between pt-0">
+        <p className="text-sm text-muted-foreground line-clamp-3 mb-3">{entry.summary}</p>
+        <TriangleChart 
+          scores={entry.domainScores} 
+          width={180} // Slightly smaller for card
+          height={156} // Adjusted height for aspect ratio
+          className="mx-auto mb-2 !p-0 !bg-transparent !shadow-none !backdrop-blur-none" // Override default TriangleChart styles
+        />
+         {/* Tags are hidden as per previous request */}
+      </CardContent>
+      <CardFooter className="pt-3 border-t border-border/20">
+        <Button variant="link" size="sm" className="text-primary p-0 w-full justify-start">
+          Facet Details <Icons.chevronRight className="ml-1 h-4 w-4" />
+        </Button>
+      </CardFooter>
+    </Card>
+  );
+}
+
+
+export default function CodexPage() {
+  const [searchTerm, setSearchTerm] = useState('');
+  const [sortBy, setSortBy] = useState('alphabetical');
+  const [activeCategory, setActiveCategory] = useState<string | null>(null);
+  const [selectedEntry, setSelectedEntry] = useState<CodexEntry | null>(null);
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+
+  const dummyCodexEntries = useMemo(() => {
+    // Merge and map data inside useMemo
+    const existingNames = new Set(existingRawCodexData.map(e => e.name ? e.name.toLowerCase() : ''));
+    const uniqueNewEntries = newRawCodexDataBatch.filter(ne => 
+        ne.name && typeof ne.name === 'string' && !existingNames.has(ne.name.toLowerCase())
+    );
+    const currentRawCodexData = [...existingRawCodexData, ...uniqueNewEntries];
+    return mapRawDataToCodexEntries(currentRawCodexData);
+  }, []);
+
+
+  const handleOpenDrawer = (entry: CodexEntry) => {
+    setSelectedEntry(entry);
+    setIsDrawerOpen(true);
+  };
+
+  const filteredAndSortedEntries = useMemo(() => {
+    let entries = [...dummyCodexEntries];
+
+    // Filter by search term
+    if (searchTerm) {
+      entries = entries.filter(entry =>
+        entry.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        entry.summary.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (entry.tags && entry.tags.some(tag => tag.toLowerCase().includes(searchTerm.toLowerCase())))
+      );
+    }
+
+    // Filter by category
+    if (activeCategory) {
+      entries = entries.filter(entry => entry.category === activeCategory);
+    }
+    
+    // Sort
+    switch (sortBy) {
+      case 'alphabetical':
+        entries.sort((a, b) => a.title.localeCompare(b.title));
+        break;
+      // Add more sort cases here if needed (e.g., by dominant facet)
+      default:
+        break;
+    }
+    return entries;
+  }, [dummyCodexEntries, searchTerm, sortBy, activeCategory]);
+  
+  const dominantFacetForDrawer = selectedEntry ? getDominantFacet(selectedEntry.domainScores) : null;
+  const drawerTitleColor = getFacetColorHsl(dominantFacetForDrawer);
+
+
+  return (
+    <div className="container mx-auto py-8">
+      <header className="mb-8">
+        <h1 className="text-4xl font-bold text-center mb-2">The Codex</h1>
+        <p className="text-xl text-muted-foreground text-center">
+          Explore a library of worldviews, philosophies, and archetypes.
+        </p>
+      </header>
+
+      {/* Filter and Sort Controls */}
+      <Card className="mb-8 glassmorphic-card p-4">
+        <div className="flex flex-col md:flex-row gap-4">
+          <Input
+            type="search"
+            placeholder="Search Codex (titles, summaries, tags...)"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="flex-grow bg-background/70"
+          />
+          <Select value={sortBy} onValueChange={setSortBy}>
+            <SelectTrigger className="w-full md:w-[180px] bg-background/70">
+              <SelectValue placeholder="Sort by" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="alphabetical">Alphabetical (A-Z)</SelectItem>
+              <SelectItem value="dominant_facet_todo">By Dominant Facet (TODO)</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+        <div className="mt-4 flex flex-wrap gap-2">
+          <Button variant={activeCategory === null ? "default" : "outline"} onClick={() => setActiveCategory(null)}>All</Button>
+          <Button variant={activeCategory === "philosophical" ? "default" : "outline"} onClick={() => setActiveCategory("philosophical")}>Philosophical</Button>
+          <Button variant={activeCategory === "religious" ? "default" : "outline"} onClick={() => setActiveCategory("religious")}>Religious</Button>
+          <Button variant={activeCategory === "archetypal" ? "default" : "outline"} onClick={() => setActiveCategory("archetypal")}>Archetypal</Button>
+          <Button variant={activeCategory === "custom" ? "default" : "outline"} onClick={() => setActiveCategory("custom")}>Custom</Button>
+          {/* Add more category filters if needed */}
+        </div>
+      </Card>
+
+      {/* Codex Grid */}
+      {filteredAndSortedEntries.length > 0 ? (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          {filteredAndSortedEntries.map(entry => (
+            <CodexCard key={entry.id} entry={entry} onOpenDrawer={handleOpenDrawer} />
+          ))}
+        </div>
+      ) : (
+        <div className="text-center py-12">
+            <Icons.search className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
+            <p className="text-xl text-muted-foreground">No entries match your criteria.</p>
+            <p className="text-sm text-muted-foreground">Try adjusting your search or filters.</p>
+        </div>
+      )}
+
+
+      {/* Details Drawer (Sheet) */}
+      {selectedEntry && (
+        <Sheet open={isDrawerOpen} onOpenChange={setIsDrawerOpen}>
+          <SheetContent className="w-full max-w-md sm:max-w-lg bg-card/80 backdrop-blur-xl p-0 flex flex-col">
+            <SheetHeader className="p-6 pb-4 border-b border-border/30">
+              <div className="flex justify-between items-start">
+                <div>
+                  <SheetTitle className="text-2xl" style={{color: drawerTitleColor}}>{selectedEntry.title}</SheetTitle>
+                  <SheetDescription className="capitalize">{selectedEntry.category}</SheetDescription>
+                </div>
+                <SheetClose asChild>
+                  <Button variant="ghost" size="icon"><Icons.close className="h-5 w-5"/></Button>
+                </SheetClose>
+              </div>
+            </SheetHeader>
+            <ScrollArea className="flex-grow">
+              <div className="p-6 space-y-5">
+                <p className="text-sm text-muted-foreground leading-relaxed">{selectedEntry.summary}</p>
+                
+                <h4 className="text-lg font-semibold text-foreground pt-2 border-t border-border/20">Facet Breakdown:</h4>
+                {FACET_NAMES.map(facetName => {
+                  const scoreEntry = selectedEntry.domainScores.find(ds => ds.facetName === facetName);
+                  const score = scoreEntry ? scoreEntry.score : 0;
+                  const facetConfig = FACETS[facetName];
+                  const summary = selectedEntry.facetSummaries?.[facetName] || `Exploring ${selectedEntry.title}'s perspective on ${facetName}.`;
+                  
+                  return (
+                    <div key={facetName} className="p-3 rounded-md border border-border/30 bg-background/30">
+                      <div className="flex justify-between items-center mb-1">
+                        <h5 className="font-semibold" style={{color: getFacetColorHsl(facetName)}}>
+                          {facetName}
+                        </h5>
+                        <span className="text-xs font-bold" style={{color: getFacetColorHsl(facetName)}}>
+                          {Math.round(score * 100)}%
+                        </span>
+                      </div>
+                      <p className="text-xs text-muted-foreground">{summary}</p>
+                    </div>
+                  );
+                })}
+              </div>
+            </ScrollArea>
+            <div className="p-6 border-t border-border/30 mt-auto">
+              <Button variant="outline" className="w-full" asChild>
+                <Link href={`/codex/${selectedEntry.id}`}>
+                  View Full Deep-Dive <Icons.chevronRight className="ml-2 h-4 w-4" />
+                </Link>
+              </Button>
+            </div>
+          </SheetContent>
+        </Sheet>
+      )}
+    </div>
+  );
+}
+
+// Helper Function to map raw data - outside component for clarity, called by useMemo
+const mapRawDataToCodexEntries = (rawData: any[]): CodexEntry[] => {
+  return rawData.map((item: any) => {
+    const facetScoresObject = item.domainScores || item.facetScores;
+    const domainScores: DomainScore[] = FACET_NAMES.map(facetName => {
+      let scoreValue = 0;
+      if (facetScoresObject) {
+        if (facetScoresObject[facetName] !== undefined) { // Check capitalized key first
+          scoreValue = facetScoresObject[facetName];
+        } else if (facetScoresObject[facetName.toLowerCase()] !== undefined) { // Then lowercase
+          scoreValue = facetScoresObject[facetName.toLowerCase()];
+        }
+      }
+      return { facetName, score: typeof scoreValue === 'number' ? scoreValue : 0 };
+    });
+
+    let category: CodexEntry['category'] = 'custom';
+    const tags: string[] = Array.isArray(item.tags) ? item.tags.map(String) : [];
+    
+    const categoryKeywords: Record<string, CodexEntry['category']> = {
+      "philosophical": "philosophical", "philosophy": "philosophical",
+      "religious": "religious", "religion": "religious",
+      "archetypal": "archetypal", "archetype": "archetypal",
+      "mystical": "philosophical", // Or 'spiritual' if that becomes a category
+      "scientific": "philosophical",
+      "cultural": "custom", // Or another relevant category
+      "indigenous": "custom", // Or 'spiritual'
+      "eastern": "philosophical", // Or 'religious'/'spiritual'
+      "western": "philosophical", // Or 'religious'/'spiritual'
+      "modern": "philosophical",
+      "classical": "philosophical",
+      "ethics": "philosophical",
+      "epistemology": "philosophical",
+    };
+
+    for (const tag of tags) {
+      const lowerTag = tag.toLowerCase();
+      if (categoryKeywords[lowerTag]) {
+        category = categoryKeywords[lowerTag];
+        break; 
+      }
+    }
+    
+    const facetSummaries: Partial<Record<FacetName, string>> = {};
+    if (item.facetSummary || item.facetSummaries) {
+        const rawSummaries = item.facetSummary || item.facetSummaries;
+        for (const rawKey in rawSummaries) {
+            // Try to match rawKey (potentially lowercase) to a capitalized FacetName
+            const capitalizedKey = rawKey.charAt(0).toUpperCase() + rawKey.slice(1) as FacetName;
+            if (FACET_NAMES.includes(capitalizedKey)) {
+                facetSummaries[capitalizedKey] = rawSummaries[rawKey];
+            } else {
+                // Fallback for keys that don't directly match after simple capitalization (e.g. 'praxology')
+                const matchedFacetName = FACET_NAMES.find(fn => fn.toLowerCase() === rawKey.toLowerCase());
+                if (matchedFacetName) {
+                    facetSummaries[matchedFacetName] = rawSummaries[rawKey];
+                }
+            }
+        }
+    }
+
+    return {
+      id: item.id || (item.name ? item.name.toLowerCase().replace(/\s+/g, '_') : `entry_${Math.random().toString(36).substr(2, 9)}`),
+      title: item.name || "Untitled Entry",
+      summary: item.summary || "No summary available.",
+      domainScores,
+      category,
+      tags,
+      isArchetype: tags.includes("archetypal"),
+      createdAt: item.createdAt || new Date().toISOString(),
+      facetSummaries: facetSummaries as Record<FacetName, string>,
+    };
+  });
+};
+
