@@ -14,7 +14,7 @@ import { FACETS, FACET_NAMES } from "@/config/facets";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription, SheetClose } from "@/components/ui/sheet";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Badge } from '@/components/ui/badge';
-import { getBandColor } from '@/lib/colors'; // For coloring title and drawer facets
+import { getFacetColorHsl } from '@/lib/colors'; // For coloring title and drawer facets
 
 // Raw data for Codex entries
 const existingRawCodexData = [
@@ -410,310 +410,180 @@ const newRawCodexDataBatch = [
     },
     "tags": ["spiritual", "indigenous", "healing"]
   },
-];
-// The `mapRawDataToCodexEntries` function handles the merging of `existingRawCodexData` and `newRawCodexDataBatch`.
-// It also ensures that `domainScores` are correctly formatted as `DomainScore[]` and `facetSummaries` keys are capitalized.
-
-
-// Function to calculate dominant facet for coloring title
-const getDominantFacet = (scores: DomainScore[]): FacetName | null => {
-  if (!scores || scores.length === 0) return null;
-  let dominantFacet = scores[0].facetName;
-  let maxScore = scores[0].score;
-  for (let i = 1; i < scores.length; i++) {
-    if (scores[i].score > maxScore) {
-      maxScore = scores[i].score;
-      dominantFacet = scores[i].facetName;
-    }
+  {
+    "name": "Theosophy",
+    "summary": "A mystical movement synthesizing Eastern and Western traditions, teaching spiritual evolution, karma, and hidden wisdom.",
+    "domainScores": {
+      "ontology": 0.9, "epistemology": 0.7, "praxeology": 0.6, "axiology": 0.8, "mythology": 0.9, "cosmology": 0.9, "teleology": 1.0
+    },
+    "facetSummary": {
+      "ontology": "Spiritual planes underlie material reality.", "epistemology": "Intuition and esoteric study reveal hidden truths.", "praxeology": "Actions influence karma and spiritual evolution.", "axiology": "Wisdom, altruism, and service are highest values.", "mythology": "Myth encodes perennial teachings.", "cosmology": "The cosmos is a hierarchy of evolving worlds.", "teleology": "Purpose is spiritual ascent and union with the divine."
+    },
+    "tags": ["mystical", "esoteric", "synthesis"]
+  },
+  {
+    "name": "Theravada Buddhism",
+    "summary": "The earliest form of Buddhism, emphasizing individual enlightenment through ethical conduct, meditation, and insight.",
+    "domainScores": {
+      "ontology": 0.8, "epistemology": 0.7, "praxeology": 1.0, "axiology": 0.8, "mythology": 0.6, "cosmology": 0.7, "teleology": 1.0
+    },
+    "facetSummary": {
+      "ontology": "All phenomena are impermanent and non-self.", "epistemology": "Knowledge arises from direct meditative insight.", "praxeology": "Ethical conduct and meditation are the path.", "axiology": "Wisdom and compassion guide action.", "mythology": "Myth provides context for ethical practice.", "cosmology": "The universe cycles through endless rebirths.", "teleology": "Purpose is liberation from suffering (nirvana)."
+    },
+    "tags": ["buddhist", "spiritual", "meditation"]
+  },
+  {
+    "name": "Transcendentalism",
+    "summary": "A 19th-century American movement emphasizing the inherent goodness of people and nature, and the primacy of intuition.",
+    "domainScores": {
+      "ontology": 0.8, "epistemology": 0.6, "praxeology": 0.7, "axiology": 0.8, "mythology": 0.7, "cosmology": 0.6, "teleology": 0.7
+    },
+    "facetSummary": {
+      "ontology": "Spirit pervades all nature and humanity.", "epistemology": "Intuition and self-reliance are paths to truth.", "praxeology": "Nonconformity and individual action are prized.", "axiology": "Truth and authenticity are highest values.", "mythology": "Nature is the living symbol of Spirit.", "cosmology": "Nature is harmonious and interconnected.", "teleology": "Aim is self-cultivation and spiritual realization."
+    },
+    "tags": ["philosophical", "american", "nature", "intuition"]
+  },
+  {
+    "name": "Unitarian Universalism",
+    "summary": "A pluralistic faith embracing wisdom from all traditions and affirming freedom of belief and conscience.",
+    "domainScores": {
+      "ontology": 0.5, "epistemology": 0.7, "praxeology": 0.8, "axiology": 0.9, "mythology": 0.5, "cosmology": 0.5, "teleology": 0.7
+    },
+    "facetSummary": {
+      "ontology": "Reality is open to diverse interpretations.", "epistemology": "Truth is sought through reason, experience, and tradition.", "praxeology": "Action pursues justice and compassion.", "axiology": "Dignity, equity, and community are core values.", "mythology": "Wisdom is found in many stories.", "cosmology": "Cosmos is explored through many lenses.", "teleology": "Purpose is self-actualization and service."
+    },
+    "tags": ["religious", "pluralistic", "liberal"]
+  },
+  {
+    "name": "Vedanta",
+    "summary": "A major school of Hindu philosophy teaching the unity of Atman (self) and Brahman (absolute reality).",
+    "domainScores": {
+      "ontology": 1.0, "epistemology": 0.8, "praxeology": 0.8, "axiology": 0.9, "mythology": 0.8, "cosmology": 0.9, "teleology": 1.0
+    },
+    "facetSummary": {
+      "ontology": "Only Brahman is ultimately real; the world is appearance.", "epistemology": "Direct realization leads to knowledge of unity.", "praxeology": "Spiritual practice removes ignorance.", "axiology": "Liberation is the highest value.", "mythology": "Myth reveals the divine play (lila).", "cosmology": "The cosmos is cyclical, an expression of Brahman.", "teleology": "The goal is moksha—union with the Absolute."
+    },
+    "tags": ["hindu", "philosophical", "monism"]
+  },
+  {
+    "name": "Zen Buddhism",
+    "summary": "A school of Mahayana Buddhism emphasizing direct, wordless experience and sudden enlightenment.",
+    "domainScores": {
+      "ontology": 0.9, "epistemology": 0.7, "praxeology": 0.8, "axiology": 0.7, "mythology": 0.6, "cosmology": 0.7, "teleology": 0.8
+    },
+    "facetSummary": {
+      "ontology": "All is empty, interdependent, and immediate.", "epistemology": "Intuitive, direct experience transcends concepts.", "praxeology": "Practice is zazen (sitting meditation) and daily mindfulness.", "axiology": "Simplicity, presence, and compassion are valued.", "mythology": "Koans and stories prompt insight, not dogma.", "cosmology": "The world is always already complete.", "teleology": "Goal is awakening to original nature."
+    },
+    "tags": ["buddhist", "mahayana", "meditation", "direct experience"]
+  },
+  {
+    "name": "Zoroastrianism",
+    "summary": "An ancient Persian religion centering on the cosmic struggle between truth and falsehood, light and darkness.",
+    "domainScores": {
+      "ontology": 0.7, "epistemology": 0.6, "praxeology": 0.9, "axiology": 0.9, "mythology": 0.7, "cosmology": 0.7, "teleology": 0.9
+    },
+    "facetSummary": {
+      "ontology": "Duality of truth (asha) and falsehood (druj) defines reality.", "epistemology": "Revelation and reason are paths to knowledge.", "praxeology": "Good thoughts, words, and deeds are essential.", "axiology": "Truth and purity are supreme values.", "mythology": "Myth narrates the cosmic drama of light vs. darkness.", "cosmology": "Cosmos is a battleground for order and chaos.", "teleology": "Purpose is the ultimate triumph of light."
+    },
+    "tags": ["religious", "ancient", "persian", "dualism"]
+  },
+  {
+    "name": "Agnosticism",
+    "summary": "A position of suspended belief about the existence of deities or ultimate reality, prioritizing uncertainty or open inquiry.",
+    "domainScores": {
+      "ontology": 0.4, "epistemology": 0.5, "praxeology": 0.5, "axiology": 0.5, "mythology": 0.2, "cosmology": 0.2, "teleology": 0.3
+    },
+    "facetSummary": {
+      "ontology": "Reality is possibly unknowable.", "epistemology": "Knowledge of ultimate things is suspended.", "praxeology": "Actions are provisional and open-minded.", "axiology": "Values are tentative and plural.", "mythology": "Myth is seen as speculation.", "cosmology": "The cosmos may be mysterious.", "teleology": "Purpose is an open question."
+    },
+    "tags": ["philosophical", "skepticism", "uncertainty"]
+  },
+  {
+    "name": "Atheism",
+    "summary": "The absence of belief in deities, often grounded in skepticism, rationalism, or naturalism.",
+    "domainScores": {
+      "ontology": 0.1, "epistemology": 0.9, "praxeology": 0.7, "axiology": 0.7, "mythology": 0.0, "cosmology": 0.2, "teleology": 0.1
+    },
+    "facetSummary": {
+      "ontology": "No supernatural beings exist.", "epistemology": "Reason and evidence are supreme.", "praxeology": "Ethics and actions are human-centered.", "axiology": "Value is grounded in human concerns.", "mythology": "Myth is metaphor or fiction.", "cosmology": "Cosmos is natural, not divinely ordered.", "teleology": "Purpose is individually determined."
+    },
+    "tags": ["philosophical", "skepticism", "naturalism"]
+  },
+  {
+    "name": "Catholicism",
+    "summary": "The largest Christian tradition, emphasizing the sacraments, apostolic succession, and the universal church.",
+    "domainScores": {
+      "ontology": 0.8, "epistemology": 0.8, "praxeology": 1.0, "axiology": 0.9, "mythology": 0.8, "cosmology": 0.8, "teleology": 1.0
+    },
+    "facetSummary": {
+      "ontology": "Creation is real, but God is its foundation.", "epistemology": "Scripture, tradition, and reason guide knowledge.", "praxeology": "Sacraments and works express faith.", "axiology": "Love, faith, and charity are supreme.", "mythology": "Myths are sacred history and mystery.", "cosmology": "Cosmos is purposeful, ordered by God.", "teleology": "Purpose is union with God in eternal life."
+    },
+    "tags": ["christian", "religious", "sacraments"]
+  },
+  {
+    "name": "Deism",
+    "summary": "A belief in a creator God who does not intervene in the universe, emphasizing reason and observation of the natural world.",
+    "domainScores": {
+      "ontology": 0.7, "epistemology": 0.8, "praxeology": 0.6, "axiology": 0.7, "mythology": 0.3, "cosmology": 0.7, "teleology": 0.6
+    },
+    "facetSummary": {
+      "ontology": "God is a distant creator, not immanent.", "epistemology": "Reason and observation reveal truth.", "praxeology": "Ethics are based on natural law.", "axiology": "Virtue, rationality, and autonomy are valued.", "mythology": "Myth is instructive but not authoritative.", "cosmology": "Universe runs on consistent laws.", "teleology": "Purpose is found in fulfilling natural potential."
+    },
+    "tags": ["philosophical", "reason", "natural law"]
+  },
+  {
+    "name": "Druze Faith",
+    "summary": "A secretive Middle Eastern tradition blending elements of Islam, Gnosticism, Neoplatonism, and more.",
+    "domainScores": {
+      "ontology": 0.8, "epistemology": 0.7, "praxeology": 0.7, "axiology": 0.8, "mythology": 0.8, "cosmology": 0.8, "teleology": 0.9
+    },
+    "facetSummary": {
+      "ontology": "Reality is layered and esoteric.", "epistemology": "Knowledge is revealed to the initiated.", "praxeology": "Action reflects secret teachings.", "axiology": "Wisdom and loyalty are prized.", "mythology": "Myths conceal hidden truths.", "cosmology": "The cosmos reflects divine unity.", "teleology": "Purpose is spiritual return and perfection."
+    },
+    "tags": ["religious", "esoteric", "middle eastern"]
+  },
+  {
+    "name": "Manichaeism",
+    "summary": "A dualistic religion founded by Mani, teaching the cosmic struggle between light and darkness.",
+    "domainScores": {
+      "ontology": 0.7, "epistemology": 0.6, "praxeology": 0.7, "axiology": 0.7, "mythology": 1.0, "cosmology": 0.7, "teleology": 0.8
+    },
+    "facetSummary": {
+      "ontology": "Reality is divided into spiritual light and material darkness.", "epistemology": "Revelation and ascetic practice yield knowledge.", "praxeology": "Ethical action separates light from darkness.", "axiology": "Purity and detachment are prized.", "mythology": "Myth details the struggle of light in matter.", "cosmology": "Cosmos is the battleground of dual forces.", "teleology": "Purpose is liberation of light from darkness."
+    },
+    "tags": ["religious", "dualism", "ancient"]
+  },
+  {
+    "name": "Quakerism",
+    "summary": "A Christian tradition emphasizing direct inner experience, simplicity, pacifism, and equality.",
+    "domainScores": {
+      "ontology": 0.7, "epistemology": 0.7, "praxeology": 0.9, "axiology": 0.9, "mythology": 0.5, "cosmology": 0.6, "teleology": 0.7
+    },
+    "facetSummary": {
+      "ontology": "Divine light dwells within all.", "epistemology": "Truth comes through inward experience.", "praxeology": "Action is guided by conscience and peace.", "axiology": "Equality, integrity, and nonviolence are valued.", "mythology": "Bible is interpreted in the light of experience.", "cosmology": "World is sacred, guided by Spirit.", "teleology": "Purpose is realization of the Inner Light."
+    },
+    "tags": ["christian", "religious", "pacifism", "equality"]
+  },
+  {
+    "name": "Rosicrucianism",
+    "summary": "A Western esoteric movement blending alchemy, mysticism, and the pursuit of hidden wisdom.",
+    "domainScores": {
+      "ontology": 0.8, "epistemology": 0.7, "praxeology": 0.7, "axiology": 0.8, "mythology": 0.9, "cosmology": 0.7, "teleology": 0.9
+    },
+    "facetSummary": {
+      "ontology": "Nature is alive with spiritual correspondences.", "epistemology": "Knowledge is sought through both reason and mystic revelation.", "praxeology": "Practice is self-transformation and service.", "axiology": "Wisdom and harmony are highest values.", "mythology": "Myth encodes allegorical truths.", "cosmology": "Cosmos is a web of interconnected forces.", "teleology": "Purpose is the perfection of self and world."
+    },
+    "tags": ["esoteric", "mystical", "western"]
+  },
+  {
+    "name": "Secular Humanism",
+    "summary": "A worldview prioritizing human welfare, ethics, and rationality without reference to the supernatural.",
+    "domainScores": {
+      "ontology": 0.2, "epistemology": 0.9, "praxeology": 0.9, "axiology": 1.0, "mythology": 0.1, "cosmology": 0.2, "teleology": 0.3
+    },
+    "facetSummary": {
+      "ontology": "Only the natural world exists.", "epistemology": "Reason and science guide knowledge.", "praxeology": "Action pursues human flourishing.", "axiology": "Human welfare and autonomy are highest values.", "mythology": "Myth is cultural heritage.", "cosmology": "The universe is natural and knowable.", "teleology": "Purpose is human-created."
+    },
+    "tags": ["philosophical", "secular", "ethics"]
   }
-  return dominantFacet;
-};
-
-// Helper to get HSL color string for a facet
-const getFacetColorHsl = (facetName: FacetName | null): string => {
-  if (!facetName) return `hsl(var(--foreground))`;
-  const facetConfig = FACETS[facetName];
-  return facetConfig ? `hsl(var(${facetConfig.colorVariable.slice(2)}))` : `hsl(var(--foreground))`;
-};
-
-
-// CodexCard component
-function CodexCard({ entry, onOpenDrawer }: { entry: CodexEntry, onOpenDrawer: (entry: CodexEntry) => void }) {
-  const dominantFacet = getDominantFacet(entry.domainScores);
-  const titleColor = getFacetColorHsl(dominantFacet);
-
-  return (
-    <Card 
-      className="codex-card-compact glassmorphic-card flex flex-col overflow-hidden hover:shadow-primary/20 transition-shadow duration-300"
-      tabIndex={0}
-      onClick={() => onOpenDrawer(entry)}
-      onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && onOpenDrawer(entry)}
-      role="button"
-      aria-label={`View details for ${entry.title}`}
-    >
-      <CardHeader className="pb-3">
-        <CardTitle className="text-xl" style={{ color: titleColor }}>{entry.title}</CardTitle>
-        <CardDescription className="text-xs capitalize">{entry.category}</CardDescription>
-      </CardHeader>
-      <CardContent className="flex-grow flex flex-col justify-between pt-0">
-        <p className="text-sm text-muted-foreground line-clamp-3 mb-3">{entry.summary}</p>
-        <TriangleChart 
-          scores={entry.domainScores} 
-          width={180} // Slightly smaller for card
-          height={156} // Adjusted height for aspect ratio
-          className="mx-auto mb-2 !p-0 !bg-transparent !shadow-none !backdrop-blur-none" // Override default TriangleChart styles
-        />
-         {/* Tags are hidden as per previous request */}
-      </CardContent>
-      <CardFooter className="pt-3 border-t border-border/20">
-        <Button variant="link" size="sm" className="text-primary p-0 w-full justify-start">
-          Facet Details <Icons.chevronRight className="ml-1 h-4 w-4" />
-        </Button>
-      </CardFooter>
-    </Card>
-  );
-}
-
-
-export default function CodexPage() {
-  const [searchTerm, setSearchTerm] = useState('');
-  const [sortBy, setSortBy] = useState('alphabetical');
-  const [activeCategory, setActiveCategory] = useState<string | null>(null);
-  const [selectedEntry, setSelectedEntry] = useState<CodexEntry | null>(null);
-  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
-
-  const dummyCodexEntries = useMemo(() => {
-    // Merge and map data inside useMemo
-    const existingNames = new Set(existingRawCodexData.map(e => e.name ? e.name.toLowerCase() : ''));
-    const uniqueNewEntries = newRawCodexDataBatch.filter(ne => 
-        ne.name && typeof ne.name === 'string' && !existingNames.has(ne.name.toLowerCase())
-    );
-    const currentRawCodexData = [...existingRawCodexData, ...uniqueNewEntries];
-    return mapRawDataToCodexEntries(currentRawCodexData);
-  }, []);
-
-
-  const handleOpenDrawer = (entry: CodexEntry) => {
-    setSelectedEntry(entry);
-    setIsDrawerOpen(true);
-  };
-
-  const filteredAndSortedEntries = useMemo(() => {
-    let entries = [...dummyCodexEntries];
-
-    // Filter by search term
-    if (searchTerm) {
-      entries = entries.filter(entry =>
-        entry.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        entry.summary.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        (entry.tags && entry.tags.some(tag => tag.toLowerCase().includes(searchTerm.toLowerCase())))
-      );
-    }
-
-    // Filter by category
-    if (activeCategory) {
-      entries = entries.filter(entry => entry.category === activeCategory);
-    }
-    
-    // Sort
-    switch (sortBy) {
-      case 'alphabetical':
-        entries.sort((a, b) => a.title.localeCompare(b.title));
-        break;
-      // Add more sort cases here if needed (e.g., by dominant facet)
-      default:
-        break;
-    }
-    return entries;
-  }, [dummyCodexEntries, searchTerm, sortBy, activeCategory]);
-  
-  const dominantFacetForDrawer = selectedEntry ? getDominantFacet(selectedEntry.domainScores) : null;
-  const drawerTitleColor = getFacetColorHsl(dominantFacetForDrawer);
-
-
-  return (
-    <div className="container mx-auto py-8">
-      <header className="mb-8">
-        <h1 className="text-4xl font-bold text-center mb-2">The Codex</h1>
-        <p className="text-xl text-muted-foreground text-center">
-          Explore a library of worldviews, philosophies, and archetypes.
-        </p>
-      </header>
-
-      {/* Filter and Sort Controls */}
-      <Card className="mb-8 glassmorphic-card p-4">
-        <div className="flex flex-col md:flex-row gap-4">
-          <Input
-            type="search"
-            placeholder="Search Codex (titles, summaries, tags...)"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="flex-grow bg-background/70"
-          />
-          <Select value={sortBy} onValueChange={setSortBy}>
-            <SelectTrigger className="w-full md:w-[180px] bg-background/70">
-              <SelectValue placeholder="Sort by" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="alphabetical">Alphabetical (A-Z)</SelectItem>
-              <SelectItem value="dominant_facet_todo">By Dominant Facet (TODO)</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-        <div className="mt-4 flex flex-wrap gap-2">
-          <Button variant={activeCategory === null ? "default" : "outline"} onClick={() => setActiveCategory(null)}>All</Button>
-          <Button variant={activeCategory === "philosophical" ? "default" : "outline"} onClick={() => setActiveCategory("philosophical")}>Philosophical</Button>
-          <Button variant={activeCategory === "religious" ? "default" : "outline"} onClick={() => setActiveCategory("religious")}>Religious</Button>
-          <Button variant={activeCategory === "archetypal" ? "default" : "outline"} onClick={() => setActiveCategory("archetypal")}>Archetypal</Button>
-          <Button variant={activeCategory === "custom" ? "default" : "outline"} onClick={() => setActiveCategory("custom")}>Custom</Button>
-          {/* Add more category filters if needed */}
-        </div>
-      </Card>
-
-      {/* Codex Grid */}
-      {filteredAndSortedEntries.length > 0 ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-          {filteredAndSortedEntries.map(entry => (
-            <CodexCard key={entry.id} entry={entry} onOpenDrawer={handleOpenDrawer} />
-          ))}
-        </div>
-      ) : (
-        <div className="text-center py-12">
-            <Icons.search className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
-            <p className="text-xl text-muted-foreground">No entries match your criteria.</p>
-            <p className="text-sm text-muted-foreground">Try adjusting your search or filters.</p>
-        </div>
-      )}
-
-
-      {/* Details Drawer (Sheet) */}
-      {selectedEntry && (
-        <Sheet open={isDrawerOpen} onOpenChange={setIsDrawerOpen}>
-          <SheetContent className="w-full max-w-md sm:max-w-lg bg-card/80 backdrop-blur-xl p-0 flex flex-col">
-            <SheetHeader className="p-6 pb-4 border-b border-border/30">
-              <div className="flex justify-between items-start">
-                <div>
-                  <SheetTitle className="text-2xl" style={{color: drawerTitleColor}}>{selectedEntry.title}</SheetTitle>
-                  <SheetDescription className="capitalize">{selectedEntry.category}</SheetDescription>
-                </div>
-                <SheetClose asChild>
-                  <Button variant="ghost" size="icon"><Icons.close className="h-5 w-5"/></Button>
-                </SheetClose>
-              </div>
-            </SheetHeader>
-            <ScrollArea className="flex-grow">
-              <div className="p-6 space-y-5">
-                <p className="text-sm text-muted-foreground leading-relaxed">{selectedEntry.summary}</p>
-                
-                <h4 className="text-lg font-semibold text-foreground pt-2 border-t border-border/20">Facet Breakdown:</h4>
-                {FACET_NAMES.map(facetName => {
-                  const scoreEntry = selectedEntry.domainScores.find(ds => ds.facetName === facetName);
-                  const score = scoreEntry ? scoreEntry.score : 0;
-                  const facetConfig = FACETS[facetName];
-                  const summary = selectedEntry.facetSummaries?.[facetName] || `Exploring ${selectedEntry.title}'s perspective on ${facetName}.`;
-                  
-                  return (
-                    <div key={facetName} className="p-3 rounded-md border border-border/30 bg-background/30">
-                      <div className="flex justify-between items-center mb-1">
-                        <h5 className="font-semibold" style={{color: getFacetColorHsl(facetName)}}>
-                          {facetName}
-                        </h5>
-                        <span className="text-xs font-bold" style={{color: getFacetColorHsl(facetName)}}>
-                          {Math.round(score * 100)}%
-                        </span>
-                      </div>
-                      <p className="text-xs text-muted-foreground">{summary}</p>
-                    </div>
-                  );
-                })}
-              </div>
-            </ScrollArea>
-            <div className="p-6 border-t border-border/30 mt-auto">
-              <Button variant="outline" className="w-full" asChild>
-                <Link href={`/codex/${selectedEntry.id}`}>
-                  View Full Deep-Dive <Icons.chevronRight className="ml-2 h-4 w-4" />
-                </Link>
-              </Button>
-            </div>
-          </SheetContent>
-        </Sheet>
-      )}
-    </div>
-  );
-}
-
-// Helper Function to map raw data - outside component for clarity, called by useMemo
-const mapRawDataToCodexEntries = (rawData: any[]): CodexEntry[] => {
-  return rawData.map((item: any) => {
-    const facetScoresObject = item.domainScores || item.facetScores;
-    const domainScores: DomainScore[] = FACET_NAMES.map(facetName => {
-      let scoreValue = 0;
-      if (facetScoresObject) {
-        if (facetScoresObject[facetName] !== undefined) { // Check capitalized key first
-          scoreValue = facetScoresObject[facetName];
-        } else if (facetScoresObject[facetName.toLowerCase()] !== undefined) { // Then lowercase
-          scoreValue = facetScoresObject[facetName.toLowerCase()];
-        }
-      }
-      return { facetName, score: typeof scoreValue === 'number' ? scoreValue : 0 };
-    });
-
-    let category: CodexEntry['category'] = 'custom';
-    const tags: string[] = Array.isArray(item.tags) ? item.tags.map(String) : [];
-    
-    const categoryKeywords: Record<string, CodexEntry['category']> = {
-      "philosophical": "philosophical", "philosophy": "philosophical",
-      "religious": "religious", "religion": "religious",
-      "archetypal": "archetypal", "archetype": "archetypal",
-      "mystical": "philosophical", // Or 'spiritual' if that becomes a category
-      "scientific": "philosophical",
-      "cultural": "custom", // Or another relevant category
-      "indigenous": "custom", // Or 'spiritual'
-      "eastern": "philosophical", // Or 'religious'/'spiritual'
-      "western": "philosophical", // Or 'religious'/'spiritual'
-      "modern": "philosophical",
-      "classical": "philosophical",
-      "ethics": "philosophical",
-      "epistemology": "philosophical",
-    };
-
-    for (const tag of tags) {
-      const lowerTag = tag.toLowerCase();
-      if (categoryKeywords[lowerTag]) {
-        category = categoryKeywords[lowerTag];
-        break; 
-      }
-    }
-    
-    const facetSummaries: Partial<Record<FacetName, string>> = {};
-    if (item.facetSummary || item.facetSummaries) {
-        const rawSummaries = item.facetSummary || item.facetSummaries;
-        for (const rawKey in rawSummaries) {
-            // Try to match rawKey (potentially lowercase) to a capitalized FacetName
-            const capitalizedKey = rawKey.charAt(0).toUpperCase() + rawKey.slice(1) as FacetName;
-            if (FACET_NAMES.includes(capitalizedKey)) {
-                facetSummaries[capitalizedKey] = rawSummaries[rawKey];
-            } else {
-                // Fallback for keys that don't directly match after simple capitalization (e.g. 'praxology')
-                const matchedFacetName = FACET_NAMES.find(fn => fn.toLowerCase() === rawKey.toLowerCase());
-                if (matchedFacetName) {
-                    facetSummaries[matchedFacetName] = rawSummaries[rawKey];
-                }
-            }
-        }
-    }
-
-    return {
-      id: item.id || (item.name ? item.name.toLowerCase().replace(/\s+/g, '_') : `entry_${Math.random().toString(36).substr(2, 9)}`),
-      title: item.name || "Untitled Entry",
-      summary: item.summary || "No summary available.",
-      domainScores,
-      category,
-      tags,
-      isArchetype: tags.includes("archetypal"),
-      createdAt: item.createdAt || new Date().toISOString(),
-      facetSummaries: facetSummaries as Record<FacetName, string>,
-    };
-  });
-};
-
+]
