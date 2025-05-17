@@ -129,6 +129,60 @@ const rawArchetypeData = [
     "summary": "Combines wisdom with leadership, governing self and society in accordance with deeper principles.",
     "facetScores": { "ontology": 0.8, "epistemology": 0.9, "praxeology": 1.0, "axiology": 0.9, "mythology": 0.7, "cosmology": 0.8, "teleology": 0.9 },
     "facetSummaries": { "ontology": "Reality is ordered and intelligible.", "epistemology": "Combines knowledge and insight for wise rule.", "praxeology": "Acts to harmonize and lead.", "axiology": "Values justice, harmony, and benevolence.", "mythology": "Inspired by philosopher-kings and wise rulers.", "cosmology": "World as a kingdom to be governed wisely.", "teleology": "Purpose is to establish a just order." }
+  },
+  {
+    "name": "The Builder",
+    "summary": "Manifests vision through practical action, structure, and perseverance—turning ideas into reality.",
+    "facetScores": { "ontology": 0.7, "epistemology": 0.7, "praxeology": 1.0, "axiology": 0.8, "mythology": 0.6, "cosmology": 0.6, "teleology": 0.8 },
+    "facetSummaries": { "ontology": "Reality as foundation for constructive effort.", "epistemology": "Learns through hands-on engagement.", "praxeology": "Acts by building, shaping, and organizing.", "axiology": "Values stability, achievement, and order.", "mythology": "Guided by myths of founders and architects.", "cosmology": "World as a structure to be improved.", "teleology": "Purpose is to create lasting impact." }
+  },
+  {
+    "name": "The Oracle",
+    "summary": "Serves as a conduit for intuition, prophecy, and the mysteries beyond the rational mind.",
+    "facetScores": { "ontology": 0.9, "epistemology": 0.7, "praxeology": 0.6, "axiology": 0.8, "mythology": 0.9, "cosmology": 0.8, "teleology": 1.0 },
+    "facetSummaries": { "ontology": "Reality is layered with hidden meaning.", "epistemology": "Trusts inner vision and synchronicity.", "praxeology": "Acts through divination and guidance.", "axiology": "Values wisdom, insight, and mystery.", "mythology": "Embodying the seer, prophet, or sibyl.", "cosmology": "World as an oracle’s mirror.", "teleology": "Purpose is to reveal destiny." }
+  },
+  {
+    "name": "The Warrior",
+    "summary": "Embraces conflict, challenge, and adversity to defend, conquer, or uphold a cause.",
+    "facetScores": { "ontology": 0.7, "epistemology": 0.6, "praxeology": 1.0, "axiology": 0.7, "mythology": 0.8, "cosmology": 0.5, "teleology": 0.8 },
+    "facetSummaries": { "ontology": "Reality is a field for contest and valor.", "epistemology": "Learns from challenge and testing.", "praxeology": "Acts through strategy and strength.", "axiology": "Values courage, honor, and loyalty.", "mythology": "Guided by hero and battle myths.", "cosmology": "World as an arena of conflict.", "teleology": "Purpose is to overcome and defend." }
+  },
+  {
+    "name": "The Artist",
+    "summary": "Channels inspiration into beauty, meaning, and novel forms of expression.",
+    "facetScores": { "ontology": 0.7, "epistemology": 0.8, "praxeology": 0.8, "axiology": 0.9, "mythology": 0.8, "cosmology": 0.7, "teleology": 0.9 },
+    "facetSummaries": { "ontology": "Reality is a canvas for creativity.", "epistemology": "Learns through imagination and observation.", "praxeology": "Acts by creating and expressing.", "axiology": "Values beauty, originality, and authenticity.", "mythology": "Inspired by muses, poets, and creators.", "cosmology": "World as a theater of inspiration.", "teleology": "Purpose is to give form to the ineffable." }
+  },
+  {
+    "name": "The Shaman",
+    "summary": "Bridges worlds, heals, and brings back wisdom from the unseen and the archetypal.",
+    "facetScores": { "ontology": 0.9, "epistemology": 0.8, "praxeology": 0.8, "axiology": 0.8, "mythology": 0.9, "cosmology": 0.8, "teleology": 1.0 },
+    "facetSummaries": { "ontology": "Sees layers of reality—seen and unseen.", "epistemology": "Knows through journeying and vision.", "praxeology": "Acts as healer, guide, and mediator.", "axiology": "Values balance, connection, and wisdom.", "mythology": "Embodies the medicine person or dream-walker.", "cosmology": "World as a web of interconnection.", "teleology": "Purpose is to heal, restore, and initiate." }
+  },
+  {
+    "name": "The Merchant",
+    "summary": "Navigates the world of exchange, value, and negotiation—creating abundance and opportunity.",
+    "facetScores": { "ontology": 0.6, "epistemology": 0.7, "praxeology": 0.9, "axiology": 0.8, "mythology": 0.7, "cosmology": 0.5, "teleology": 0.7 },
+    "facetSummaries": { "ontology": "Reality as a marketplace of possibility.", "epistemology": "Learns from deals, trends, and patterns.", "praxeology": "Acts by trading, connecting, and negotiating.", "axiology": "Values opportunity, prosperity, and fairness.", "mythology": "Guided by the archetype of the trader or broker.", "cosmology": "World as a network of exchange.", "teleology": "Purpose is to generate abundance." }
+  },
+  {
+    "name": "The Explorer of Consciousness",
+    "summary": "Seeks new frontiers of perception, mind, and experience—pioneering the inner world.",
+    "facetScores": { "ontology": 0.8, "epistemology": 0.9, "praxeology": 0.8, "axiology": 0.8, "mythology": 0.7, "cosmology": 0.7, "teleology": 0.9 },
+    "facetSummaries": { "ontology": "Reality is multi-layered and experiential.", "epistemology": "Values introspection, meditation, and altered states.", "praxeology": "Acts through experimentation with consciousness.", "axiology": "Values novelty, insight, and personal evolution.", "mythology": "Inspired by mythic journeys and psychonauts.", "cosmology": "World as a field of infinite mind.", "teleology": "Purpose is to expand awareness." }
+  },
+  {
+    "name": "The Lover",
+    "summary": "Embodies connection, passion, and the drive to unite self with others and with life itself.",
+    "facetScores": { "ontology": 0.8, "epistemology": 0.7, "praxeology": 0.8, "axiology": 1.0, "mythology": 0.9, "cosmology": 0.8, "teleology": 0.9 },
+    "facetSummaries": { "ontology": "Reality as a web of relationships.", "epistemology": "Knows through feeling, empathy, and intimacy.", "praxeology": "Acts through loving, connecting, and merging.", "axiology": "Values love, unity, and acceptance.", "mythology": "Guided by the archetype of the beloved or muse.", "cosmology": "World as a field of attraction and union.", "teleology": "Purpose is union and belonging." }
+  },
+  {
+    "name": "The Outlaw",
+    "summary": "Rebels against conventions, breaks boundaries, and seeks to redefine what is possible.",
+    "facetScores": { "ontology": 0.5, "epistemology": 0.7, "praxeology": 0.9, "axiology": 0.6, "mythology": 0.8, "cosmology": 0.4, "teleology": 0.7 },
+    "facetSummaries": { "ontology": "Reality is up for challenge and change.", "epistemology": "Questions all authority and dogma.", "praxeology": "Acts by defying rules and limitations.", "axiology": "Values freedom, rebellion, and authenticity.", "mythology": "Inspired by antiheroes and tricksters.", "cosmology": "World as an open system for disruption.", "teleology": "Purpose is to catalyze revolution." }
   }
 ];
 
@@ -364,5 +418,7 @@ export default function ArchetypesPage() {
     </div>
   );
 }
+
+    
 
     
