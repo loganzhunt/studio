@@ -1,3 +1,4 @@
+
 import type { LucideIcon } from 'lucide-react';
 import type { Icons } from '@/components/icons'; // Import Icons type
 
@@ -41,6 +42,7 @@ export interface WorldviewProfile {
 export interface CodexEntry extends WorldviewProfile {
   category: "religious" | "philosophical" | "archetypal" | "custom";
   tags?: string[];
+  facetSummaries?: { [K_FacetName in FacetName]?: string }; // Added facetSummaries
 }
 
 export interface WorldviewContextType {
@@ -50,7 +52,7 @@ export interface WorldviewContextType {
   setAssessmentAnswers: (answers: AssessmentAnswers) => void;
   updateAssessmentAnswer: (questionId: string, value: number) => void;
   domainScores: DomainScore[];
-  calculateDomainScores: () => void;
+  calculateDomainScores: () => DomainScore[]; // Ensure it returns DomainScore[]
   savedWorldviews: WorldviewProfile[];
   addSavedWorldview: (profile: WorldviewProfile) => void;
   updateSavedWorldview: (profile: WorldviewProfile) => void;
@@ -64,7 +66,7 @@ export interface WorldviewContextType {
 export type NavItem = {
   title: string;
   href: string;
-  icon?: keyof typeof Icons; // Changed from LucideIcon
+  icon?: keyof typeof Icons;
   disabled?: boolean;
   external?: boolean;
   label?: string;
