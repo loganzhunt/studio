@@ -1,7 +1,8 @@
+
 "use client";
 
 import { useWorldview } from "@/hooks/use-worldview";
-import { TriangleChart } from "@/components/triangle-chart";
+import { TriangleChart } from "@/components/visualization/TriangleChart";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Icons } from "@/components/icons";
@@ -43,83 +44,54 @@ function DomainFeedbackBar({ facetName, score, anchorLeft, anchorRight }: { face
 
 
 export default function DashboardPage() {
-  const { domainScores, activeProfile, savedWorldviews } = useWorldview();
+  const { domainScores, activeProfile } = useWorldview();
 
   const currentTitle = activeProfile?.title || "Your Latest Worldview";
 
   return (
-    <div className="container mx-auto py-8">
-      <h1 className="text-3xl font-bold mb-8 text-center">Dashboard</h1>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-        <Card className="glassmorphic-card">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2"><Icons.assessment className="w-5 h-5 text-primary"/> Assessment</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-muted-foreground mb-4">Ready to explore your worldview or refine your current understanding?</p>
-            <Button asChild className="w-full"><Link href="/assessment">Start/Retake Assessment</Link></Button>
-          </CardContent>
-        </Card>
-        <Card className="glassmorphic-card">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2"><Icons.builder className="w-5 h-5 text-primary"/> Builder Mode</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-muted-foreground mb-4">Craft a custom worldview by selecting systems from the Codex.</p>
-            <Button asChild className="w-full" variant="outline"><Link href="/builder">Open Builder</Link></Button>
-          </CardContent>
-        </Card>
-        <Card className="glassmorphic-card">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2"><Icons.saved className="w-5 h-5 text-primary"/> Saved Worldviews</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-muted-foreground mb-4">You have {savedWorldviews.length} saved profile(s).</p>
-            <Button asChild className="w-full" variant="outline"><Link href="/saved-worldviews">View Saved</Link></Button>
-          </CardContent>
-        </Card>
-      </div>
+    <div className="container mx-auto py-8 space-y-8">
+      <h1 className="text-3xl font-bold text-center">Dashboard</h1>
       
       {domainScores && domainScores.length > 0 ? (
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          <Card className="lg:col-span-2 glassmorphic-card">
-            <CardHeader>
-              <CardTitle className="text-2xl">Latest Profile: "{currentTitle}"</CardTitle>
-              <CardDescription>A summary of your most recent worldview assessment or creation.</CardDescription>
-            </CardHeader>
-            <CardContent>
-              {domainScores.map(ds => (
-                <DomainFeedbackBar 
-                  key={ds.facetName}
-                  facetName={ds.facetName}
-                  score={ds.score}
-                  anchorLeft={`${ds.facetName} Low`}
-                  anchorRight={`${ds.facetName} High`}
-                />
-              ))}
-              <Button asChild className="mt-4"><Link href="/results">View Full Results</Link></Button>
-            </CardContent>
-          </Card>
-
-          <div className="space-y-8">
-            <Card className="glassmorphic-card">
-              <CardHeader>
-                <CardTitle className="text-2xl">Your Signature</CardTitle>
-                 <Button variant="ghost" size="icon" className="absolute top-4 right-4" onClick={() => alert("Export options placeholder")}>
+        <>
+          {/* Centered "Your Signature" Card */}
+          <div className="flex justify-center">
+            <Card className="w-full max-w-lg glassmorphic-card">
+              <CardHeader className="relative">
+                <CardTitle className="text-2xl text-center">Your Signature</CardTitle>
+                <Button variant="ghost" size="icon" className="absolute top-2 right-2" onClick={() => alert("Export options placeholder")}>
                   <Icons.share className="h-5 w-5" />
                 </Button>
               </CardHeader>
-              <CardContent>
-                <TriangleChart scores={domainScores} className="mx-auto" />
-                <div className="mt-4 flex flex-col space-y-2">
-                   <Button variant="outline" size="sm"><Icons.edit className="mr-2 h-4 w-4" /> Edit Selections</Button>
-                </div>
+              <CardContent className="flex flex-col items-center">
+                <TriangleChart scores={domainScores} className="mx-auto mb-6" />
+                <Button variant="outline" size="sm"><Icons.edit className="mr-2 h-4 w-4" /> Edit Selections</Button>
               </CardContent>
             </Card>
-            
-            {/* Placeholder for InsightPanel */}
-            <Card className="glassmorphic-card">
+          </div>
+
+          {/* Grid for Latest Profile and Quick Insights */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <Card className="lg:col-span-2 glassmorphic-card">
+              <CardHeader>
+                <CardTitle className="text-2xl">Latest Profile: "{currentTitle}"</CardTitle>
+                <CardDescription>A summary of your most recent worldview assessment or creation.</CardDescription>
+              </CardHeader>
+              <CardContent>
+                {domainScores.map(ds => (
+                  <DomainFeedbackBar 
+                    key={ds.facetName}
+                    facetName={ds.facetName}
+                    score={ds.score}
+                    anchorLeft={`${ds.facetName} Low`} // Placeholder anchors
+                    anchorRight={`${ds.facetName} High`} // Placeholder anchors
+                  />
+                ))}
+                <Button asChild className="mt-4"><Link href="/results">View Full Results</Link></Button>
+              </CardContent>
+            </Card>
+
+            <Card className="glassmorphic-card"> {/* Quick Insights - now takes up the remaining 1 col on lg */}
               <CardHeader>
                 <CardTitle>Quick Insights</CardTitle>
               </CardHeader>
@@ -128,9 +100,9 @@ export default function DashboardPage() {
               </CardContent>
             </Card>
           </div>
-        </div>
+        </>
       ) : (
-         <Card className="glassmorphic-card text-center py-12">
+         <Card className="glassmorphic-card text-center py-12 max-w-lg mx-auto">
             <CardHeader>
               <Icons.search className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
               <CardTitle className="text-2xl">No Active Worldview</CardTitle>
