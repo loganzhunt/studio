@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useWorldview } from "@/hooks/use-worldview";
@@ -106,7 +107,7 @@ export default function ResultsPage() {
           <CardTitle>Actions</CardTitle>
         </CardHeader>
         <CardContent className="flex flex-wrap gap-4">
-          <Button variant="outline"><Icons.save className="mr-2 h-4 w-4" /> Save to Library</Button>
+          <Button variant="outline"><Icons.saved className="mr-2 h-4 w-4" /> Save to Library</Button>
           <Button variant="outline"><Icons.download className="mr-2 h-4 w-4" /> Export PNG</Button>
           <Button variant="outline"><Icons.print className="mr-2 h-4 w-4" /> Export PDF</Button>
           <Button variant="outline"><Icons.share className="mr-2 h-4 w-4" /> Share Link</Button>
