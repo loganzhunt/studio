@@ -1,6 +1,6 @@
-
 import chroma from "chroma-js";
 import type { FacetName } from "@/types";
+import { FACETS } from "@/config/facets"; // Import FACETS for colorVariable
 
 // Updated ROYGBIV palette (capitalized keys to match FacetName)
 export const DOMAIN_COLORS: Record<FacetName | string, string> = {
@@ -23,14 +23,28 @@ const FALLBACK_COLOR = "#BDBDBD"; // Medium Gray
  * @param score The normalized score (0.0 - 1.0).
  * @returns A hex color string.
  */
-export function getBandColor(domainName: FacetName | string, score: number): string {
+export function getBandColor(domainName: FacetName, score: number): string {
   const baseColor = DOMAIN_COLORS[domainName] || FALLBACK_COLOR;
 
-  if (score <= 0.33) { // Adjusted threshold for better distribution (0-0.33, 0.34-0.66, 0.67-1.0)
-    return chroma(baseColor).darken(1.5).hex(); // Slightly less dark than 2
+  // Score thresholds: 0-0.33 (dark), 0.34-0.66 (base), 0.67-1.0 (light)
+  if (score <= 0.33) {
+    return chroma(baseColor).darken(1.5).hex();
   } else if (score <= 0.66) {
-    return baseColor; // Normal shade
+    return baseColor; 
   } else {
-    return chroma(baseColor).brighten(1).hex(); // Slightly less bright than 1.2
+    return chroma(baseColor).brighten(1).hex();
   }
+}
+
+/**
+ * Returns the HSL string for a facet's base color.
+ * @param facetName The name of the facet.
+ * @returns HSL string (e.g., "hsl(var(--domain-ontology))") or a fallback.
+ */
+export function getFacetColorHsl(facetName: FacetName | string | undefined): string {
+  if (!facetName || !FACETS[facetName as FacetName]) {
+    return `hsl(var(--foreground))`; // Fallback color
+  }
+  const facetConfig = FACETS[facetName as FacetName];
+  return `hsl(var(${facetConfig.colorVariable.slice(2)}))`;
 }
