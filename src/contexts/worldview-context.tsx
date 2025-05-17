@@ -1,8 +1,9 @@
+
 "use client";
 
 import type { WorldviewContextType, WorldviewProfile, AssessmentAnswers, DomainScore, FacetName } from "@/types";
 import React, { createContext, useState, useEffect, useCallback } from "react";
-import { FACET_NAMES } from "@/config/facets";
+import { FACETS, FACET_NAMES } from "@/config/facets"; // Import FACETS
 
 const defaultWorldviewContext: WorldviewContextType = {
   activeProfile: null,
@@ -11,7 +12,7 @@ const defaultWorldviewContext: WorldviewContextType = {
   setAssessmentAnswers: () => {},
   updateAssessmentAnswer: () => {},
   domainScores: FACET_NAMES.map(name => ({ facetName: name, score: 0 })),
-  calculateDomainScores: () => {},
+  calculateDomainScores: () => { return []; }, // Ensure it matches the new return type
   savedWorldviews: [],
   addSavedWorldview: () => {},
   updateSavedWorldview: () => {},
@@ -34,12 +35,12 @@ export const WorldviewProvider = ({ children }: { children: React.ReactNode }) =
 
 
   const persistState = useCallback(() => {
-    if (!isLoaded) return; // Don't persist until loaded
+    if (!isLoaded) return; 
     try {
       localStorage.setItem("metaPrismState", JSON.stringify({
         activeProfile,
         assessmentAnswers,
-        domainScores,
+        domainScores, // domainScores in context are also persisted
         savedWorldviews,
         facetSelections,
       }));
@@ -82,28 +83,36 @@ export const WorldviewProvider = ({ children }: { children: React.ReactNode }) =
   };
 
   const calculateDomainScores = useCallback(() => {
-    // Placeholder logic: This should average questions per facet
-    // Assume questions are named like "Ontology_q1", "Ontology_q2", etc.
-    // And Likert scale is 1-7. Normalize to 0-1.
     const newScores: DomainScore[] = FACET_NAMES.map(facetName => {
-      let total = 0;
-      let count = 0;
-      for (const qId in assessmentAnswers) {
-        if (qId.startsWith(facetName)) {
-          total += assessmentAnswers[qId];
-          count++;
+      const facetConfig = FACETS[facetName];
+      const questionsForFacet = facetConfig.questions.length; // Should be 10
+      let sumForFacet = 0;
+      let answeredCount = 0;
+
+      for (let i = 0; i < questionsForFacet; i++) {
+        const questionId = `${facetName}_q${i}`;
+        if (assessmentAnswers[questionId] !== undefined) {
+          sumForFacet += assessmentAnswers[questionId];
+          answeredCount++;
         }
       }
-      // Assuming 10 questions per facet, Likert 1-7. Max score 70, min 10.
-      // Normalized score: (actual_sum - min_sum) / (max_sum - min_sum)
-      // min_sum = count * 1, max_sum = count * 7 (if 1-7 scale)
-      // If questions are 0-indexed for answers (e.g. 0-4 for 5 options)
-      // and 10 questions, min_sum = 0, max_sum = 40.
-      // For now, a simpler placeholder:
-      const score = count > 0 ? (total / (count * 7)) : 0; // Simple average, assuming 1-7 scale
+
+      let score = 0;
+      // Ensure all questions for the facet are answered to calculate a meaningful score
+      if (answeredCount === questionsForFacet && questionsForFacet > 0) {
+        const minSum = questionsForFacet * 1; // Min score for each question is 1 (Likert 1-5)
+        const maxSum = questionsForFacet * 5; // Max score for each question is 5 (Likert 1-5)
+        if (maxSum - minSum > 0) { // Avoid division by zero if only 1 question or scale is 1 point
+             score = (sumForFacet - minSum) / (maxSum - minSum);
+        } else if (maxSum - minSum === 0 && questionsForFacet > 0) { // Handle case for single point scale (e.g. all questions must be 3)
+            score = sumForFacet / questionsForFacet === minSum / questionsForFacet ? 1 : 0; // Simplified for single point example
+        }
+      }
+      
       return { facetName, score: Math.max(0, Math.min(1, score)) };
     });
-    setDomainScores(newScores);
+    setDomainScores(newScores); // Update context state
+    return newScores; // Return for immediate use by caller
   }, [assessmentAnswers]);
 
   const addSavedWorldview = (profile: WorldviewProfile) => {
