@@ -18,11 +18,14 @@ import { Progress } from "@/components/ui/progress";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
+import { cn } from "@/lib/utils";
 
 // --- Helper Functions (copied/adapted from archetypes/page.tsx) ---
 const getDominantFacet = (scores: DomainScore[]): FacetName => {
   if (!scores || scores.length === 0) return FACET_NAMES[0];
-  return scores.reduce((prev, current) => (current && prev && current.score > prev.score) ? current : prev, scores[0] || { facetName: FACET_NAMES[0], score: 0 }).facetName || FACET_NAMES[0];
+  const validScores = scores.filter(s => s && typeof s.score === 'number');
+  if (validScores.length === 0) return FACET_NAMES[0];
+  return validScores.reduce((prev, current) => (current.score > prev.score) ? current : prev).facetName || FACET_NAMES[0];
 };
 
 // Archetype Data (should ideally be shared or fetched, copied for now)
@@ -39,8 +42,7 @@ const rawArchetypeData: any[] = [
     "facetScores": { "ontology": 0.9, "epistemology": 0.8, "praxeology": 0.7, "axiology": 0.8, "mythology": 0.8, "cosmology": 0.7, "teleology": 1.0 },
     "facetSummaries": { "ontology": "Reality is ultimately spiritual and unified.", "epistemology": "Direct experience and inner knowing are trusted.", "praxeology": "Practice is devotion, meditation, contemplation.", "axiology": "Values unity, compassion, transcendence.", "mythology": "Draws inspiration from mystical stories.", "cosmology": "Sees the cosmos as alive with spirit.", "teleology": "Purpose is awakening to divine union." }
   },
-  // ... (include all other archetypes from archetypes/page.tsx)
-  {
+   {
     "name": "The Rationalist Skeptic",
     "summary": "Believes reality is material, truth comes from reason and science, and meaning is self-created.",
     "facetScores": { "ontology": 0.1, "epistemology": 0.2, "praxeology": 0.3, "axiology": 0.5, "mythology": 0.3, "cosmology": 0.4, "teleology": 0.2 }
@@ -61,15 +63,36 @@ const rawArchetypeData: any[] = [
     "facetScores": { "ontology": 0.7, "epistemology": 0.7, "praxeology": 0.9, "axiology": 0.9, "mythology": 0.6, "cosmology": 0.7, "teleology": 0.8 },
     "facetSummaries": { "ontology": "Reality is complex and interconnected.", "epistemology": "Learns from dialogue and negotiation.", "praxeology": "Acts through mediation and bridge-building.", "axiology": "Values harmony, balance, and respect.", "mythology": "Guided by peacemakers and mediators.", "cosmology": "World as a field of relationship.", "teleology": "Purpose is unity and reconciliation." }
   }
+  // ... (Ensure ALL archetypes from archetypes/page.tsx are eventually copied here for full comparison functionality)
 ];
 
 
 const mapRawArchetypeToCodexEntry = (raw: any): CodexEntry => {
+    if (!raw || typeof raw.name !== 'string') {
+      console.error("mapRawArchetypeToCodexEntry: Invalid raw data item", raw);
+      // Return a placeholder or throw an error, depending on desired handling
+      return {
+        id: `invalid_archetype_${Date.now()}`,
+        title: "Invalid Archetype Data",
+        summary: "This archetype data could not be processed.",
+        domainScores: FACET_NAMES.map(name => ({ facetName: name, score: 0 })),
+        facetSummaries: {},
+        category: "custom",
+        isArchetype: true,
+        createdAt: new Date().toISOString(),
+        tags: ["error"],
+      };
+    }
+
     const domainScoresArray: DomainScore[] = FACET_NAMES.map(facetKey => {
-      const score = (raw.facetScores && typeof raw.facetScores === 'object' && typeof raw.facetScores[facetKey.toLowerCase()] === 'number')
-        ? raw.facetScores[facetKey.toLowerCase()]
-        : 0.5; // Default score if missing
-      return { facetName: facetKey, score: Math.max(0, Math.min(1, Number(score))) };
+      let score = 0.5; // Default score
+      if (raw.facetScores && typeof raw.facetScores === 'object') {
+        const rawScore = raw.facetScores[facetKey.toLowerCase()];
+        if (typeof rawScore === 'number') {
+          score = Math.max(0, Math.min(1, Number(rawScore)));
+        }
+      }
+      return { facetName: facetKey, score };
     });
   
     const processedFacetSummaries: { [K_FacetName in FacetName]?: string } = {};
@@ -85,13 +108,13 @@ const mapRawArchetypeToCodexEntry = (raw: any): CodexEntry => {
     return {
       id: raw.name.toLowerCase().replace(/\s+/g, '_'),
       title: raw.name,
-      summary: raw.summary,
+      summary: raw.summary || "No summary available.",
       domainScores: domainScoresArray,
       facetSummaries: processedFacetSummaries,
       category: "archetypal",
       isArchetype: true,
       createdAt: new Date().toISOString(),
-      tags: [raw.name.toLowerCase().replace(/\s+/g, '_'), "archetype"],
+      tags: raw.tags || [raw.name.toLowerCase().replace(/\s+/g, '_'), "archetype"],
     };
   };
 
@@ -114,7 +137,8 @@ const calculateSimilarity = (userScores: DomainScore[], archetypeScores: DomainS
   userMagnitude = Math.sqrt(userMagnitude);
   archetypeMagnitude = Math.sqrt(archetypeMagnitude);
   if (userMagnitude === 0 || archetypeMagnitude === 0) return 0;
-  return (dotProduct / (userMagnitude * archetypeMagnitude)) * 100;
+  const similarity = (dotProduct / (userMagnitude * archetypeMagnitude)) * 100;
+  return Math.max(0, Math.min(100, similarity)); // Clamp between 0 and 100
 };
 
 
@@ -128,19 +152,19 @@ export default function DashboardPage() {
 
   const [selectedSourceAId, setSelectedSourceAId] = useState<string>('latest_results');
   const [selectedSourceBId, setSelectedSourceBId] = useState<string>('none');
-  const [comparisonProfileA, setComparisonProfileA] = useState<WorldviewProfile | null>(null);
-  const [comparisonProfileB, setComparisonProfileB] = useState<WorldviewProfile | null>(null);
+  const [comparisonProfileA, setComparisonProfileA] = useState<WorldviewProfile | CodexEntry | null>(null);
+  const [comparisonProfileB, setComparisonProfileB] = useState<WorldviewProfile | CodexEntry | null>(null);
   const [sortFacetComparisonByDifference, setSortFacetComparisonByDifference] = useState(false);
 
   const hasAssessmentData = useMemo(() => {
-    return userDomainScores && userDomainScores.some(ds => ds.score !== 0 && ds.score !== 0.5); // More robust check than just length
+    return userDomainScores && userDomainScores.some(ds => ds.score !== 0.5); 
   }, [userDomainScores]);
 
   const mappedArchetypes = useMemo(() => {
     try {
-      return rawArchetypeData.map(mapRawArchetypeToCodexEntry);
+      return rawArchetypeData.filter(item => item && item.name).map(mapRawArchetypeToCodexEntry);
     } catch (error) {
-      console.error("Error mapping archetypes:", error);
+      console.error("Error mapping archetypes in Dashboard:", error);
       return [];
     }
   }, []);
@@ -157,12 +181,20 @@ export default function DashboardPage() {
   }, [userDomainScores, mappedArchetypes, hasAssessmentData]);
 
   const comparisonProfileOptions = useMemo(() => {
-    const options: { id: string; title: string; profile: WorldviewProfile | null }[] = [
+    const options: { id: string; title: string; profile: WorldviewProfile | CodexEntry | null }[] = [
       { id: 'latest_results', title: 'My Latest Results', profile: hasAssessmentData && userDomainScores ? { id: 'latest', title: 'My Latest Results', domainScores: userDomainScores, createdAt: new Date().toISOString() } : null },
       { id: 'neutral_placeholder', title: 'Neutral Baseline (All 50%)', profile: { id: 'neutral', title: 'Neutral Baseline', domainScores: defaultNeutralScores, createdAt: new Date().toISOString() }}
     ];
-    savedWorldviews.forEach(sw => options.push({ id: `saved::${sw.id}`, title: `Saved: ${sw.title}`, profile: sw }));
-    mappedArchetypes.forEach(arch => options.push({ id: `archetype::${arch.id}`, title: `Archetype: ${arch.title}`, profile: arch }));
+    if (Array.isArray(savedWorldviews)) {
+        savedWorldviews.forEach(sw => options.push({ id: `saved::${sw.id}`, title: `Saved: ${sw.title}`, profile: sw }));
+    }
+    if (Array.isArray(mappedArchetypes)) {
+        mappedArchetypes.forEach(arch => {
+            if (arch && arch.id) { // Ensure arch and arch.id are defined
+                 options.push({ id: `archetype::${arch.id}`, title: `Archetype: ${arch.title}`, profile: arch })
+            }
+        });
+    }
     options.push({ id: 'none', title: 'None (Compare to Neutral)', profile: null });
     return options;
   }, [hasAssessmentData, userDomainScores, savedWorldviews, mappedArchetypes]);
@@ -179,7 +211,7 @@ export default function DashboardPage() {
   }, [selectedSourceBId, comparisonProfileOptions]);
 
   const facetComparisonDisplayData = useMemo(() => {
-    if (!comparisonProfileA || !comparisonProfileB) return [];
+    if (!comparisonProfileA || !comparisonProfileA.domainScores || !comparisonProfileB || !comparisonProfileB.domainScores) return [];
 
     let data = FACET_NAMES.map(facetName => {
       const facetConfig = FACETS[facetName];
@@ -207,21 +239,20 @@ export default function DashboardPage() {
   };
 
   const renderDomainFeedbackBars = () => {
-    const scoresToDisplay = hasAssessmentData ? userDomainScores : defaultNeutralScores;
+    const scoresToDisplay = hasAssessmentData && userDomainScores ? userDomainScores : defaultNeutralScores;
     return scoresToDisplay.map(ds => (
       <DomainFeedbackBar
         key={ds.facetName}
         facetName={ds.facetName}
         score={ds.score}
-        anchorLeft={hasAssessmentData ? `${ds.facetName} Low` : "Spectrum Low"}
-        anchorRight={hasAssessmentData ? `${ds.facetName} High` : "Spectrum High"}
+        anchorLeft={hasAssessmentData ? `${FACETS[ds.facetName]?.name || ds.facetName} Low` : "Spectrum Low"}
+        anchorRight={hasAssessmentData ? `${FACETS[ds.facetName]?.name || ds.facetName} High` : "Spectrum High"}
       />
     ));
   };
 
   return (
     <div className="container mx-auto py-8 space-y-12">
-      {/* User Greeting / Auth Prompt */}
       <Card className="glassmorphic-card text-center p-6">
         {currentUser ? (
           <>
@@ -231,7 +262,7 @@ export default function DashboardPage() {
         ) : (
           <>
             <h1 className="text-3xl font-bold text-foreground">Welcome to Meta-Prism!</h1>
-            <p className="text-muted-foreground mt-1">Sign in to save your results and explore your worldview.</p>
+            <p className="text-muted-foreground mt-1">Sign in to explore your worldview.</p>
             <Button onClick={openAuthModal} className="mt-4">
               <Icons.user className="mr-2 h-4 w-4" /> Sign In (Local Demo)
             </Button>
@@ -239,17 +270,16 @@ export default function DashboardPage() {
         )}
       </Card>
 
-      {/* Your Signature */}
       <Card className="glassmorphic-card">
         <CardHeader className="text-center">
           <CardTitle className="text-2xl font-bold text-primary">Your Worldview Signature</CardTitle>
           {!hasAssessmentData && <CardDescription>Complete the assessment to reveal your unique pattern.</CardDescription>}
         </CardHeader>
-        <CardContent className="flex justify-center items-center min-h-[280px]">
-          <TriangleChart scores={hasAssessmentData ? userDomainScores : defaultNeutralScores} interactive={false} />
+        <CardContent className="flex justify-center items-center min-h-[280px] p-0">
+          <TriangleChart scores={hasAssessmentData ? userDomainScores : defaultNeutralScores} interactive={false} width={320} height={277} className="!p-0 !bg-transparent !shadow-none !backdrop-blur-none" />
         </CardContent>
          {!hasAssessmentData && (
-            <CardFooter className="flex-col items-center gap-3 pt-0">
+            <CardFooter className="flex-col items-center gap-3 pt-4 border-t border-border/20">
                  <p className="text-sm text-muted-foreground text-center">Your results will appear here once you complete the assessment.</p>
                 <Button asChild>
                     <Link href="/assessment"><Icons.assessment className="mr-2 h-4 w-4"/> Begin Assessment</Link>
@@ -258,7 +288,6 @@ export default function DashboardPage() {
         )}
       </Card>
 
-      {/* Quick Insights & Facet Breakdown */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <Card className="lg:col-span-2 glassmorphic-card">
           <CardHeader>
@@ -278,21 +307,21 @@ export default function DashboardPage() {
         <Card className="glassmorphic-card">
           <CardHeader>
             <CardTitle className="text-xl">Quick Insights</CardTitle>
+            <CardDescription className="text-xs">Powered by AI (placeholder)</CardDescription>
           </CardHeader>
           <CardContent>
-            {hasAssessmentData ? (
-              <p className="text-muted-foreground">
-                Reflective prompts and symbolic interpretations based on your scores will appear here.
-                Your dominant facet appears to be {getDominantFacet(userDomainScores)}.
+            {hasAssessmentData && userDomainScores ? (
+              <p className="text-muted-foreground text-sm">
+                Reflective prompts based on your scores will appear here.
+                Your dominant facet appears to be <span className="font-semibold" style={{color: getFacetColorHsl(getDominantFacet(userDomainScores))}}>{getDominantFacet(userDomainScores)}</span>.
               </p>
             ) : (
-              <p className="text-muted-foreground">Complete the assessment to unlock insights and reflections about your worldview.</p>
+              <p className="text-muted-foreground text-sm">Complete the assessment to unlock insights about your worldview.</p>
             )}
           </CardContent>
         </Card>
       </div>
 
-      {/* Closest Archetype Matches */}
       <Card className="glassmorphic-card">
         <CardHeader className="text-center">
           <CardTitle className="text-2xl font-bold text-primary roygbiv-gradient-underline pb-2">Closest Archetype Matches</CardTitle>
@@ -302,10 +331,12 @@ export default function DashboardPage() {
             <div className="text-center py-8">
               <TriangleChart scores={defaultNeutralScores} width={200} height={173} interactive={false} className="mx-auto mb-4 !p-0 !bg-transparent !shadow-none !backdrop-blur-none opacity-50" />
               <p className="text-muted-foreground">Take the Assessment to Discover Your Archetypal Matches.</p>
+               <Button asChild className="mt-4">
+                    <Link href="/assessment"><Icons.assessment className="mr-2 h-4 w-4"/> Begin Assessment</Link>
+                </Button>
             </div>
           ) : topThreeMatches.length > 0 ? (
             <div className="space-y-6">
-              {/* Top Match */}
               {topThreeMatches[0] && (
                 <Card className="bg-card/50 border-primary/30 shadow-lg">
                   <CardHeader>
@@ -327,7 +358,6 @@ export default function DashboardPage() {
                   </CardContent>
                 </Card>
               )}
-              {/* Other Matches */}
               {(topThreeMatches[1] || topThreeMatches[2]) && (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4">
                   {topThreeMatches.slice(1).map((match) => match && (
@@ -355,7 +385,6 @@ export default function DashboardPage() {
         </CardContent>
       </Card>
       
-      {/* Facet Comparison Slider Tool */}
       <Card className="glassmorphic-card">
         <CardHeader>
           <CardTitle className="text-2xl font-bold text-primary roygbiv-gradient-underline pb-2">Facet Comparison Tool</CardTitle>
@@ -408,22 +437,20 @@ export default function DashboardPage() {
                     <span className="text-xs text-muted-foreground font-normal ml-2 italic">({facetConfig.tagline})</span>
                   </h4>
                 </div>
-                <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-xs items-center">
-                  {/* Source A Bar */}
-                  <div className="col-span-1">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-2 text-xs items-center">
+                  <div className="sm:col-span-1">
                     <div className="flex justify-between mb-0.5">
-                      <span className="font-medium text-muted-foreground">{comparisonProfileA?.title || "Source A"}</span>
-                      <span style={{ color: getFacetColorHsl(facetName) }}>{Math.round(scoreA * 100)}%</span>
+                      <span className="font-medium text-muted-foreground truncate max-w-[150px] xs:max-w-[200px] sm:max-w-none">{comparisonProfileA?.title || "Source A"}</span>
+                      <span style={{ color: getFacetColorHsl(facetName) }} className="font-semibold">{Math.round(scoreA * 100)}%</span>
                     </div>
                     <div className="h-3 w-full bg-muted rounded">
                       <div style={{ width: `${scoreA * 100}%`, backgroundColor: getFacetColorHsl(facetName) }} className="h-3 rounded transition-all"></div>
                     </div>
                   </div>
-                  {/* Source B Bar */}
-                  <div className="col-span-1">
+                  <div className="sm:col-span-1">
                      <div className="flex justify-between mb-0.5">
-                      <span className="font-medium text-muted-foreground">{comparisonProfileB?.title || "Source B"}</span>
-                      <span style={{ color: getFacetColorHsl(facetName) }}>{Math.round(scoreB * 100)}%</span>
+                      <span className="font-medium text-muted-foreground truncate max-w-[150px] xs:max-w-[200px] sm:max-w-none">{comparisonProfileB?.title || "Source B"}</span>
+                      <span style={{ color: getFacetColorHsl(facetName) }} className="font-semibold">{Math.round(scoreB * 100)}%</span>
                     </div>
                     <div className="h-3 w-full bg-muted rounded">
                       <div style={{ width: `${scoreB * 100}%`, backgroundColor: getFacetColorHsl(facetName) }} className="h-3 rounded transition-all"></div>
@@ -433,7 +460,7 @@ export default function DashboardPage() {
               </div>
             ))}
           </div>
-          {!hasAssessmentData && (
+          {!hasAssessmentData && comparisonProfileA?.id === 'latest' && (
             <p className="text-center text-muted-foreground text-sm pt-4">
               Complete the assessment to compare your results with other profiles.
             </p>
@@ -441,7 +468,6 @@ export default function DashboardPage() {
         </CardContent>
       </Card>
 
-      {/* Archetype Details Drawer */}
       {selectedArchetypeForDrawer && (
         <Sheet open={isArchetypeDrawerOpen} onOpenChange={setIsArchetypeDrawerOpen}>
           <SheetContent className="w-full max-w-md sm:max-w-lg md:max-w-xl lg:max-w-2xl p-0 glassmorphic-card !bg-card/80 backdrop-blur-xl" side="right">
@@ -485,12 +511,6 @@ export default function DashboardPage() {
                     );
                   })}
                 </div>
-                {/* Link for full deep-dive if applicable
-                <Button variant="link" asChild className="p-0 text-primary">
-                  <Link href={`/archetypes/${selectedArchetypeForDrawer.id}`}>
-                    View Full Archetype Profile <Icons.chevronRight className="ml-1 h-4 w-4" />
-                  </Link>
-                </Button> */}
               </div>
             </ScrollArea>
           </SheetContent>
@@ -501,16 +521,19 @@ export default function DashboardPage() {
   );
 }
 
-// Helper for domain feedback bars (can be moved to a separate component)
+// Helper for domain feedback bars
 function DomainFeedbackBar({ facetName, score, anchorLeft, anchorRight }: { facetName: FacetName, score: number, anchorLeft: string, anchorRight: string }) {
   const facetConfig = FACETS[facetName];
+  if (!facetConfig) return null; // Safety check
+  const colorHsl = getFacetColorHsl(facetName);
+
   return (
     <div className="mb-4 p-3 rounded-md border border-border/30 bg-background/40">
       <div className="flex justify-between items-center mb-1">
-        <span className="text-sm font-medium" style={{ color: getFacetColorHsl(facetName) }}>{facetName}</span>
-        <span className="text-xs font-semibold" style={{ color: getFacetColorHsl(facetName) }}>{Math.round(score * 100)}%</span>
+        <span className="text-sm font-medium" style={{ color: colorHsl }}>{facetName}</span>
+        <span className="text-xs font-semibold" style={{ color: colorHsl }}>{Math.round(score * 100)}%</span>
       </div>
-      <Progress value={score * 100} className="h-3" indicatorClassName={cn(`bg-[${getFacetColorHsl(facetName)}]`)} />
+      <Progress value={score * 100} className="h-3" indicatorStyle={{ backgroundColor: colorHsl }} />
       <div className="flex justify-between text-xs text-muted-foreground mt-1">
         <span>{anchorLeft}</span>
         <span>{anchorRight}</span>
@@ -520,8 +543,11 @@ function DomainFeedbackBar({ facetName, score, anchorLeft, anchorRight }: { face
 }
 
 // Ensure Progress component can take indicatorClassName
+// This declaration might be better in a global .d.ts file or next to the component itself if it's a common pattern
+// For now, keeping it here to satisfy TypeScript in this context.
 declare module "@/components/ui/progress" {
   interface ProgressProps extends React.ComponentPropsWithoutRef<typeof ProgressPrimitive.Root> {
     indicatorClassName?: string;
+    indicatorStyle?: React.CSSProperties;
   }
 }
