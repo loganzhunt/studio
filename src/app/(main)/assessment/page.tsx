@@ -13,7 +13,7 @@ import { Icons } from '@/components/icons';
 import { useWorldview } from '@/hooks/use-worldview';
 import { useRouter } from 'next/navigation';
 import { useToast } from '@/hooks/use-toast';
-import { cn } from "@/lib/utils"; // Ensure this import is present
+import { cn } from "@/lib/utils";
 
 const LIKERT_SCALE_OPTIONS = [
   { value: 1, label: "Strongly Disagree" },
@@ -68,7 +68,7 @@ export default function AssessmentPage() {
           
           toast({
             title: "Assessment Complete!",
-            description: "Your scores have been calculated and saved. Redirecting to results...",
+            description: "Your scores have been calculated and saved. You are being redirected to the results page.", // Updated toast message
           });
         } catch (error) {
           console.error("Error during background score calculation/saving:", error);
@@ -114,7 +114,7 @@ export default function AssessmentPage() {
           </div>
           <Progress value={progress} className="w-full mt-4 h-3" />
         </CardHeader>
-        <CardContent className="space-y-8">
+        <CardContent className="space-y-8" key={currentFacetName}> {/* Added key here */}
           <form onSubmit={(e) => { e.preventDefault(); handleNext(); }}>
             {currentFacet.questions.map((question, index) => (
               <div 
