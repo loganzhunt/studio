@@ -8,14 +8,16 @@ import { Button } from "@/components/ui/button";
 import { Icons } from "@/components/icons";
 import Link from "next/link";
 import { FACETS, FACET_NAMES } from "@/config/facets";
-import type { DomainScore, FacetName, CodexEntry } from "@/types";
-import React, { useState, useMemo } from 'react';
+import type { DomainScore, FacetName, CodexEntry, WorldviewProfile } from "@/types";
+import React, { useState, useMemo, useEffect } from 'react';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription, SheetClose } from "@/components/ui/sheet";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { getFacetColorHsl } from '@/lib/colors';
-import { Badge } from '@/components/ui/badge'; // Added for consistency if needed in drawer
+import { Badge } from '@/components/ui/badge';
 import { Progress } from "@/components/ui/progress";
-
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
 
 // --- Helper Functions (copied/adapted from archetypes/page.tsx) ---
 const getDominantFacet = (scores: DomainScore[]): FacetName => {
@@ -23,7 +25,6 @@ const getDominantFacet = (scores: DomainScore[]): FacetName => {
   return scores.reduce((prev, current) => (prev.score > current.score) ? prev : current).facetName || FACET_NAMES[0];
 };
 
-// Copied from archetypes/page.tsx - this data should ideally be in a shared file
 const rawArchetypeData = [
   {
     "name": "The Philosopher",
