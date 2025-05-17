@@ -5,7 +5,7 @@ import type { Icons } from '@/components/icons'; // Import Icons type
 // Simplified User type for local demo
 export type LocalUser = {
   displayName: string;
-  email: string;
+  email?: string; // Email is now optional
 } | null;
 
 export type FacetName = 
@@ -43,7 +43,6 @@ export interface WorldviewProfile {
   createdAt: string; // ISO date string
   summary?: string;
   isArchetype?: boolean;
-  // For local user, we might tie saved profiles to their local email if needed, or just one generic save
 }
 
 export interface CodexEntry extends WorldviewProfile {
@@ -53,9 +52,8 @@ export interface CodexEntry extends WorldviewProfile {
 }
 
 export interface WorldviewContextType {
-  currentUser: LocalUser; // Updated to LocalUser
-  // Firebase Auth methods removed
-  signInLocally: (name: string, email: string) => void; // New local sign-in
+  currentUser: LocalUser; 
+  signInLocally: (name: string) => void; // Only name is required
   signOutUser: () => void;
 
   isAuthModalOpen: boolean;
@@ -70,7 +68,7 @@ export interface WorldviewContextType {
   domainScores: DomainScore[];
   calculateDomainScores: () => DomainScore[];
   savedWorldviews: WorldviewProfile[];
-  addSavedWorldview: (profile: WorldviewProfile) => void; // Will save to localStorage
+  addSavedWorldview: (profile: WorldviewProfile) => void; 
   updateSavedWorldview: (profile: WorldviewProfile) => void;
   deleteSavedWorldview: (profileId: string) => void;
   facetSelections: { [K_FacetName in FacetName]?: string };

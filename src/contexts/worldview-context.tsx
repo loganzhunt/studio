@@ -56,12 +56,14 @@ export const WorldviewProvider = ({ children }: { children: React.ReactNode }) =
   const openAuthModal = () => setIsAuthModalOpen(true);
   const closeAuthModal = () => setIsAuthModalOpen(false);
 
-  const signInLocally = (name: string, email: string) => {
-    if (!name.trim() || !email.trim()) {
-      toast({ title: "Name and Email Required", description: "Please enter both name and email.", variant: "destructive" });
+  const signInLocally = (name: string) => {
+    if (!name.trim()) {
+      toast({ title: "Name Required", description: "Please enter your name.", variant: "destructive" });
       return;
     }
-    const localUser: LocalUser = { displayName: name, email: email };
+    // Create a placeholder email for the local user object
+    const placeholderEmail = `${name.toLowerCase().replace(/\s+/g, '_')}@local.user`;
+    const localUser: LocalUser = { displayName: name, email: placeholderEmail };
     setCurrentUser(localUser);
     try {
       localStorage.setItem(LOCAL_USER_STORAGE_KEY, JSON.stringify(localUser));
@@ -77,8 +79,6 @@ export const WorldviewProvider = ({ children }: { children: React.ReactNode }) =
     setCurrentUser(null);
     try {
       localStorage.removeItem(LOCAL_USER_STORAGE_KEY);
-      // Optionally, clear the single saved assessment for this demo user or all local data
-      // localStorage.removeItem(ASSESSMENT_SCORES_STORAGE_KEY); // Example: clear last assessment on logout
       toast({ title: "Signed Out", description: "You have been signed out from the local demo." });
     } catch (error) {
       console.error("Error removing local user from localStorage:", error);
@@ -86,20 +86,17 @@ export const WorldviewProvider = ({ children }: { children: React.ReactNode }) =
   };
 
   const persistState = useCallback(() => {
-    if (!isLoaded) return; 
+    if (!isLoaded) return;
     try {
-      // Local user is persisted separately by signInLocally/signOutUser
       localStorage.setItem("metaPrismAssessmentAnswers_local", JSON.stringify(assessmentAnswers));
       localStorage.setItem("metaPrismDomainScores_local", JSON.stringify(domainScores));
       localStorage.setItem(SAVED_WORLDVIEWS_STORAGE_KEY, JSON.stringify(savedWorldviews));
       localStorage.setItem("metaPrismFacetSelections_local", JSON.stringify(facetSelections));
-      // activeProfile is more complex to persist if it contains non-serializable data or is large.
-      // For a local demo, maybe we don't persist activeProfile directly or simplify it.
     } catch (error) {
       console.error("Error saving app state to localStorage:", error);
     }
   }, [assessmentAnswers, domainScores, savedWorldviews, facetSelections, isLoaded]);
-  
+
   const loadStateFromLocalStorage = useCallback(() => {
     try {
       const storedUser = localStorage.getItem(LOCAL_USER_STORAGE_KEY);
@@ -109,30 +106,26 @@ export const WorldviewProvider = ({ children }: { children: React.ReactNode }) =
 
       const storedAnswers = localStorage.getItem("metaPrismAssessmentAnswers_local");
       if (storedAnswers) setAssessmentAnswers(JSON.parse(storedAnswers));
-      
+
       const storedScores = localStorage.getItem("metaPrismDomainScores_local");
       if (storedScores) setDomainScores(JSON.parse(storedScores));
-      else { // If no stored scores, but answers exist, calculate them
+      else {
         const tempAnswers = storedAnswers ? JSON.parse(storedAnswers) : {};
         if(Object.keys(tempAnswers).length > 0) {
            const calculated = calculateAllDomainScores(tempAnswers, FACETS);
            setDomainScores(calculated);
         }
       }
-      
+
       const storedSavedWorldviews = localStorage.getItem(SAVED_WORLDVIEWS_STORAGE_KEY);
       if (storedSavedWorldviews) setSavedWorldviews(JSON.parse(storedSavedWorldviews));
-      
+
       const storedFacetSelections = localStorage.getItem("metaPrismFacetSelections_local");
       if (storedFacetSelections) setFacetSelections(JSON.parse(storedFacetSelections));
 
-    } catch (error) {
+    } catch (error) { // Added opening brace
       console.error("Error loading state from localStorage:", error);
-      // Clear potentially corrupted storage
-      // localStorage.removeItem(LOCAL_USER_STORAGE_KEY);
-      // localStorage.removeItem("metaPrismAssessmentAnswers_local");
-      // ... etc.
-    }
+    } // Added closing brace
     setIsLoaded(true);
   }, []);
 
@@ -155,19 +148,14 @@ export const WorldviewProvider = ({ children }: { children: React.ReactNode }) =
   const calculateDomainScores = useCallback(() => {
     const newScores = calculateAllDomainScores(assessmentAnswers, FACETS);
     setDomainScores(newScores);
-    // For local demo, also save the "latest" assessment scores if a user is "logged in"
-    if (currentUser) {
+    // For local demo, we can always save to a generic key, or a user-specific one if currentUser exists
+    // if (currentUser) { // Not strictly necessary for local demo, but good for structure
         localStorage.setItem(ASSESSMENT_SCORES_STORAGE_KEY, JSON.stringify(newScores));
-        // This key holds the general latest assessment, could be tied to user if needed.
-        // For "save one assessment result" this is fine.
-    }
+    // }
     return newScores;
-  }, [assessmentAnswers, currentUser]);
+  }, [assessmentAnswers]); // Removed currentUser from dependencies as it's not strictly needed for local demo scores saving
 
   const addSavedWorldview = (profile: WorldviewProfile) => {
-    // For local demo, save to localStorage.
-    // If a local user is signed in, we could theoretically store it under a user-specific key,
-    // but for "one assessment" and simplicity, we'll just add to a general list.
     const newId = profile.id || `local_profile_${Date.now()}`;
     const profileWithId = { ...profile, id: newId, createdAt: new Date().toISOString() };
     setSavedWorldviews(prev => [...prev, profileWithId]);
@@ -188,7 +176,7 @@ export const WorldviewProvider = ({ children }: { children: React.ReactNode }) =
       return prev.filter(p => p.id !== profileId);
     });
   };
-  
+
   const selectWorldviewForFacet = (facetName: FacetName, worldviewId: string) => {
     setFacetSelections(prev => ({ ...prev, [facetName]: worldviewId }));
   };
@@ -230,9 +218,3 @@ export const WorldviewProvider = ({ children }: { children: React.ReactNode }) =
     </WorldviewContext.Provider>
   );
 };
-
-// Helper to recalculate scores if not available directly in storedScores
-// This function might be better placed in scoring.ts but kept here for context simplicity.
-// calculateAllDomainScores is already imported from @/lib/scoring and should handle this.
-// We need to ensure calculateAllDomainScores in scoring.ts takes (assessmentAnswers, FACETS)
-// and returns DomainScore[].

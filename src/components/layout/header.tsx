@@ -3,7 +3,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Logo, MinimalLogo } from '@/components/logo'; // Updated import for MinimalLogo
+import { Logo, MinimalLogo } from '@/components/logo';
 import { Button } from '@/components/ui/button';
 import { Icons } from '@/components/icons';
 import { mainNavItems, allNavItemsForMobile, secondaryNavItems } from '@/config/site';
@@ -23,10 +23,10 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { useWorldview } from "@/hooks/use-worldview";
+import { useWorldview } from "@/hooks/use-worldview"; 
 import * as React from 'react';
-import { AuthForm } from '@/components/auth/auth-form';
-import { ScrollArea } from '@/components/ui/scroll-area'; // Import ScrollArea
+import { AuthForm } from '@/components/auth/auth-form'; 
+import { ScrollArea } from '@/components/ui/scroll-area'; 
 
 export function Header() {
   const pathname = usePathname();
@@ -84,52 +84,53 @@ export function Header() {
             {currentUser ? (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" className="relative h-10 w-10 rounded-full p-0">
-                    <Avatar className="h-10 w-10 border-2 border-primary/50 shadow-sm">
-                      {/* LocalUser might not have photoURL, use fallback */}
-                      <AvatarFallback className="bg-primary/20 text-primary font-semibold">
+                  <Button variant="ghost" className="relative h-14 w-14 rounded-full p-0 shadow-md">
+                    <Avatar className="h-14 w-14 border-2 border-primary/50">
+                       <AvatarFallback className="bg-primary/20 text-primary font-semibold text-lg">
                         {getInitials(currentUser.displayName)}
                       </AvatarFallback>
                     </Avatar>
                   </Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent className="w-64 glassmorphic-card mt-2 p-2" align="end" forceMount>
-                  <DropdownMenuLabel className="font-normal px-3 py-2">
+                <DropdownMenuContent className="w-72 glassmorphic-card mt-2 p-4" align="end" forceMount>
+                  <DropdownMenuLabel className="font-normal px-0 py-2">
                     <div className="flex flex-col space-y-1">
-                      <p className="text-sm font-bold leading-none tracking-tight text-foreground">
+                      <p className="text-lg font-bold leading-none tracking-tighter text-foreground">
                         {currentUser.displayName || "User"}
                       </p>
-                      <p className="text-xs leading-none text-muted-foreground">
-                        {currentUser.email} (Local Demo)
-                      </p>
+                      {currentUser.email && (
+                        <p className="text-xs leading-none text-muted-foreground">
+                          {currentUser.email}
+                        </p>
+                      )}
                     </div>
                   </DropdownMenuLabel>
-                  <DropdownMenuSeparator className="mx-1 my-1 bg-border/50" />
-                  <DropdownMenuItem asChild className="cursor-pointer hover:bg-muted/50 focus:bg-muted/50 p-2">
-                    <Link href="/dashboard" className="flex items-center">
-                      <Icons.dashboard className="mr-2 h-4 w-4 text-muted-foreground" />
+                  <DropdownMenuSeparator className="mx-0 my-2 bg-border/50" />
+                  <DropdownMenuItem asChild className="cursor-pointer hover:bg-muted/50 focus:bg-muted/50 p-2.5">
+                    <Link href="/dashboard" className="flex items-center text-sm">
+                      <Icons.dashboard className="mr-2.5 h-4 w-4 text-muted-foreground" />
                       Dashboard
                     </Link>
                   </DropdownMenuItem>
-                  <DropdownMenuItem asChild className="cursor-pointer hover:bg-muted/50 focus:bg-muted/50 p-2">
-                    <Link href="/results" className="flex items-center">
-                      <Icons.results className="mr-2 h-4 w-4 text-muted-foreground" />
+                  <DropdownMenuItem asChild className="cursor-pointer hover:bg-muted/50 focus:bg-muted/50 p-2.5">
+                    <Link href="/results" className="flex items-center text-sm">
+                      <Icons.results className="mr-2.5 h-4 w-4 text-muted-foreground" />
                        Results
                     </Link>
                   </DropdownMenuItem>
-                   <DropdownMenuItem asChild className="cursor-pointer hover:bg-muted/50 focus:bg-muted/50 p-2">
-                    <Link href="/saved-worldviews" className="flex items-center">
-                      <Icons.saved className="mr-2 h-4 w-4 text-muted-foreground" />
+                   <DropdownMenuItem asChild className="cursor-pointer hover:bg-muted/50 focus:bg-muted/50 p-2.5">
+                    <Link href="/saved-worldviews" className="flex items-center text-sm">
+                      <Icons.saved className="mr-2.5 h-4 w-4 text-muted-foreground" />
                        My Saved Profiles
                     </Link>
                   </DropdownMenuItem>
-                  <DropdownMenuSeparator className="mx-1 my-1 bg-border/50" />
+                  <DropdownMenuSeparator className="mx-0 my-2 bg-border/50" />
                   <DropdownMenuItem
                     onClick={signOutUser}
-                    className="cursor-pointer text-red-500 hover:!bg-red-500/10 focus:!bg-red-500/10 focus:!text-red-500 p-2 flex items-center"
+                    className="cursor-pointer !text-red-100 !bg-red-600 hover:!bg-red-700 focus:!bg-red-700 p-2.5 flex items-center text-sm font-medium rounded-md"
                   >
-                    <Icons.logout className="mr-2 h-4 w-4" />
-                    Sign Out (Local Demo)
+                    <Icons.logout className="mr-2.5 h-4 w-4" />
+                    Sign Out
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
@@ -138,7 +139,7 @@ export function Header() {
                 variant="outline" 
                 size="sm"
                 onClick={openAuthModal}
-                className="border-primary/50 text-primary hover:bg-primary/10 hover:text-primary px-3 py-2"
+                className="border-primary/50 text-primary hover:bg-primary/10 hover:text-primary px-4 py-2 font-medium"
               >
                 <Icons.user className="mr-2 h-4 w-4" />
                 Sign In
@@ -211,15 +212,4 @@ export function Header() {
       <AuthForm />
     </>
   );
-}
-
-// // Dummy ScrollArea for the example, replace with actual import
-// const ScrollArea = ({children, className}: {children: React.ReactNode, className?:string}) => <div className={className}>{children}</div>;
-
-// Ensure Icons.user and Icons.logout are defined
-if (!Icons.user) {
-  Icons.user = Icons.home; 
-}
-if (!Icons.logout) {
-  Icons.logout = Icons.close; 
 }
