@@ -7,7 +7,6 @@ import { Icons } from "@/components/icons";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label"; // Ensure Label is imported
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { TriangleChart } from "@/components/visualization/TriangleChart";
 import type { CodexEntry, FacetName, DomainScore } from "@/types";
@@ -15,7 +14,9 @@ import { FACETS, FACET_NAMES } from "@/config/facets";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription, SheetClose } from "@/components/ui/sheet";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Badge } from '@/components/ui/badge';
+import { getBandColor } from '@/lib/colors'; // For coloring title and drawer facets
 
+// Raw data for Codex entries (existing + new batch, merged)
 const existingRawCodexData = [
   {
     "name": "Platonism",
@@ -127,7 +128,7 @@ const existingRawCodexData = [
     },
     "tags": ["indigenous", "spiritual", "nature"]
   },
-  {
+   {
     "name": "The Sage Archetype",
     "summary": "Represents wisdom, knowledge, and truth. The Sage seeks understanding and enlightenment through introspection and learning.",
     "domainScores": FACET_NAMES.reduce((acc, name) => {
@@ -179,6 +180,18 @@ const newRawCodexDataBatch = [
     "tags": ["philosophical", "ethics", "hedonism"]
   },
   // Note: Existentialism is already present, will be skipped by merge logic if name matches exactly
+  // Updated Existentialism entry from new batch:
+  {
+    "name": "Existentialism", // Name is the same, so it will be skipped if exact match by merge
+    "summary": "A philosophical movement emphasizing individual existence, freedom, and the search for authentic meaning in an indifferent universe.",
+    "domainScores": {
+      "ontology": 0.4, "epistemology": 0.5, "praxeology": 0.8, "axiology": 0.7, "mythology": 0.5, "cosmology": 0.2, "teleology": 0.9
+    },
+    "facetSummary": {
+      "ontology": "Existence precedes essence; reality is absurd, contingent.", "epistemology": "Truth emerges through subjective, lived experience.", "praxeology": "Freedom requires personal responsibility and authentic action.", "axiology": "Values are created through choices and commitments.", "mythology": "Mythic motifs reflect the individual’s struggle for meaning.", "cosmology": "The universe is indifferent to human concerns.", "teleology": "Purpose must be constructed by the individual."
+    },
+    "tags": ["philosophical", "modern", "authenticity"]
+  },
   {
     "name": "Gnosticism",
     "summary": "A mystical and dualistic tradition emphasizing secret knowledge (gnosis) and inner spiritual awakening.",
@@ -356,8 +369,17 @@ const newRawCodexDataBatch = [
     "tags": ["spiritual", "philosophical", "divinity"]
   },
   // Platonism is already present
-  // Stoicism is already present
-  // Taoism is already present
+  {
+    "name": "Platonism", // This is a duplicate name, merge logic should handle it (prefer existing one)
+    "summary": "A worldview centered on the existence of eternal Forms or Ideas as the ultimate reality.",
+    "domainScores": {
+      "ontology": 1.0, "epistemology": 0.8, "praxeology": 0.7, "axiology": 0.9, "mythology": 0.7, "cosmology": 0.9, "teleology": 0.9
+    },
+    "facetSummary": {
+      "ontology": "Eternal Forms or Ideas are the ultimate reality.", "epistemology": "Knowledge is recollection of the Forms.", "praxeology": "Virtue is alignment with the Good.", "axiology": "Truth, beauty, and goodness are supreme values.", "mythology": "Myths veil metaphysical truths.", "cosmology": "Cosmos mirrors the world of Forms.", "teleology": "Goal is ascent to the vision of the Good."
+    },
+    "tags": ["philosophical", "idealism", "classical"]
+  },
   {
     "name": "Postmodernism",
     "summary": "A skeptical and critical orientation challenging grand narratives, objectivity, and stable meaning.",
@@ -413,8 +435,20 @@ const newRawCodexDataBatch = [
     },
     "tags": ["spiritual", "indigenous", "healing"]
   },
+  // Stoicism is already present
   {
-    "name": "Sufism", // Already present as "Mystical Sufism", new one has different scores/summary
+    "name": "Stoicism", // This is a duplicate name
+    "summary": "An ancient philosophy teaching acceptance of fate, virtue as the only good, and living in accord with nature’s order.",
+    "domainScores": {
+      "ontology": 0.7, "epistemology": 0.8, "praxeology": 1.0, "axiology": 1.0, "mythology": 0.2, "cosmology": 0.7, "teleology": 0.9
+    },
+    "facetSummary": {
+      "ontology": "The cosmos is rational and governed by logos.", "epistemology": "Wisdom is understanding what is and isn’t in our control.", "praxeology": "Virtue is living in accord with nature.", "axiology": "Virtue is the sole good.", "mythology": "Myths serve as moral exemplars.", "cosmology": "The world is a living organism.", "teleology": "Aim is ataraxia—serene acceptance."
+    },
+    "tags": ["philosophical", "ethics", "resilience"]
+  },
+  {
+    "name": "Sufism", // Already present as "Mystical Sufism", new one has different scores/summary but same name "Sufism"
     "summary": "The mystical dimension of Islam, focused on the direct experience of divine love and unity.",
     "domainScores": {
       "ontology": 0.9, "epistemology": 0.7, "praxeology": 0.8, "axiology": 0.8, "mythology": 0.9, "cosmology": 0.8, "teleology": 1.0
@@ -423,5 +457,17 @@ const newRawCodexDataBatch = [
       "ontology": "Reality is unity—God alone is real.", "epistemology": "Knowledge is attained by unveiling the heart.", "praxeology": "Practice is remembrance (dhikr) and love.", "axiology": "Love and surrender are supreme values.", "mythology": "Myth and poetry express mystical truths.", "cosmology": "The universe is a reflection of divine beauty.", "teleology": "Purpose is reunion with the Beloved."
     },
     "tags": ["mystical", "islamic", "love"]
+  },
+  // Taoism is already present
+  {
+    "name": "Taoism", // This is a duplicate name
+    "summary": "An ancient Chinese tradition teaching harmony with the Tao—the natural way of the universe.",
+    "domainScores": {
+      "ontology": 0.8, "epistemology": 0.6, "praxeology": 0.8, "axiology": 0.7, "mythology": 0.7, "cosmology": 0.9, "teleology": 0.8
+    },
+    "facetSummary": {
+      "ontology": "All arises from and returns to the Tao.", "epistemology": "Wisdom is intuitive, non-conceptual.", "praxeology": "Non-action (wu wei) achieves harmony.", "axiology": "Simplicity, humility, and balance are valued.", "mythology": "Myth guides action without force.", "cosmology": "Nature is an unfolding process.", "teleology": "Aim is effortless alignment with the Tao."
+    },
+    "tags": ["spiritual", "eastern", "nature"]
   }
 ]
