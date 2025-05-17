@@ -3,7 +3,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Logo } from '@/components/logo';
+import { Logo, MinimalLogo } from '@/components/logo'; // Updated import for MinimalLogo
 import { Button } from '@/components/ui/button';
 import { Icons } from '@/components/icons';
 import { mainNavItems, allNavItemsForMobile, secondaryNavItems } from '@/config/site';
@@ -23,27 +23,29 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { useWorldview } from "@/hooks/use-worldview"; // Import the hook
+import { useWorldview } from "@/hooks/use-worldview";
 import * as React from 'react';
-import { AuthForm } from '@/components/auth/auth-form'; // Import AuthForm
+import { AuthForm } from '@/components/auth/auth-form';
+import { ScrollArea } from '@/components/ui/scroll-area'; // Import ScrollArea
 
 export function Header() {
   const pathname = usePathname();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = React.useState(false);
   const { 
     currentUser, 
-    signInWithGoogle, 
     signOutUser,
-    isAuthModalOpen,
     openAuthModal,
-    closeAuthModal 
-  } = useWorldview(); // Use the context
+  } = useWorldview();
 
   const getInitials = (name: string | null | undefined) => {
     if (!name) return "?";
     const names = name.split(' ');
-    if (names.length === 1) return names[0][0].toUpperCase();
-    return names[0][0].toUpperCase() + names[names.length - 1][0].toUpperCase();
+    if (names.length === 1 && names[0].length > 0) return names[0][0].toUpperCase();
+    if (names.length > 1 && names[0].length > 0 && names[names.length - 1].length > 0) {
+      return names[0][0].toUpperCase() + names[names.length - 1][0].toUpperCase();
+    }
+    if (name.length > 0) return name[0].toUpperCase();
+    return "?";
   };
 
   return (
@@ -54,10 +56,9 @@ export function Header() {
             <Logo />
           </Link>
           
-          {/* Desktop Navigation */}
           <nav className="hidden md:flex items-center space-x-1">
             {mainNavItems.map((item) => {
-              if (item.hideOnDesktop) return null; // Hide if hideOnDesktop is true
+              if (item.hideOnDesktop) return null;
               const IconComponent = item.icon ? Icons[item.icon] : null;
               const isActive = pathname === item.href || (item.href !== "/" && pathname.startsWith(item.href));
               return (
@@ -66,7 +67,7 @@ export function Header() {
                   variant="ghost"
                   asChild
                   className={cn(
-                    "text-sm font-medium px-3 py-2", // Adjusted padding
+                    "text-sm font-medium px-3 py-2",
                     isActive ? "text-primary bg-primary/10" : "text-muted-foreground hover:text-foreground hover:bg-muted/50",
                   )}
                 >
@@ -85,7 +86,7 @@ export function Header() {
                 <DropdownMenuTrigger asChild>
                   <Button variant="ghost" className="relative h-10 w-10 rounded-full p-0">
                     <Avatar className="h-10 w-10 border-2 border-primary/50 shadow-sm">
-                      <AvatarImage src={currentUser.photoURL || undefined} alt={currentUser.displayName || "User"} />
+                      {/* LocalUser might not have photoURL, use fallback */}
                       <AvatarFallback className="bg-primary/20 text-primary font-semibold">
                         {getInitials(currentUser.displayName)}
                       </AvatarFallback>
@@ -99,7 +100,7 @@ export function Header() {
                         {currentUser.displayName || "User"}
                       </p>
                       <p className="text-xs leading-none text-muted-foreground">
-                        {currentUser.email}
+                        {currentUser.email} (Local Demo)
                       </p>
                     </div>
                   </DropdownMenuLabel>
@@ -122,19 +123,13 @@ export function Header() {
                        My Saved Profiles
                     </Link>
                   </DropdownMenuItem>
-                  {/* <DropdownMenuItem asChild className="cursor-pointer hover:bg-muted/50 focus:bg-muted/50 p-2">
-                    <Link href="/settings" className="flex items-center">
-                      <Icons.settings className="mr-2 h-4 w-4 text-muted-foreground" />
-                      Settings
-                    </Link>
-                  </DropdownMenuItem> */}
                   <DropdownMenuSeparator className="mx-1 my-1 bg-border/50" />
                   <DropdownMenuItem
                     onClick={signOutUser}
-                    className="cursor-pointer text-red-500 hover:!bg-red-500/10 focus:!bg-red-500/10 focus:!text-red-500 p-2"
+                    className="cursor-pointer text-red-500 hover:!bg-red-500/10 focus:!bg-red-500/10 focus:!text-red-500 p-2 flex items-center"
                   >
                     <Icons.logout className="mr-2 h-4 w-4" />
-                    Sign Out
+                    Sign Out (Local Demo)
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
@@ -143,14 +138,13 @@ export function Header() {
                 variant="outline" 
                 size="sm"
                 onClick={openAuthModal}
-                className="border-primary/50 text-primary hover:bg-primary/10 hover:text-primary px-4 py-2"
+                className="border-primary/50 text-primary hover:bg-primary/10 hover:text-primary px-3 py-2"
               >
                 <Icons.user className="mr-2 h-4 w-4" />
                 Sign In
               </Button>
             )}
 
-            {/* Mobile Menu Trigger */}
             <Sheet open={isMobileMenuOpen} onOpenChange={setIsMobileMenuOpen}>
               <SheetTrigger asChild className="md:hidden">
                 <Button variant="ghost" size="icon">
@@ -214,25 +208,18 @@ export function Header() {
           </div>
         </div>
       </header>
-      <AuthForm /> {/* AuthForm is rendered here, its visibility controlled by context */}
+      <AuthForm />
     </>
   );
 }
 
-// Minimal logo for tight spaces if needed in mobile drawer
-function MinimalLogo({ className, ...props }: React.SVGProps<SVGSVGElement>) {
-  return (
-     <Icons.logo className={cn("h-7 w-7 text-primary", className)} {...props} />
-  );
-}
+// // Dummy ScrollArea for the example, replace with actual import
+// const ScrollArea = ({children, className}: {children: React.ReactNode, className?:string}) => <div className={className}>{children}</div>;
 
-// Dummy ScrollArea for the example, replace with actual import
-const ScrollArea = ({children, className}: {children: React.ReactNode, className?:string}) => <div className={className}>{children}</div>;
-
-// Dummy Icons.user for the example, ensure it's defined in your Icons object
+// Ensure Icons.user and Icons.logout are defined
 if (!Icons.user) {
-  Icons.user = Icons.home; // Placeholder if user icon is missing
+  Icons.user = Icons.home; 
 }
 if (!Icons.logout) {
-  Icons.logout = Icons.close; // Placeholder if logout icon is missing
+  Icons.logout = Icons.close; 
 }
