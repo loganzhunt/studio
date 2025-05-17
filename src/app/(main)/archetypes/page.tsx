@@ -233,14 +233,70 @@ const rawArchetypeData = [
     "name": "The Contemplative Realist",
     "summary": "Grounded in realism but open to mystery, this archetype values awareness, modesty, and interior clarity.",
     "facetScores": { "ontology": 0.5, "epistemology": 0.6, "praxeology": 0.5, "axiology": 0.7, "mythology": 0.5, "cosmology": 0.5, "teleology": 0.6 }
+  },
+  {
+    "name": "The Teacher",
+    "summary": "Imparts knowledge, mentors others, and lights the way toward understanding and growth.",
+    "facetScores": { "ontology": 0.8, "epistemology": 0.9, "praxeology": 0.8, "axiology": 0.9, "mythology": 0.7, "cosmology": 0.6, "teleology": 0.9 },
+    "facetSummaries": { "ontology": "Sees reality as knowable and sharable.", "epistemology": "Values knowledge, clarity, and explanation.", "praxeology": "Acts through teaching and demonstration.", "axiology": "Values wisdom, growth, and empowerment.", "mythology": "Inspired by sages, mentors, and guides.", "cosmology": "World as a classroom of learning.", "teleology": "Purpose is to inspire and uplift others." }
+  },
+  {
+    "name": "The Steward",
+    "summary": "Cares for the land, resources, and community—promoting sustainability and harmony.",
+    "facetScores": { "ontology": 0.9, "epistemology": 0.7, "praxeology": 0.9, "axiology": 1.0, "mythology": 0.7, "cosmology": 0.8, "teleology": 0.8 },
+    "facetSummaries": { "ontology": "Reality is an interconnected ecosystem.", "epistemology": "Learns from nature and tradition.", "praxeology": "Acts with care, responsibility, and foresight.", "axiology": "Values sustainability, health, and cooperation.", "mythology": "Inspired by caretakers, elders, and guardians.", "cosmology": "World as a garden to be tended.", "teleology": "Purpose is preservation and flourishing." }
+  },
+  {
+    "name": "The Priest/Priestess",
+    "summary": "Connects the human and the sacred, leading rituals, holding space, and invoking transformation.",
+    "facetScores": { "ontology": 0.9, "epistemology": 0.8, "praxeology": 0.9, "axiology": 0.9, "mythology": 1.0, "cosmology": 0.9, "teleology": 1.0 },
+    "facetSummaries": { "ontology": "Reality is suffused with the sacred.", "epistemology": "Trusts in revelation, tradition, and mystical insight.", "praxeology": "Acts through ritual, invocation, and service.", "axiology": "Values sanctity, devotion, and meaning.", "mythology": "Embodying the hierophant, priestess, or ritual leader.", "cosmology": "World as temple and altar.", "teleology": "Purpose is spiritual transformation and service." }
+  },
+  {
+    "name": "The Innocent",
+    "summary": "Trusts in goodness, beauty, and possibility—living with openness, wonder, and hope.",
+    "facetScores": { "ontology": 0.9, "epistemology": 0.7, "praxeology": 0.7, "axiology": 1.0, "mythology": 0.9, "cosmology": 0.9, "teleology": 0.9 },
+    "facetSummaries": { "ontology": "Sees reality as fundamentally good and safe.", "epistemology": "Learns through experience and play.", "praxeology": "Acts with openness and trust.", "axiology": "Values purity, joy, and hope.", "mythology": "Inspired by the child, fool, or holy innocent.", "cosmology": "World as a place of wonder.", "teleology": "Purpose is happiness and peace." }
+  },
+  {
+    "name": "The Sage Fool",
+    "summary": "Blends wisdom and playfulness—challenging convention while modeling radical openness.",
+    "facetScores": { "ontology": 0.8, "epistemology": 0.8, "praxeology": 0.9, "axiology": 0.8, "mythology": 1.0, "cosmology": 0.6, "teleology": 0.9 },
+    "facetSummaries": { "ontology": "Reality is paradoxical and full of surprises.", "epistemology": "Learns from curiosity and questioning.", "praxeology": "Acts with humor, unpredictability, and play.", "axiology": "Values humility, laughter, and insight.", "mythology": "Guided by trickster, clown, and holy fool myths.", "cosmology": "World as a stage for cosmic play.", "teleology": "Purpose is to awaken through paradox." }
+  },
+  {
+    "name": "The Magician",
+    "summary": "Works with symbol, will, and intention to shift consciousness and manifest new realities.",
+    "facetScores": { "ontology": 0.9, "epistemology": 0.8, "praxeology": 0.8, "axiology": 0.8, "mythology": 1.0, "cosmology": 0.9, "teleology": 1.0 },
+    "facetSummaries": { "ontology": "Sees reality as malleable and interconnected.", "epistemology": "Learns through gnosis, practice, and revelation.", "praxeology": "Acts by ritual, intention, and transformation.", "axiology": "Values mastery, creativity, and alignment.", "mythology": "Inspired by magicians, wizards, and occultists.", "cosmology": "World as a matrix of potential.", "teleology": "Purpose is conscious evolution and realization." }
+  },
+  {
+    "name": "The Pilgrim-Sage",
+    "summary": "Journeys with humility and wisdom, gathering insight and sharing it for the benefit of all.",
+    "facetScores": { "ontology": 0.8, "epistemology": 0.9, "praxeology": 0.8, "axiology": 0.9, "mythology": 0.8, "cosmology": 0.7, "teleology": 0.9 },
+    "facetSummaries": { "ontology": "Sees reality as unfolding through experience.", "epistemology": "Values learning, reflection, and integration.", "praxeology": "Acts through journey, dialogue, and teaching.", "axiology": "Values wisdom, compassion, and openness.", "mythology": "Guided by wandering sages and traveling teachers.", "cosmology": "World as a path and story.", "teleology": "Purpose is wisdom-sharing and service." }
+  },
+  {
+    "name": "The Witness",
+    "summary": "Observes reality with equanimity, cultivating presence, clarity, and deep understanding.",
+    "facetScores": { "ontology": 0.8, "epistemology": 0.9, "praxeology": 0.8, "axiology": 0.8, "mythology": 0.7, "cosmology": 0.7, "teleology": 0.9 },
+    "facetSummaries": { "ontology": "Sees reality as what is—just so.", "epistemology": "Values direct awareness and mindfulness.", "praxeology": "Acts through presence and acceptance.", "axiology": "Values clarity, peace, and understanding.", "mythology": "Inspired by hermits and silent sages.", "cosmology": "World as a field for contemplation.", "teleology": "Purpose is liberation through seeing." }
+  },
+  {
+    "name": "The Diplomat",
+    "summary": "Mediates conflict, builds bridges, and seeks harmony among differences.",
+    "facetScores": { "ontology": 0.7, "epistemology": 0.7, "praxeology": 0.9, "axiology": 0.9, "mythology": 0.6, "cosmology": 0.7, "teleology": 0.8 },
+    "facetSummaries": { "ontology": "Reality is complex and interconnected.", "epistemology": "Learns from dialogue and negotiation.", "praxeology": "Acts through mediation and bridge-building.", "axiology": "Values harmony, balance, and respect.", "mythology": "Guided by peacemakers and mediators.", "cosmology": "World as a field of relationship.", "teleology": "Purpose is unity and reconciliation." }
   }
 ];
 
+// Helper function to ensure consistent `CodexEntry` structure
+// (Already defined in the file, assuming it's similar to this)
 const mapRawArchetypeToCodexEntry = (raw: any): CodexEntry => {
   const domainScoresArray: DomainScore[] = FACET_NAMES.map(facetKey => {
     const score = (raw.facetScores && typeof raw.facetScores === 'object' && typeof raw.facetScores[facetKey.toLowerCase()] === 'number')
       ? raw.facetScores[facetKey.toLowerCase()]
-      : 0.5; // Default score
+      : 0.5; // Default score if missing
     return { facetName: facetKey, score: Math.max(0, Math.min(1, Number(score))) };
   });
 
@@ -260,7 +316,7 @@ const mapRawArchetypeToCodexEntry = (raw: any): CodexEntry => {
     summary: raw.summary,
     domainScores: domainScoresArray,
     facetSummaries: processedFacetSummaries,
-    category: "archetypal",
+    category: "archetypal", // All these are archetypal
     isArchetype: true,
     createdAt: new Date().toISOString(),
     tags: [raw.name.toLowerCase().replace(/\s+/g, '_'), "archetype"],
@@ -468,6 +524,8 @@ export default function ArchetypesPage() {
     </div>
   );
 }
+
+    
 
     
 
