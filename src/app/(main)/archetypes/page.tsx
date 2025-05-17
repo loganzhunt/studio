@@ -183,6 +183,56 @@ const rawArchetypeData = [
     "summary": "Rebels against conventions, breaks boundaries, and seeks to redefine what is possible.",
     "facetScores": { "ontology": 0.5, "epistemology": 0.7, "praxeology": 0.9, "axiology": 0.6, "mythology": 0.8, "cosmology": 0.4, "teleology": 0.7 },
     "facetSummaries": { "ontology": "Reality is up for challenge and change.", "epistemology": "Questions all authority and dogma.", "praxeology": "Acts by defying rules and limitations.", "axiology": "Values freedom, rebellion, and authenticity.", "mythology": "Inspired by antiheroes and tricksters.", "cosmology": "World as an open system for disruption.", "teleology": "Purpose is to catalyze revolution." }
+  },
+  {
+    "name": "The Rationalist Skeptic",
+    "summary": "Believes reality is material, truth comes from reason and science, and meaning is self-created.",
+    "facetScores": { "ontology": 0.1, "epistemology": 0.2, "praxeology": 0.3, "axiology": 0.5, "mythology": 0.3, "cosmology": 0.4, "teleology": 0.2 }
+  },
+  {
+    "name": "The Transcendent Mystic",
+    "summary": "Sees all of existence as sacred and interconnected, guided by direct spiritual insight.",
+    "facetScores": { "ontology": 0.95, "epistemology": 0.9, "praxeology": 0.8, "axiology": 0.95, "mythology": 0.95, "cosmology": 0.95, "teleology": 1.0 }
+  },
+  {
+    "name": "The Postmodern Pluralist",
+    "summary": "Holds reality and truth to be perspectival, with value placed on diversity, story, and context.",
+    "facetScores": { "ontology": 0.6, "epistemology": 0.7, "praxeology": 0.5, "axiology": 0.7, "mythology": 0.8, "cosmology": 0.6, "teleology": 0.5 }
+  },
+  {
+    "name": "The Scientific Humanist",
+    "summary": "Grounded in rational ethics, scientific method, and belief in human progress.",
+    "facetScores": { "ontology": 0.1, "epistemology": 0.2, "praxeology": 0.4, "axiology": 0.6, "mythology": 0.4, "cosmology": 0.5, "teleology": 0.6 }
+  },
+  {
+    "name": "The Archetypal Traditionalist",
+    "summary": "Upholds sacred order, divine authority, and moral duty rooted in religious tradition.",
+    "facetScores": { "ontology": 0.4, "epistemology": 0.3, "praxeology": 0.5, "axiology": 0.75, "mythology": 0.9, "cosmology": 0.8, "teleology": 0.9 }
+  },
+  {
+    "name": "The Earth-Centered Animist",
+    "summary": "Views the world as alive, reciprocal, and sacred; values ecological harmony and ancestral continuity.",
+    "facetScores": { "ontology": 0.9, "epistemology": 0.8, "praxeology": 0.7, "axiology": 0.85, "mythology": 0.85, "cosmology": 0.9, "teleology": 0.85 }
+  },
+  {
+    "name": "The Existential Individualist",
+    "summary": "Asserts self-determined meaning, embraces uncertainty, and rejects cosmic absolutes.",
+    "facetScores": { "ontology": 0.3, "epistemology": 0.4, "praxeology": 0.6, "axiology": 0.5, "mythology": 0.4, "cosmology": 0.3, "teleology": 0.2 }
+  },
+  {
+    "name": "The Integral Synthesizer",
+    "summary": "Integrates science and spirituality, development and depth, autonomy and wholeness.",
+    "facetScores": { "ontology": 0.7, "epistemology": 0.7, "praxeology": 0.6, "axiology": 0.9, "mythology": 0.8, "cosmology": 0.85, "teleology": 0.9 }
+  },
+  {
+    "name": "The Stoic Rationalist",
+    "summary": "Sees life as ordered by reason and fate, values virtue, and emphasizes inner discipline.",
+    "facetScores": { "ontology": 0.4, "epistemology": 0.5, "praxeology": 0.8, "axiology": 0.75, "mythology": 0.6, "cosmology": 0.6, "teleology": 0.7 }
+  },
+  {
+    "name": "The Contemplative Realist",
+    "summary": "Grounded in realism but open to mystery, this archetype values awareness, modesty, and interior clarity.",
+    "facetScores": { "ontology": 0.5, "epistemology": 0.6, "praxeology": 0.5, "axiology": 0.7, "mythology": 0.5, "cosmology": 0.5, "teleology": 0.6 }
   }
 ];
 
@@ -418,6 +468,8 @@ export default function ArchetypesPage() {
     </div>
   );
 }
+
+    
 
     
 
