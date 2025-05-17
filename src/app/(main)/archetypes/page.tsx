@@ -75,6 +75,60 @@ const rawArchetypeData = [
     "summary": "Journeys through life seeking meaning, spiritual growth, and transformative experiences.",
     "facetScores": { "ontology": 0.6, "epistemology": 0.7, "praxeology": 0.8, "axiology": 0.8, "mythology": 0.8, "cosmology": 0.7, "teleology": 0.9 },
     "facetSummaries": { "ontology": "Sees life as a sacred journey.", "epistemology": "Learns from diverse experiences and cultures.", "praxeology": "Embraces change and new directions.", "axiology": "Values discovery, humility, and openness.", "mythology": "Inspired by pilgrimage and quest stories.", "cosmology": "Cosmos as a path of unfolding.", "teleology": "Purpose is to grow and evolve." }
+  },
+  {
+    "name": "The Visionary",
+    "summary": "Imagines new possibilities and inspires others toward transformation and collective growth.",
+    "facetScores": { "ontology": 0.7, "epistemology": 0.8, "praxeology": 0.8, "axiology": 0.9, "mythology": 0.7, "cosmology": 0.6, "teleology": 1.0 },
+    "facetSummaries": { "ontology": "Sees reality as open to creative change.", "epistemology": "Trusts in intuition, imagination, and foresight.", "praxeology": "Acts to inspire, envision, and lead.", "axiology": "Values progress, hope, and transformation.", "mythology": "Draws on myths of prophecy and renaissance.", "cosmology": "Cosmos as a canvas for creation.", "teleology": "Purpose is to realize a better future." }
+  },
+  {
+    "name": "The Caregiver",
+    "summary": "Nurtures, protects, and supports others, embodying compassion and selfless service.",
+    "facetScores": { "ontology": 0.7, "epistemology": 0.6, "praxeology": 0.9, "axiology": 1.0, "mythology": 0.8, "cosmology": 0.7, "teleology": 0.8 },
+    "facetSummaries": { "ontology": "Sees life as interconnected and worthy of care.", "epistemology": "Understands through empathy and relationship.", "praxeology": "Acts through nurturing, supporting, and healing.", "axiology": "Values love, compassion, and generosity.", "mythology": "Guided by stories of caretakers and protectors.", "cosmology": "World as a family or community.", "teleology": "Purpose is to alleviate suffering and foster well-being." }
+  },
+  {
+    "name": "The Trickster",
+    "summary": "Disrupts patterns, exposes assumptions, and brings hidden truths to light through humor and subversion.",
+    "facetScores": { "ontology": 0.5, "epistemology": 0.8, "praxeology": 0.9, "axiology": 0.6, "mythology": 1.0, "cosmology": 0.4, "teleology": 0.7 },
+    "facetSummaries": { "ontology": "Reality is flexible and unpredictable.", "epistemology": "Questions certainty and reveals blind spots.", "praxeology": "Acts through play, subversion, and improvisation.", "axiology": "Values wit, freedom, and transformation.", "mythology": "Embodies the archetype of the cosmic joker.", "cosmology": "World as a theater of surprise.", "teleology": "Purpose is to provoke awakening and growth." }
+  },
+  {
+    "name": "The Guardian",
+    "summary": "Protects and preserves what is valued, upholding order, tradition, and responsibility.",
+    "facetScores": { "ontology": 0.8, "epistemology": 0.7, "praxeology": 1.0, "axiology": 0.8, "mythology": 0.8, "cosmology": 0.7, "teleology": 0.9 },
+    "facetSummaries": { "ontology": "Sees reality as structured and worthy of stewardship.", "epistemology": "Learns from history, tradition, and authority.", "praxeology": "Acts to defend and maintain stability.", "axiology": "Values duty, loyalty, and responsibility.", "mythology": "Guided by stories of protectors and saviors.", "cosmology": "World as a domain of trust and duty.", "teleology": "Purpose is to safeguard the good." }
+  },
+  {
+    "name": "The Creator",
+    "summary": "Expresses originality, imagination, and artistry, shaping new realities from inspiration.",
+    "facetScores": { "ontology": 0.6, "epistemology": 0.8, "praxeology": 0.9, "axiology": 0.9, "mythology": 0.8, "cosmology": 0.6, "teleology": 1.0 },
+    "facetSummaries": { "ontology": "Reality is a medium for creative expression.", "epistemology": "Trusts imagination, intuition, and the muse.", "praxeology": "Acts through art, invention, and innovation.", "axiology": "Values beauty, originality, and self-expression.", "mythology": "Inspired by myths of creation and invention.", "cosmology": "Cosmos as an evolving masterpiece.", "teleology": "Purpose is to manifest the new." }
+  },
+  {
+    "name": "The Explorer",
+    "summary": "Seeks discovery, adventure, and new frontiers—physical, intellectual, or spiritual.",
+    "facetScores": { "ontology": 0.7, "epistemology": 0.8, "praxeology": 0.9, "axiology": 0.7, "mythology": 0.8, "cosmology": 0.8, "teleology": 0.9 },
+    "facetSummaries": { "ontology": "Sees reality as a vast domain to discover.", "epistemology": "Values curiosity and open-minded inquiry.", "praxeology": "Acts by venturing into the unknown.", "axiology": "Values novelty, freedom, and learning.", "mythology": "Inspired by journeys of explorers and pioneers.", "cosmology": "World as a landscape of possibility.", "teleology": "Purpose is to expand horizons." }
+  },
+  {
+    "name": "The Judge",
+    "summary": "Upholds justice, discernment, and ethical balance, weighing evidence and motives impartially.",
+    "facetScores": { "ontology": 0.7, "epistemology": 0.8, "praxeology": 0.8, "axiology": 1.0, "mythology": 0.6, "cosmology": 0.6, "teleology": 0.8 },
+    "facetSummaries": { "ontology": "Reality is governed by laws and principles.", "epistemology": "Seeks clarity, objectivity, and evidence.", "praxeology": "Acts by weighing and deciding justly.", "axiology": "Values fairness, integrity, and justice.", "mythology": "Inspired by myths of wise judges.", "cosmology": "World as a court of consequence.", "teleology": "Purpose is to maintain balance." }
+  },
+  {
+    "name": "The Seeker",
+    "summary": "Pursues truth, enlightenment, and transcendence, often traveling between worlds and paradigms.",
+    "facetScores": { "ontology": 0.8, "epistemology": 0.9, "praxeology": 0.8, "axiology": 0.8, "mythology": 0.7, "cosmology": 0.7, "teleology": 1.0 },
+    "facetSummaries": { "ontology": "Sees reality as mysterious and layered.", "epistemology": "Values wisdom from diverse sources.", "praxeology": "Acts through inquiry, travel, and growth.", "axiology": "Values authenticity, growth, and openness.", "mythology": "Guided by stories of seekers and wanderers.", "cosmology": "World as a path to greater awareness.", "teleology": "Purpose is ultimate self-realization." }
+  },
+  {
+    "name": "The Sage-King",
+    "summary": "Combines wisdom with leadership, governing self and society in accordance with deeper principles.",
+    "facetScores": { "ontology": 0.8, "epistemology": 0.9, "praxeology": 1.0, "axiology": 0.9, "mythology": 0.7, "cosmology": 0.8, "teleology": 0.9 },
+    "facetSummaries": { "ontology": "Reality is ordered and intelligible.", "epistemology": "Combines knowledge and insight for wise rule.", "praxeology": "Acts to harmonize and lead.", "axiology": "Values justice, harmony, and benevolence.", "mythology": "Inspired by philosopher-kings and wise rulers.", "cosmology": "World as a kingdom to be governed wisely.", "teleology": "Purpose is to establish a just order." }
   }
 ];
 
@@ -310,3 +364,5 @@ export default function ArchetypesPage() {
     </div>
   );
 }
+
+    
