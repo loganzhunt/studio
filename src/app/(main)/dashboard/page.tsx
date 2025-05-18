@@ -18,7 +18,8 @@ import { Progress } from "@/components/ui/progress";
 import { cn } from "@/lib/utils";
 import { FacetIcon } from "@/components/facet-icon";
 
-// --- Archetype Data & Helpers (Copied from archetypes/page.tsx for dashboard use) ---
+
+// --- Archetype Data & Helpers ---
 // This should ideally be fetched or imported from a shared location if data grows significantly.
 const rawArchetypeData: any[] = [
   {
@@ -33,7 +34,7 @@ const rawArchetypeData: any[] = [
     "facetScores": { "ontology": 0.9, "epistemology": 0.8, "praxeology": 0.7, "axiology": 0.8, "mythology": 0.8, "cosmology": 0.7, "teleology": 1.0 },
     "facetSummaries": { "ontology": "Reality is ultimately spiritual and unified.", "epistemology": "Direct experience and inner knowing are trusted.", "praxeology": "Practice is devotion, meditation, contemplation.", "axiology": "Values unity, compassion, transcendence.", "mythology": "Draws inspiration from mystical stories.", "cosmology": "Sees the cosmos as alive with spirit.", "teleology": "Purpose is awakening to divine union." }
   },
-   {
+  {
     "name": "The Rationalist Skeptic",
     "summary": "Believes reality is material, truth comes from reason and science, and meaning is self-created.",
     "facetScores": { "ontology": 0.1, "epistemology": 0.2, "praxeology": 0.3, "axiology": 0.5, "mythology": 0.3, "cosmology": 0.4, "teleology": 0.2 }
@@ -130,11 +131,24 @@ const calculateSimilarity = (userScores: DomainScore[], archetypeScores: DomainS
 };
 // --- End Archetype Data & Helpers ---
 
+const SPECTRUM_LABELS: Record<FacetName, { left: string; right: string }> = {
+  Ontology: { left: "Materialism", right: "Idealism" },
+  Epistemology: { left: "Empirical", right: "Revelatory" },
+  Praxeology: { left: "Hierarchical", right: "Egalitarian" },
+  Axiology: { left: "Individualism", right: "Collectivism" },
+  Mythology: { left: "Linear", right: "Cyclical" },
+  Cosmology: { left: "Mechanistic", right: "Holistic" },
+  Teleology: { left: "Divine", right: "Existential" },
+};
+
 const defaultNeutralScores: DomainScore[] = FACET_NAMES.map(name => ({ facetName: name, score: 0.5 }));
 
 function DomainFeedbackBar({ facetName, score, anchorLeft, anchorRight }: { facetName: FacetName, score: number, anchorLeft: string, anchorRight: string }) {
   const facetConfig = FACETS[facetName];
-  if (!facetConfig) return null;
+  if (!facetConfig) {
+      console.warn(`Facet configuration not found for: ${facetName} in DomainFeedbackBar`);
+      return null;
+  }
   
   return (
     <div className="mb-4 p-3 rounded-md border border-border/30 bg-background/40">
@@ -143,9 +157,9 @@ function DomainFeedbackBar({ facetName, score, anchorLeft, anchorRight }: { face
         <span className="text-xs font-semibold" style={{ color: getFacetColorHsl(facetName) }}>{Math.round(score * 100)}%</span>
       </div>
       <Progress value={score * 100} className="h-3" indicatorStyle={{ backgroundColor: getFacetColorHsl(facetName) }} />
-      <div className="flex justify-between text-xs text-muted-foreground mt-1">
-        <span className="font-semibold">{anchorLeft}</span>
-        <span className="font-semibold">{anchorRight}</span>
+      <div className="flex justify-between text-xs text-muted-foreground font-semibold mt-1">
+        <span>{anchorLeft}</span>
+        <span>{anchorRight}</span>
       </div>
     </div>
   );
@@ -156,7 +170,7 @@ export default function DashboardPage() {
     domainScores: userDomainScoresFromContext,
     currentUser,
     openAuthModal,
-    hasAssessmentBeenRun, // Use this from context
+    hasAssessmentBeenRun, 
   } = useWorldview();
 
   const [selectedArchetypeForDrawer, setSelectedArchetypeForDrawer] = useState<CodexEntry | null>(null);
@@ -168,13 +182,16 @@ export default function DashboardPage() {
   const userDomainScores = useMemo(() => {
     return (userDomainScoresFromContext && userDomainScoresFromContext.length === FACET_NAMES.length)
       ? userDomainScoresFromContext
-      : FACET_NAMES.map(name => ({ facetName: name, score: 0 })); // Default to 0 if context is not ready
+      : FACET_NAMES.map(name => ({ facetName: name, score: 0 })); 
   }, [userDomainScoresFromContext]);
 
 
   const mappedArchetypes = useMemo(() => {
     try {
-      return rawArchetypeData.filter(item => item && typeof item.name === 'string').map(mapRawArchetypeToCodexEntry);
+      // Defensive mapping
+      return rawArchetypeData
+        .filter(item => item && typeof item.name === 'string')
+        .map(mapRawArchetypeToCodexEntry);
     } catch (error) {
       console.error("Error mapping archetypes in Dashboard:", error);
       return [];
@@ -186,7 +203,7 @@ export default function DashboardPage() {
   }, [userDomainScores, hasAssessmentBeenRun]);
 
   const topThreeMatches = useMemo(() => {
-    if (!hasAssessmentBeenRun || !userDomainScores || userDomainScores.length === 0 || mappedArchetypes.length === 0) return [];
+    if (!hasAssessmentBeenRun || !userDomainScores || userDomainScores.length === 0 || !Array.isArray(mappedArchetypes) || mappedArchetypes.length === 0) return [];
     return mappedArchetypes
       .map(archetype => ({
         ...archetype,
@@ -272,16 +289,9 @@ export default function DashboardPage() {
                     return null;
                 }
 
-                let anchorLeftText: string;
-                let anchorRightText: string;
-
-                if (ds.facetName === "Ontology") {
-                  anchorLeftText = "Materialism";
-                  anchorRightText = "Idealism";
-                } else {
-                  anchorLeftText = `${facetConfig.name} Low`;
-                  anchorRightText = `${facetConfig.name} High`;
-                }
+                const labels = SPECTRUM_LABELS[ds.facetName];
+                const anchorLeftText = labels ? labels.left : "Spectrum Low";
+                const anchorRightText = labels ? labels.right : "Spectrum High";
 
                 return (
                     <DomainFeedbackBar

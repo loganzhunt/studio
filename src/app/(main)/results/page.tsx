@@ -14,9 +14,22 @@ import React, { useState, useEffect } from 'react';
 import { useToast } from "@/hooks/use-toast";
 import type { WorldviewProfile } from "@/types";
 
+const SPECTRUM_LABELS: Record<FacetName, { left: string; right: string }> = {
+  Ontology: { left: "Materialism", right: "Idealism" },
+  Epistemology: { left: "Empirical", right: "Revelatory" },
+  Praxeology: { left: "Hierarchical", right: "Egalitarian" },
+  Axiology: { left: "Individualism", right: "Collectivism" },
+  Mythology: { left: "Linear", right: "Cyclical" },
+  Cosmology: { left: "Mechanistic", right: "Holistic" },
+  Teleology: { left: "Divine", right: "Existential" },
+};
+
 function DomainFeedbackBar({ facetName, score, anchorLeft, anchorRight }: { facetName: FacetName, score: number, anchorLeft: string, anchorRight: string }) {
   const facetConfig = FACETS[facetName];
-  if (!facetConfig) return null;
+  if (!facetConfig) {
+    console.warn(`Facet configuration not found for: ${facetName} in DomainFeedbackBar`);
+    return null;
+  }
   
   return (
     <div className="mb-4 p-3 rounded-md border border-border/30 bg-background/40">
@@ -48,6 +61,7 @@ export default function ResultsPage() {
       setProfileTitle(`Assessment - ${new Date().toLocaleDateString()}`);
     } else {
       setIsSaved(false);
+      // When no assessment has been run, and no active profile, use a neutral title
       setProfileTitle("Results Placeholder");
     }
   }, [activeProfile, savedWorldviews, hasAssessmentBeenRun]);
@@ -65,15 +79,19 @@ export default function ResultsPage() {
     );
   }
   
-  const currentScoresToDisplay = hasAssessmentBeenRun ? domainScores : FACET_NAMES.map(name => ({ facetName: name, score: 0.5 }));
-  const displayTitle = hasAssessmentBeenRun ? profileTitle : "Neutral Baseline";
+  // Determine scores to display: actual scores if assessment run, otherwise neutral (0.5) scores
+  const scoresToDisplay = hasAssessmentBeenRun 
+    ? domainScores 
+    : FACET_NAMES.map(name => ({ facetName: name, score: 0.5 }));
+  
+  const displayTitle = activeProfile?.title || (hasAssessmentBeenRun ? profileTitle : "Neutral Baseline");
 
   return (
     <div className="container mx-auto py-8">
       <h1 className="text-3xl font-bold mb-2 text-center">Your Worldview Results</h1>
       <p className="text-xl text-muted-foreground text-center mb-8">"{displayTitle}"</p>
 
-      {!hasAssessmentBeenRun && (
+      {!hasAssessmentBeenRun && !activeProfile && (
         <Card className="mb-8 glassmorphic-card text-center p-6">
           <CardTitle className="text-xl text-primary">No Assessment Taken</CardTitle>
           <CardDescription className="my-2">Complete the assessment to see your personalized results.</CardDescription>
@@ -88,27 +106,20 @@ export default function ResultsPage() {
           <CardHeader>
             <CardTitle className="text-2xl">Facet Breakdown</CardTitle>
             <CardDescription>
-              {hasAssessmentBeenRun 
+              {hasAssessmentBeenRun || activeProfile
                 ? "Your scores across the 7 worldview dimensions." 
-                : "Showing neutral baseline scores. Complete an assessment to see your breakdown."
+                : "Showing neutral baseline scores. Complete an assessment or load a profile to see a breakdown."
               }
             </CardDescription>
           </CardHeader>
           <CardContent>
-            {currentScoresToDisplay.map(ds => {
+            {scoresToDisplay.map(ds => {
               const facetConfig = FACETS[ds.facetName];
               if (!facetConfig) return null;
 
-              let anchorLeftText: string;
-              let anchorRightText: string;
-
-              if (ds.facetName === "Ontology") {
-                anchorLeftText = "Materialism";
-                anchorRightText = "Idealism";
-              } else {
-                anchorLeftText = `${facetConfig.name} Low`;
-                anchorRightText = `${facetConfig.name} High`;
-              }
+              const labels = SPECTRUM_LABELS[ds.facetName];
+              const anchorLeftText = labels ? labels.left : "Low";
+              const anchorRightText = labels ? labels.right : "High";
               
               return (
                 <DomainFeedbackBar 
@@ -129,7 +140,7 @@ export default function ResultsPage() {
               <CardTitle className="text-2xl">Your Signature</CardTitle>
             </CardHeader>
             <CardContent className="flex justify-center items-center">
-              <TriangleChart scores={currentScoresToDisplay} width={250} height={217} />
+              <TriangleChart scores={scoresToDisplay} width={250} height={217} />
             </CardContent>
           </Card>
           
@@ -139,9 +150,9 @@ export default function ResultsPage() {
             </CardHeader>
             <CardContent>
               <p className="text-muted-foreground">
-                {hasAssessmentBeenRun 
+                {hasAssessmentBeenRun || activeProfile 
                   ? "Symbolic interpretations and reflective prompts based on your scores will appear here."
-                  : "Complete the assessment to unlock insights."
+                  : "Complete the assessment or load a profile to unlock insights."
                 }
               </p>
             </CardContent>
@@ -149,7 +160,7 @@ export default function ResultsPage() {
         </div>
       </div>
 
-      {hasAssessmentBeenRun && (
+      {(hasAssessmentBeenRun || activeProfile) && (
         <Card className="mt-8 glassmorphic-card">
           <CardHeader>
             <CardTitle>Actions</CardTitle>
@@ -162,7 +173,7 @@ export default function ResultsPage() {
                 if (!titleToSave && activeProfile?.id) {
                   titleToSave = activeProfile.title;
                 } else if (!titleToSave) {
-                    const newTitle = prompt("Enter a title for this worldview profile:", `Assessment - ${new Date().toLocaleDateString()}`);
+                    const newTitle = prompt("Enter a title for this worldview profile:", hasAssessmentBeenRun ? `Assessment - ${new Date().toLocaleDateString()}` : "My Custom Profile");
                     if (!newTitle || !newTitle.trim()) {
                         toast({ title: "Save Cancelled", description: "Profile title cannot be empty.", variant: "destructive" });
                         return;
@@ -179,15 +190,16 @@ export default function ResultsPage() {
                 const profileToSave: WorldviewProfile = {
                   id: activeProfile?.id || `assessment_${Date.now()}`,
                   title: titleToSave,
-                  domainScores: domainScores,
+                  domainScores: domainScores, // Use the current domainScores from context
                   createdAt: activeProfile?.createdAt || new Date().toISOString(),
                   summary: activeProfile?.summary || "Assessment results",
                   isArchetype: activeProfile?.isArchetype || false,
+                  facetSelections: activeProfile?.facetSelections // Persist facet selections if they exist on activeProfile
                 };
                 addSavedWorldview(profileToSave);
-                setIsSaved(true);
+                setIsSaved(true); 
               }} 
-              disabled={isSaved && activeProfile?.id ? savedWorldviews.some(p => p.id === activeProfile.id) : false}
+              disabled={(isSaved && activeProfile?.id ? savedWorldviews.some(p => p.id === activeProfile.id) : false) || (!hasAssessmentBeenRun && !activeProfile)}
             >
               <Icons.saved className="mr-2 h-4 w-4" /> 
               {(isSaved && activeProfile?.id && savedWorldviews.some(p => p.id === activeProfile.id)) ? "Profile Saved" : "Save to Library"}
