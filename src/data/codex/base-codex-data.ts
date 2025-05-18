@@ -1,4 +1,3 @@
-
 // src/data/codex/base-codex-data.ts
 // Contains the initial, base set of Codex entries.
 

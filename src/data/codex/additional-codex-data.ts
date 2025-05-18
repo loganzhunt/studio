@@ -228,7 +228,7 @@ export const ADDITIONAL_CODEX_DATA: any[] = [
     "scores": { "ontology": 0.75, "epistemology": 0.85, "praxeology": 0.50, "axiology": 0.75, "mythology": 0.80, "cosmology": 0.80, "teleology": 0.80 },
     "facetDescriptions": { "ontology": "Idealist; spirit is primary, matter as transformation.", "epistemology": "Revelatory; wisdom through mystical insight and symbolism.", "praxeology": "Ritual, discipline, and initiatory practice.", "axiology": "Values wisdom, purity, transformation.", "mythology": "Alchemy, spiritual journeys, symbolic stories.", "cosmology": "Esoteric; cosmos as layered and mysterious.", "teleology": "Purpose is spiritual ascent and universal harmony." }
   },
-  { // Note: Scientific Materialism is also in BASE_CODEX_DATA, this one from ADDITIONAL_CODEX_DATA might take precedence
+  {
     "title": "Scientific Materialism",
     "category": "philosophical - Worldview",
     "summary": "A worldview grounded in physicalism and empirical science. Reality is ultimately material and measurable.",
@@ -269,7 +269,7 @@ export const ADDITIONAL_CODEX_DATA: any[] = [
     "scores": { "ontology": 0.65, "epistemology": 0.65, "praxeology": 0.75, "axiology": 0.85, "mythology": 0.70, "cosmology": 0.65, "teleology": 0.90 },
     "facetDescriptions": { "ontology": "Unified; one transcendent reality, present in all.", "epistemology": "Revelatory and devotional; knowledge through scripture and experience.", "praxeology": "Service (seva), equality, honest living.", "axiology": "Values compassion, justice, humility.", "mythology": "Stories of gurus and martyrs, unity of faith.", "cosmology": "Creation as divine manifestation.", "teleology": "Purpose is union with the Divine through devotion and service." }
   },
-  { // Note: Stoicism is also in BASE_CODEX_DATA, this one from ADDITIONAL_CODEX_DATA might take precedence
+  {
     "title": "Stoicism",
     "category": "philosophical - Worldview",
     "summary": "A philosophy of rational resilience and self-mastery, emphasizing the cultivation of virtue and acceptance of nature.",
@@ -277,7 +277,7 @@ export const ADDITIONAL_CODEX_DATA: any[] = [
     "scores": { "ontology": 0.30, "epistemology": 0.20, "praxeology": 0.65, "axiology": 0.75, "mythology": 0.30, "cosmology": 0.40, "teleology": 0.30 },
     "facetDescriptions": { "ontology": "Materialist or dualist; reason is part of nature.", "epistemology": "Reasoned reflection; self-examination.", "praxeology": "Virtuous action, self-control, resilience.", "axiology": "Values wisdom, virtue, equanimity.", "mythology": "Draws from Greco-Roman myths for exemplars.", "cosmology": "Universe as rational, ordered whole.", "teleology": "Purpose is to live in harmony with nature and reason." }
   },
-  { // Note: Sufism is also in BASE_CODEX_DATA (as Mystical Sufism), this one may create a new entry or update based on exact title match policy
+  {
     "title": "Sufism",
     "category": "religious - Worldview",
     "summary": "The mystical dimension of Islam, focusing on direct experience of God through love and devotion.",
@@ -285,7 +285,7 @@ export const ADDITIONAL_CODEX_DATA: any[] = [
     "scores": { "ontology": 0.80, "epistemology": 0.90, "praxeology": 0.70, "axiology": 0.90, "mythology": 0.80, "cosmology": 0.80, "teleology": 0.95 },
     "facetDescriptions": { "ontology": "Unity of all being; Divine presence in all.", "epistemology": "Revelatory; knowledge through love, poetry, and ecstatic practice.", "praxeology": "Devotional acts, dance, and ritual.", "axiology": "Values love, compassion, annihilation of ego.", "mythology": "Stories of saints, union with the Beloved.", "cosmology": "Cosmic love and unity.", "teleology": "Purpose is union with God, annihilation in Divine." }
   },
-  { // Note: Taoism is also in BASE_CODEX_DATA, this one from ADDITIONAL_CODEX_DATA might take precedence
+  {
     "title": "Taoism",
     "category": "religious - Worldview",
     "summary": "A spiritual tradition rooted in the Tao, the ineffable source of all. Emphasizes harmony, non-action, and flowing with nature.",
@@ -365,4 +365,4 @@ export const ADDITIONAL_CODEX_DATA: any[] = [
     "scores": { "ontology": 0.55, "epistemology": 0.65, "praxeology": 0.70, "axiology": 0.75, "mythology": 0.80, "cosmology": 0.60, "teleology": 0.80 },
     "facetDescriptions": { "ontology": "Dualistic; world of good and evil, light and dark.", "epistemology": "Scriptural, ritual, moral discernment.", "praxeology": "Truth-telling, purity, fire ritual.", "axiology": "Values honesty, righteousness, order.", "mythology": "Myths of Ahura Mazda, Angra Mainyu, cosmic struggle.", "cosmology": "Order (asha) vs. chaos (druj), cosmic history.", "teleology": "Purpose is to aid truth and light, achieve renewal." }
   }
-];
+]
