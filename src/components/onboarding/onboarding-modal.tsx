@@ -2,12 +2,12 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog'; // Removed DialogClose from here if it was imported
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Icons } from '@/components/icons';
 import { cn } from '@/lib/utils';
-import { FACETS } from '@/config/facets'; // Import FACETS for icons
-import { FacetIcon } from '@/components/facet-icon'; // Import FacetIcon
+import { FACETS } from '@/config/facets';
+import { FacetIcon } from '@/components/facet-icon';
 
 interface OnboardingModalProps {
   isOpen: boolean;
@@ -49,7 +49,7 @@ const onboardingStepsData = [
     text: "Answer 70 rapid-fire statements (10 per domain).\nYour answers generate a unique “worldview signature”—a color-coded triangle chart that maps your symbolic spectrum."
   },
   {
-    icon: Icons.results,
+    icon: Icons.results, // Using results icon for "Begin Journey"
     headline: "Ready to Discover Your Meta-Prism Signature?",
     title: "Begin Your Journey",
     text: "Your journey is private, intuitive, and always in your control.\nLet’s begin!"
@@ -75,7 +75,8 @@ export function OnboardingModal({ isOpen, onClose }: OnboardingModalProps) {
   };
 
   const handleDotClick = (stepIndex: number) => {
-    if (stepIndex < currentStep) { 
+    // Allow jumping only to previously visited steps or current step
+    if (stepIndex <= currentStep) { 
       setCurrentStep(stepIndex);
     }
   };
@@ -83,11 +84,13 @@ export function OnboardingModal({ isOpen, onClose }: OnboardingModalProps) {
   const currentStepData = onboardingStepsData[currentStep];
 
   useEffect(() => {
+    // Prevent body scroll when modal is open
     if (isOpen) {
       document.body.style.overflow = 'hidden';
     } else {
       document.body.style.overflow = 'unset';
     }
+    // Cleanup function to restore body scroll when component unmounts or modal closes
     return () => {
       document.body.style.overflow = 'unset';
     };
@@ -98,76 +101,79 @@ export function OnboardingModal({ isOpen, onClose }: OnboardingModalProps) {
   return (
     <Dialog open={isOpen} onOpenChange={(open) => { if (!open) onClose(); }}>
       <DialogContent 
-        className="bg-background/60 backdrop-blur-xl rounded-2xl shadow-xl border border-border/30 p-0 flex flex-col max-w-lg w-[95vw] max-h-[90vh] sm:max-h-[85vh]"
+        className="glassmorphic-card !bg-card/80 backdrop-blur-lg !border-border/50 !rounded-2xl !shadow-xl p-3 sm:p-4 flex flex-col max-w-lg w-[95vw] max-h-[90vh] overflow-y-auto" // Make DialogContent itself scrollable
         onInteractOutside={(e) => e.preventDefault()} 
       >
-        <DialogHeader className="p-3 sm:p-4 md:p-6 text-center border-b border-border/30 relative">
-          <div className="flex justify-center items-center space-x-2 mb-2 sm:mb-3">
+        <DialogHeader className="pt-2 pb-1 text-center relative">
+          {/* Step Indicators */}
+          <div className="flex justify-center items-center space-x-2 mb-2">
             {Array.from({ length: totalSteps }).map((_, index) => (
               <button
                 key={index}
                 onClick={() => handleDotClick(index)}
-                disabled={index >= currentStep && index !== 0}
+                disabled={index > currentStep} // Disable future steps
                 className={cn(
-                  "h-2 w-2 sm:h-2.5 sm:w-2.5 rounded-full transition-all duration-300 ease-in-out",
-                  currentStep === index ? "bg-primary scale-125" : "bg-muted/50 hover:bg-muted",
-                  index < currentStep ? "cursor-pointer" : "cursor-not-allowed opacity-70"
+                  "h-2 w-2 rounded-full transition-all duration-300 ease-in-out",
+                  currentStep === index ? "bg-primary scale-125" : "bg-muted/50",
+                  index <= currentStep ? "cursor-pointer hover:bg-muted" : "cursor-not-allowed opacity-70"
                 )}
                 aria-label={`Go to step ${index + 1}`}
               />
             ))}
           </div>
-          <div className="flex justify-center items-center mb-1 sm:mb-2">
-            {React.createElement(currentStepData.icon, { className: "h-8 w-8 sm:h-10 sm:w-10 text-primary" })}
+          {/* Icon and Title for current step */}
+          <div className="flex justify-center items-center mb-1">
+            {React.createElement(currentStepData.icon, { className: "h-8 w-8 text-primary" })}
           </div>
-           <DialogTitle className="text-lg sm:text-xl md:text-2xl font-semibold text-foreground">{currentStepData.title}</DialogTitle>
-           {/* The explicit DialogClose button that might cause a duplicate 'X' is removed from here. 
-               ShadCN DialogContent provides its own default close button. */}
+           <DialogTitle className="text-lg font-semibold text-foreground">{currentStepData.title}</DialogTitle>
         </DialogHeader>
 
-        <div className="flex-grow overflow-y-auto p-3 sm:p-4 md:p-6 space-y-2 sm:space-y-3 min-h-[100px] sm:min-h-[120px]">
-          <h2 className="text-lg sm:text-xl font-semibold text-foreground text-center">{currentStepData.headline}</h2>
+        {/* Main content area - NO LONGER INDEPENDENTLY SCROLLING, min-h removed or greatly reduced */}
+        <div className="px-1 py-2 space-y-2 text-center">
+          <h2 className="text-md font-semibold text-foreground">{currentStepData.headline}</h2>
           
           {currentStepData.text.split('\n').map((paragraph, index) => (
-            <p key={index} className="text-sm text-muted-foreground text-center leading-relaxed">
+            <p key={index} className="text-sm text-muted-foreground leading-relaxed">
               {paragraph}
             </p>
           ))}
 
           {currentStepData.facets && (
-            <div className="mt-2 sm:mt-3 grid grid-cols-1 sm:grid-cols-2 gap-x-3 gap-y-1.5 text-xs text-muted-foreground/90 p-1.5 bg-muted/30 rounded-md">
+            <div className="mt-2 grid grid-cols-1 sm:grid-cols-2 gap-x-2 gap-y-1 text-xs text-muted-foreground/90 p-1.5 bg-muted/30 rounded-md max-w-md mx-auto">
               {currentStepData.facets.map(facet => (
-                <div key={facet.name} className="flex items-center space-x-1.5">
-                  <FacetIcon facetName={facet.name} className="h-4 w-4" />
-                  <span className="font-medium text-foreground/90 whitespace-nowrap">{facet.name}</span>
-                  <span className="whitespace-nowrap text-xs">– {facet.question}</span>
+                <div key={facet.name} className="flex items-center space-x-1.5 p-1 text-left"> {/* Text left for facet list */}
+                  <FacetIcon facetName={facet.name} className="h-3.5 w-3.5 shrink-0" />
+                  <div>
+                    <span className="font-medium text-foreground/90 whitespace-nowrap">{facet.name}</span>
+                    <span className="whitespace-nowrap text-xs block sm:inline"> – {facet.question}</span>
+                  </div>
                 </div>
               ))}
             </div>
           )}
         </div>
 
-        <DialogFooter className="p-3 sm:p-4 border-t border-border/30 flex flex-col sm:flex-row justify-between items-center gap-2 sm:gap-3">
+        <DialogFooter className="p-3 border-t border-border/30 mt-auto flex flex-col sm:flex-row justify-between items-center gap-2">
           <Button 
             variant="ghost" 
             onClick={onClose} 
-            className="w-full sm:w-auto order-last sm:order-first text-muted-foreground hover:text-foreground text-xs sm:text-sm px-3 py-1.5 h-auto sm:h-9"
+            className="w-full sm:w-auto order-last sm:order-first text-muted-foreground hover:text-foreground text-xs px-3 py-1.5 h-auto"
           >
             Skip
           </Button>
-          <div className="flex w-full sm:w-auto space-x-2 sm:space-x-3">
+          <div className="flex w-full sm:w-auto space-x-2">
             {currentStep > 0 && (
               <Button 
                 variant="outline" 
                 onClick={handleBack} 
-                className="flex-1 sm:flex-none text-xs sm:text-sm px-3 py-1.5 h-auto sm:h-9"
+                className="flex-1 sm:flex-none text-xs px-3 py-1.5 h-auto"
               >
                 <Icons.chevronRight className="h-3.5 w-3.5 mr-1 rotate-180"/> Back
               </Button>
             )}
             <Button 
               onClick={handleNext} 
-              className="flex-1 sm:flex-none bg-primary hover:bg-primary/90 text-primary-foreground text-xs sm:text-sm px-3 py-1.5 h-auto sm:h-9"
+              className="flex-1 sm:flex-none bg-primary hover:bg-primary/90 text-primary-foreground text-xs px-3 py-1.5 h-auto"
             >
               {currentStep === totalSteps - 1 ? "Start Assessment" : "Next"}
               {currentStep < totalSteps - 1 && <Icons.chevronRight className="h-3.5 w-3.5 ml-1"/>}
@@ -178,5 +184,3 @@ export function OnboardingModal({ isOpen, onClose }: OnboardingModalProps) {
     </Dialog>
   );
 }
-
-    
