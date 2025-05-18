@@ -7,10 +7,10 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter }
 import { Button } from "@/components/ui/button";
 import { Icons } from "@/components/icons";
 import Link from "next/link";
-import { FACETS, FACET_NAMES, FacetName, getFacetByName } from "@/config/facets";
-import type { DomainScore, CodexEntry, WorldviewProfile, LocalUser } from "@/types";
+import { FACETS, FACET_NAMES, FacetName } from "@/config/facets";
+import type { DomainScore, CodexEntry, LocalUser } from "@/types";
 import React, { useState, useMemo, useEffect } from 'react';
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from "@/components/ui/sheet";
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription, SheetClose } from "@/components/ui/sheet";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { getFacetColorHsl } from '@/lib/colors';
 import { Badge } from '@/components/ui/badge';
@@ -19,6 +19,7 @@ import { cn } from "@/lib/utils";
 import { FacetIcon } from "@/components/facet-icon";
 
 // --- Archetype Data & Helpers (Copied from archetypes/page.tsx for dashboard use) ---
+// This should ideally be fetched or imported from a shared location if data grows significantly.
 const rawArchetypeData: any[] = [
   {
     "name": "The Philosopher",
@@ -43,26 +44,29 @@ const rawArchetypeData: any[] = [
     "facetScores": { "ontology": 0.7, "epistemology": 0.7, "praxeology": 0.9, "axiology": 0.9, "mythology": 0.6, "cosmology": 0.7, "teleology": 0.8 },
     "facetSummaries": { "ontology": "Reality is complex and interconnected.", "epistemology": "Learns from dialogue and negotiation.", "praxeology": "Acts through mediation and bridge-building.", "axiology": "Values harmony, balance, and respect.", "mythology": "Guided by peacemakers and mediators.", "cosmology": "World as a field of relationship.", "teleology": "Purpose is unity and reconciliation." }
   }
+  // ... Add all other archetype data here for completeness if you want more matches
 ];
 
 const mapRawArchetypeToCodexEntry = (raw: any): CodexEntry => {
     if (!raw || typeof raw.name !== 'string') {
       console.error("mapRawArchetypeToCodexEntry: Invalid raw data item", raw);
-      return {
+      return { // Return a fallback structure
         id: `invalid_archetype_${Date.now()}`,
         title: "Invalid Archetype Data",
         summary: "This archetype data could not be processed.",
         domainScores: FACET_NAMES.map(name => ({ facetName: name, score: 0.5 })),
         facetSummaries: {},
-        category: "custom",
+        category: "custom", // Use 'custom' or a specific error category
         isArchetype: true,
         createdAt: new Date().toISOString(),
         tags: ["error"],
       };
     }
+
     const domainScoresArray: DomainScore[] = FACET_NAMES.map(facetKey => {
-      let score = 0.5;
+      let score = 0.5; // Default if not found or invalid
       if (raw.facetScores && typeof raw.facetScores === 'object') {
+        // Check for both capitalized and lowercase keys
         const rawScore = raw.facetScores[facetKey.toLowerCase() as keyof typeof raw.facetScores] ?? raw.facetScores[facetKey as keyof typeof raw.facetScores];
         if (typeof rawScore === 'number') {
           score = Math.max(0, Math.min(1, Number(rawScore)));
@@ -70,6 +74,7 @@ const mapRawArchetypeToCodexEntry = (raw: any): CodexEntry => {
       }
       return { facetName: facetKey, score };
     });
+
     const processedFacetSummaries: { [K_FacetName in FacetName]?: string } = {};
     if (raw.facetSummaries && typeof raw.facetSummaries === 'object') {
       for (const facetKey of FACET_NAMES) {
@@ -80,6 +85,7 @@ const mapRawArchetypeToCodexEntry = (raw: any): CodexEntry => {
         }
       }
     }
+
     return {
       id: raw.name.toLowerCase().replace(/\s+/g, '_').replace(/[^\w-]+/g, ''),
       title: raw.name,
@@ -129,15 +135,14 @@ const defaultNeutralScores: DomainScore[] = FACET_NAMES.map(name => ({ facetName
 function DomainFeedbackBar({ facetName, score, anchorLeft, anchorRight }: { facetName: FacetName, score: number, anchorLeft: string, anchorRight: string }) {
   const facetConfig = FACETS[facetName];
   if (!facetConfig) return null;
-  const colorHsl = getFacetColorHsl(facetName);
-
+  
   return (
     <div className="mb-4 p-3 rounded-md border border-border/30 bg-background/40">
       <div className="flex justify-between items-center mb-1">
-        <span className="text-sm font-medium" style={{ color: colorHsl }}>{facetConfig.name}</span>
-        <span className="text-xs font-semibold" style={{ color: colorHsl }}>{Math.round(score * 100)}%</span>
+        <span className="text-sm font-medium" style={{ color: getFacetColorHsl(facetName) }}>{facetConfig.name}</span>
+        <span className="text-xs font-semibold" style={{ color: getFacetColorHsl(facetName) }}>{Math.round(score * 100)}%</span>
       </div>
-      <Progress value={score * 100} className="h-3" indicatorStyle={{ backgroundColor: colorHsl }} />
+      <Progress value={score * 100} className="h-3" indicatorStyle={{ backgroundColor: getFacetColorHsl(facetName) }} />
       <div className="flex justify-between text-xs text-muted-foreground mt-1">
         <span className="font-semibold">{anchorLeft}</span>
         <span className="font-semibold">{anchorRight}</span>
@@ -151,7 +156,7 @@ export default function DashboardPage() {
     domainScores: userDomainScoresFromContext,
     currentUser,
     openAuthModal,
-    hasAssessmentBeenRun
+    hasAssessmentBeenRun, // Use this from context
   } = useWorldview();
 
   const [selectedArchetypeForDrawer, setSelectedArchetypeForDrawer] = useState<CodexEntry | null>(null);
@@ -163,7 +168,7 @@ export default function DashboardPage() {
   const userDomainScores = useMemo(() => {
     return (userDomainScoresFromContext && userDomainScoresFromContext.length === FACET_NAMES.length)
       ? userDomainScoresFromContext
-      : defaultNeutralScores;
+      : FACET_NAMES.map(name => ({ facetName: name, score: 0 })); // Default to 0 if context is not ready
   }, [userDomainScoresFromContext]);
 
 
@@ -210,7 +215,7 @@ export default function DashboardPage() {
       <Card className="glassmorphic-card text-center p-6">
         {currentUser ? (
           <>
-            <h1 className="text-3xl font-bold text-foreground">Welcome, {currentUser.displayName}!</h1>
+            <h1 className="text-3xl font-bold text-foreground">Welcome, {currentUser.displayName || "User"}!</h1>
             <p className="text-muted-foreground mt-1">This is your Meta-Prism dashboard.</p>
           </>
         ) : (
@@ -255,59 +260,39 @@ export default function DashboardPage() {
             <CardDescription>
               {hasAssessmentBeenRun
                 ? "Your scores across the 7 worldview dimensions."
-                : "Take the assessment to see your detailed breakdown."
+                : "Showing neutral baseline scores. Complete an assessment to see your breakdown."
               }
             </CardDescription>
           </CardHeader>
           <CardContent>
-            {userDomainScores && userDomainScores.length > 0 ? (
-                userDomainScores.map(ds => {
-                    const facetConfig = FACETS[ds.facetName];
-                    if (!facetConfig) {
-                        console.warn(`Facet configuration not found for: ${ds.facetName} in Facet Breakdown`);
-                        return null;
-                    }
+            {scoresForMainTriangle.map(ds => {
+                const facetConfig = FACETS[ds.facetName];
+                if (!facetConfig) {
+                    console.warn(`Facet configuration not found for: ${ds.facetName} in Facet Breakdown`);
+                    return null;
+                }
 
-                    let anchorLeftText = "Spectrum Low";
-                    let anchorRightText = "Spectrum High";
+                let anchorLeftText: string;
+                let anchorRightText: string;
 
-                    if (hasAssessmentBeenRun) {
-                      if (ds.facetName === "Ontology") {
-                        anchorLeftText = "Materialism";
-                        anchorRightText = "Idealism";
-                      } else {
-                        anchorLeftText = `${facetConfig.name} Low`;
-                        anchorRightText = `${facetConfig.name} High`;
-                      }
-                    }
+                if (ds.facetName === "Ontology") {
+                  anchorLeftText = "Materialism";
+                  anchorRightText = "Idealism";
+                } else {
+                  anchorLeftText = `${facetConfig.name} Low`;
+                  anchorRightText = `${facetConfig.name} High`;
+                }
 
-                    return (
-                        <DomainFeedbackBar
-                            key={ds.facetName}
-                            facetName={ds.facetName}
-                            score={ds.score}
-                            anchorLeft={anchorLeftText}
-                            anchorRight={anchorRightText}
-                        />
-                    );
-                })
-            ) : (
-                 FACET_NAMES.map(name => {
-                    const facetConfig = FACETS[name];
-                     if (!facetConfig) return null;
-                    let anchorLeftText = "Spectrum Low";
-                    let anchorRightText = "Spectrum High";
-                     return (
-                        <DomainFeedbackBar
-                            key={name}
-                            facetName={name}
-                            score={0.5}
-                            anchorLeft={anchorLeftText}
-                            anchorRight={anchorRightText}
-                        />
-                    );
-                })
-            )}
+                return (
+                    <DomainFeedbackBar
+                        key={ds.facetName}
+                        facetName={ds.facetName}
+                        score={ds.score}
+                        anchorLeft={anchorLeftText}
+                        anchorRight={anchorRightText}
+                    />
+                );
+            })}
           </CardContent>
         </Card>
 
@@ -337,7 +322,7 @@ export default function DashboardPage() {
         <CardContent>
           {!hasAssessmentBeenRun ? (
             <div className="text-center py-8">
-              <TriangleChart scores={defaultNeutralScores} width={200} height={173} interactive={false} className="mx-auto mb-4 !p-0 !bg-transparent !shadow-none !backdrop-blur-none opacity-50" />
+              <TriangleChart scores={defaultNeutralScores} width={200} height={173} interactive={false} className="mx-auto mb-4 opacity-50" />
               <p className="text-muted-foreground">Take the Assessment to Discover Your Archetypal Matches.</p>
                <Button asChild className="mt-4">
                     <Link href="/assessment"><Icons.assessment className="mr-2 h-4 w-4"/> Begin Assessment</Link>
@@ -523,5 +508,3 @@ export default function DashboardPage() {
     </div>
   );
 }
-
-    

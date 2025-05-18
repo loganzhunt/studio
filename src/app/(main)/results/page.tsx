@@ -17,15 +17,14 @@ import type { WorldviewProfile } from "@/types";
 function DomainFeedbackBar({ facetName, score, anchorLeft, anchorRight }: { facetName: FacetName, score: number, anchorLeft: string, anchorRight: string }) {
   const facetConfig = FACETS[facetName];
   if (!facetConfig) return null;
-  const colorHsl = getFacetColorHsl(facetName);
-
+  
   return (
     <div className="mb-4 p-3 rounded-md border border-border/30 bg-background/40">
       <div className="flex justify-between items-center mb-1">
-        <span className="text-sm font-medium" style={{ color: colorHsl }}>{facetConfig.name}</span>
-        <span className="text-xs font-semibold" style={{ color: colorHsl }}>{Math.round(score * 100)}%</span>
+        <span className="text-sm font-medium" style={{ color: getFacetColorHsl(facetName) }}>{facetConfig.name}</span>
+        <span className="text-xs font-semibold" style={{ color: getFacetColorHsl(facetName) }}>{Math.round(score * 100)}%</span>
       </div>
-      <Progress value={score * 100} className="h-3" indicatorStyle={{ backgroundColor: colorHsl }} />
+      <Progress value={score * 100} className="h-3" indicatorStyle={{ backgroundColor: getFacetColorHsl(facetName) }} />
       <div className="flex justify-between text-xs text-muted-foreground font-semibold mt-1">
         <span>{anchorLeft}</span>
         <span>{anchorRight}</span>
@@ -100,15 +99,17 @@ export default function ResultsPage() {
               const facetConfig = FACETS[ds.facetName];
               if (!facetConfig) return null;
 
-              let anchorLeftText = hasAssessmentBeenRun ? `${facetConfig.name} Low` : "Spectrum Low";
-              let anchorRightText = hasAssessmentBeenRun ? `${facetConfig.name} High` : "Spectrum High";
+              let anchorLeftText: string;
+              let anchorRightText: string;
 
-              if (ds.facetName === "Ontology" && hasAssessmentBeenRun) {
+              if (ds.facetName === "Ontology") {
                 anchorLeftText = "Materialism";
                 anchorRightText = "Idealism";
+              } else {
+                anchorLeftText = `${facetConfig.name} Low`;
+                anchorRightText = `${facetConfig.name} High`;
               }
-              // Add similar conditions here for other facets if custom labels are needed
-
+              
               return (
                 <DomainFeedbackBar 
                   key={ds.facetName}
@@ -128,7 +129,7 @@ export default function ResultsPage() {
               <CardTitle className="text-2xl">Your Signature</CardTitle>
             </CardHeader>
             <CardContent className="flex justify-center items-center">
-              <TriangleChart scores={currentScoresToDisplay} width={250} height={217} className="mx-auto !p-0 !bg-transparent !shadow-none !backdrop-blur-none" />
+              <TriangleChart scores={currentScoresToDisplay} width={250} height={217} />
             </CardContent>
           </Card>
           
@@ -201,5 +202,3 @@ export default function ResultsPage() {
     </div>
   );
 }
-
-    
