@@ -74,5 +74,3 @@ export const BASE_CODEX_DATA: any[] = [
     "tags": ["indigenous", "spiritual", "nature"]
   }
 ];
-
-    

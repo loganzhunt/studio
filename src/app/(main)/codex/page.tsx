@@ -49,12 +49,13 @@ const mapRawDataToCodexEntries = (rawItems: any[]): CodexEntry[] => {
     const id = title.toLowerCase().replace(/\s+/g, '_').replace(/[^\w-]+/g, '');
 
     let domainScoresArray: DomainScore[] = [];
-    const scoresSource = item.scores || item.domainScores;
+    const scoresSource = item.scores || item.domainScores; // Accept 'scores' or 'domainScores'
     if (scoresSource && typeof scoresSource === 'object') {
       domainScoresArray = FACET_NAMES.map(facetKey => {
         const scoreKeyLower = facetKey.toLowerCase() as keyof typeof scoresSource;
-        const scoreKeyOriginal = facetKey as keyof typeof scoresSource;
+        const scoreKeyOriginal = facetKey as keyof typeof scoresSource; // For cases like 'Ontology'
         let score = 0.5; // Default score
+        
         if (typeof scoresSource[scoreKeyLower] === 'number') {
           score = scoresSource[scoreKeyLower];
         } else if (typeof scoresSource[scoreKeyOriginal] === 'number') {
@@ -67,13 +68,14 @@ const mapRawDataToCodexEntries = (rawItems: any[]): CodexEntry[] => {
       domainScoresArray = FACET_NAMES.map(name => ({ facetName: name, score: 0.5 }));
     }
 
-    const facetSummariesSource = item.facetDescriptions || item.facetSummaries || item.facetSummary;
+    const facetSummariesSource = item.facetDescriptions || item.facetSummaries || item.facetSummary; // Accept 'facetDescriptions'
     const processedFacetSummaries: { [K_FacetName in FacetName]?: string } = {};
     if (facetSummariesSource && typeof facetSummariesSource === 'object') {
       for (const facetKey of FACET_NAMES) {
         const summaryKeyLower = facetKey.toLowerCase() as keyof typeof facetSummariesSource;
-        const summaryKeyOriginal = facetKey as keyof typeof facetSummariesSource;
+        const summaryKeyOriginal = facetKey as keyof typeof facetSummariesSource; // For keys like 'Ontology'
         let summary = `Default summary for ${facetKey}...`; 
+        
         if (typeof facetSummariesSource[summaryKeyLower] === 'string') {
           summary = facetSummariesSource[summaryKeyLower];
         } else if (typeof facetSummariesSource[summaryKeyOriginal] === 'string') {
@@ -92,10 +94,10 @@ const mapRawDataToCodexEntries = (rawItems: any[]): CodexEntry[] => {
     const itemCategoryRaw = (item.category || '');
     const itemCategory = itemCategoryRaw.toLowerCase().split(' ')[0]; // Take first word for category
 
-    if (['philosophical', 'religious', 'archetypal', 'spiritual', 'custom'].includes(itemCategory)) {
+    if (['philosophical', 'religious', 'archetypal', 'spiritual', 'custom', 'indigenous', 'mystical', 'scientific', 'cultural'].includes(itemCategory)) {
       category = itemCategory as CodexEntry['category'];
-    } else if (item.tags && (item.tags as string[]).some(tag => ['philosophical', 'religious', 'archetypal', 'spiritual'].includes(tag))) {
-      category = (item.tags as string[]).find(tag => ['philosophical', 'religious', 'archetypal', 'spiritual'].includes(tag)) as CodexEntry['category'] || 'custom';
+    } else if (item.tags && (item.tags as string[]).some(tag => ['philosophical', 'religious', 'archetypal', 'spiritual'].includes(tag.toLowerCase()))) {
+      category = (item.tags as string[]).find(tag => ['philosophical', 'religious', 'archetypal', 'spiritual'].includes(tag.toLowerCase()))?.toLowerCase() as CodexEntry['category'] || 'custom';
     }
 
 
@@ -115,7 +117,7 @@ const mapRawDataToCodexEntries = (rawItems: any[]): CodexEntry[] => {
       summary: item.summary || "No summary available.",
       domainScores: domainScoresArray,
       category,
-      isArchetype: category === 'archetypal' || (Array.isArray(item.tags) && (item.tags as string[]).includes('archetypal')),
+      isArchetype: category === 'archetypal' || (Array.isArray(item.tags) && (item.tags as string[]).map(t=>t.toLowerCase()).includes('archetypal')),
       createdAt: item.createdAt || new Date().toISOString(),
       tags,
       facetSummaries: processedFacetSummaries,
@@ -126,6 +128,12 @@ const mapRawDataToCodexEntries = (rawItems: any[]): CodexEntry[] => {
 
 
 export default function CodexPage() {
+  // console.log("CodexPage function definition reached");
+  // console.log("Imported BASE_CODEX_DATA length:", BASE_CODEX_DATA?.length);
+  // console.log("Imported LATEST_CODEX_UPDATE_BATCH length:", LATEST_CODEX_UPDATE_BATCH?.length);
+  // console.log("Imported ADDITIONAL_CODEX_DATA length:", ADDITIONAL_CODEX_DATA?.length);
+
+
   const [searchTerm, setSearchTerm] = useState("");
   const [sortBy, setSortBy] = useState("title"); // 'title', 'category', 'dominantFacet'
   const [activeCategory, setActiveCategory] = useState<CodexEntry['category'] | "all">("all");
@@ -150,7 +158,7 @@ export default function CodexPage() {
         if (title && !uniqueTitles.has(title)) {
           // Standardize to use 'title' preferentially for mapping
           const standardizedItem = { ...item, title: item.title || item.name };
-          delete standardizedItem.name; // remove 'name' if 'title' was used from it
+          if (item.name && item.title !== item.name) delete standardizedItem.name; 
           uniqueEntriesData.push(standardizedItem);
           uniqueTitles.add(title);
         }
@@ -400,5 +408,3 @@ export default function CodexPage() {
     </div>
   );
 }
-
-    
