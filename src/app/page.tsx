@@ -1,3 +1,4 @@
+
 import Link from 'next/link';
 import Image from 'next/image';
 import { Button } from '@/components/ui/button';
@@ -6,7 +7,7 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/
 import { Icons } from '@/components/icons';
 import { FACETS, FACET_NAMES } from '@/config/facets';
 import { FacetIcon } from '@/components/facet-icon';
-import { TriangleChart } from '@/components/triangle-chart';
+import { TriangleChart } from '@/components/visualization/TriangleChart'; // Corrected import path
 import { GlassCard } from '@/components/glass-card';
 
 export default function HomePage() {
@@ -35,10 +36,10 @@ export default function HomePage() {
       <main className="flex-1">
         {/* Hero Section */}
         <section className="relative py-20 md:py-32 text-center bg-gradient-to-br from-background via-card to-background">
-          <div 
+          <div
             className="absolute inset-0 opacity-10"
             style={{
-              backgroundImage: "url('https://placehold.co/1200x800/000000/FFFFFF.png?text=.)", // Placeholder subtle background pattern
+              backgroundImage: "url('https://placehold.co/1200x800/000000/FFFFFF.png')", // Removed problematic ?text=.)
               backgroundRepeat: 'repeat',
               backgroundSize: '40px 40px', // Adjust size of pattern elements
               maskImage: 'radial-gradient(circle at center, white 20%, transparent 70%)'
@@ -55,9 +56,14 @@ export default function HomePage() {
             <p className="text-xl md:text-2xl text-muted-foreground mb-10 max-w-3xl mx-auto">
               A symbolic self-assessment tool for exploring how you construct reality.
             </p>
-            <Button size="lg" className="text-lg px-8 py-6 shadow-lg hover:shadow-primary/50 transition-shadow" asChild>
+            <Button
+              size="lg"
+              variant="outline"
+              className="border-primary/50 text-primary hover:bg-primary/10 hover:text-primary px-6 py-4 text-lg font-medium shadow-md hover:shadow-primary/30 transition-all duration-300 group"
+              asChild
+            >
               <Link href="/assessment">
-                <Icons.sparkles className="mr-2 h-5 w-5" />
+                <Icons.sparkles className="mr-2 h-5 w-5 text-primary/80 group-hover:text-primary transition-colors" />
                 Begin Your Journey
               </Link>
             </Button>
@@ -90,7 +96,7 @@ export default function HomePage() {
 
         {/* Animated Section Divider (Placeholder) */}
         <div className="h-px w-full bg-gradient-to-r from-transparent via-border to-transparent my-12 md:my-16"></div>
-        
+
         {/* Featured Worldviews Placeholder Section */}
         <section className="py-16 md:py-24 bg-card/30">
           <div className="container mx-auto">
@@ -100,7 +106,7 @@ export default function HomePage() {
             </p>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
               {[1, 2, 3].map(i => (
-                <Card key={i} className="overflow-hidden hover:shadow-lg transition-shadow duration-300">
+                <Card key={i} className="overflow-hidden hover:shadow-lg transition-shadow duration-300 glassmorphic-card">
                   <CardHeader>
                     <CardTitle className="text-xl">Example Worldview {i}</CardTitle>
                     <CardDescription>A brief summary of this worldview...</CardDescription>
@@ -121,7 +127,7 @@ export default function HomePage() {
             </div>
           </div>
         </section>
-        
+
         {/* Animated Section Divider (Placeholder) */}
         <div className="h-px w-full bg-gradient-to-r from-transparent via-border to-transparent my-12 md:my-16"></div>
 
