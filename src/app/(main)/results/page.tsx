@@ -7,7 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Button } from "@/components/ui/button";
 import { Icons } from "@/components/icons";
 import Link from "next/link";
-import { FACETS, FACET_NAMES, FacetName } from "@/config/facets"; // Ensure FacetName is imported if used directly
+import { FACETS, FACET_NAMES, FacetName } from "@/config/facets"; 
 import { Progress } from "@/components/ui/progress";
 import { getFacetColorHsl } from '@/lib/colors';
 
@@ -40,8 +40,6 @@ function DomainFeedbackBar({ facetName, score, anchorLeft, anchorRight }: { face
 export default function ResultsPage() {
   const { domainScores, activeProfile } = useWorldview();
 
-  // If domainScores aren't loaded yet (e.g. context not initialized, which shouldn't happen)
-  // or if it's an empty array for some unexpected reason.
   if (!domainScores || domainScores.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center h-[calc(100vh-10rem)] text-center">
@@ -55,7 +53,8 @@ export default function ResultsPage() {
   }
   
   const currentTitle = activeProfile?.title || "Your Current Worldview";
-  const hasTakenAssessment = domainScores.some(ds => ds.score !== 0.5); // Check if any score differs from default 0.5
+  // An assessment has been taken if any score is different from 0.5 (default placeholder score)
+  const hasTakenAssessment = domainScores.some(ds => ds.score !== 0.5); 
 
   return (
     <div className="container mx-auto py-8">
@@ -88,10 +87,10 @@ export default function ResultsPage() {
 
         <div className="space-y-8">
           <Card className="glassmorphic-card">
-            <CardHeader>
+            <CardHeader className="text-center"> {/* Centered title */}
               <CardTitle className="text-2xl">Your Signature</CardTitle>
             </CardHeader>
-            <CardContent>
+            <CardContent> {/* TriangleChart uses mx-auto, which centers it horizontally */}
               <TriangleChart scores={domainScores} width={250} height={217} className="mx-auto !p-0 !bg-transparent !shadow-none !backdrop-blur-none" />
             </CardContent>
           </Card>
