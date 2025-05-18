@@ -10,7 +10,7 @@ import Link from "next/link";
 import { FACETS, FACET_NAMES, FacetName, getFacetByName } from "@/config/facets"; 
 import type { DomainScore, CodexEntry, WorldviewProfile, LocalUser } from "@/types";
 import React, { useState, useMemo, useEffect } from 'react';
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from "@/components/ui/sheet"; // Removed SheetClose import
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from "@/components/ui/sheet";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { getFacetColorHsl, getBandColor } from '@/lib/colors';
 import { Badge } from '@/components/ui/badge';
@@ -269,14 +269,18 @@ export default function DashboardPage() {
                     const facetConfig = FACETS[ds.facetName];
                     if (!facetConfig) return null; 
                     
-                    let anchorLeftText = hasAssessmentBeenRun ? `${facetConfig.name} Low` : "Spectrum Low";
-                    let anchorRightText = hasAssessmentBeenRun ? `${facetConfig.name} High` : "Spectrum High";
+                    let anchorLeftText = "Spectrum Low";
+                    let anchorRightText = "Spectrum High";
 
-                    if (ds.facetName === "Ontology" && hasAssessmentBeenRun) {
-                      anchorLeftText = "Materialism";
-                      anchorRightText = "Idealism";
+                    if (hasAssessmentBeenRun) {
+                      if (ds.facetName === "Ontology") {
+                        anchorLeftText = "Materialism";
+                        anchorRightText = "Idealism";
+                      } else {
+                        anchorLeftText = `${facetConfig.name} Low`;
+                        anchorRightText = `${facetConfig.name} High`;
+                      }
                     }
-                    // Add similar conditions here for other facets if custom labels are needed
 
                     return (
                         <DomainFeedbackBar
@@ -290,17 +294,15 @@ export default function DashboardPage() {
                 })
             ) : (
                 FACET_NAMES.map(name => {
+                    // This block should ideally not be reached if userDomainScores is initialized correctly
+                    const facetConfig = FACETS[name];
                     let anchorLeftText = "Spectrum Low";
                     let anchorRightText = "Spectrum High";
-                    if (name === "Ontology") {
-                        // Decide what to show for Ontology if no assessment is run - perhaps generic or specific placeholders
-                        // For now, keeping generic for the no-assessment case
-                    }
                      return (
                         <DomainFeedbackBar
                             key={name}
                             facetName={name}
-                            score={0.5} 
+                            score={0.5} // Neutral score for placeholder
                             anchorLeft={anchorLeftText}
                             anchorRight={anchorRightText}
                         />
@@ -316,7 +318,7 @@ export default function DashboardPage() {
             <CardDescription className="text-xs">AI-generated insights (placeholder)</CardDescription>
           </CardHeader>
           <CardContent>
-            {hasAssessmentBeenRun && userDomainScores && userDomainScores.length > 0 ? (
+            {hasAssessmentBeenRun && userDomainScores && userDomainScores.length > 0 && userDomainScores.some(s => s.score !== 0.5) ? ( // Check if scores are not just the default neutral
               <p className="text-muted-foreground text-sm">
                 Reflective prompts based on your scores will appear here.
                 Your dominant facet appears to be <span className="font-semibold" style={{color: getFacetColorHsl(getDominantFacet(userDomainScores))}}>{getDominantFacet(userDomainScores)}</span>.
