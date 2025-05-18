@@ -7,7 +7,7 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/
 import { Icons } from '@/components/icons';
 import { FACETS, FACET_NAMES } from '@/config/facets';
 import { FacetIcon } from '@/components/facet-icon';
-import { TriangleChart } from '@/components/visualization/TriangleChart'; // Corrected import path
+import { TriangleChart } from '@/components/visualization/TriangleChart';
 import { GlassCard } from '@/components/glass-card';
 
 export default function HomePage() {
@@ -31,20 +31,18 @@ export default function HomePage() {
 
   return (
     <div className="flex flex-col"> {/* Removed min-h-screen, as RootLayout handles it */}
-      {/* Header Section Removed - Global header will take its place */}
-
       <main className="flex-1">
         {/* Hero Section */}
         <section className="relative py-20 md:py-32 text-center bg-gradient-to-br from-background via-card to-background">
           <div
             className="absolute inset-0 opacity-10"
             style={{
-              backgroundImage: "url('https://placehold.co/1200x800/000000/FFFFFF.png')", // Removed problematic ?text=.)
+              backgroundImage: "url('https://via.placeholder.com/10x10.png/000000/FFFFFF?text=+')", // Using a very simple placeholder URL
               backgroundRepeat: 'repeat',
               backgroundSize: '40px 40px', // Adjust size of pattern elements
               maskImage: 'radial-gradient(circle at center, white 20%, transparent 70%)'
             }}
-            data-ai-hint="abstract geometric"
+            // data-ai-hint="abstract geometric" // Temporarily removed for debugging
           />
           <div className="container mx-auto relative z-10">
             <div className="mx-auto mb-8 h-24 w-24">
