@@ -28,7 +28,6 @@ const getDominantFacet = (scores: DomainScore[]): FacetName => {
   return validScores.reduce((prev, current) => (current.score > prev.score) ? current : prev).facetName || FACET_NAMES[0];
 };
 
-// Archetype Data (should ideally be shared or fetched, copied for now)
 const rawArchetypeData: any[] = [
   {
     "name": "The Philosopher",
@@ -63,19 +62,17 @@ const rawArchetypeData: any[] = [
     "facetScores": { "ontology": 0.7, "epistemology": 0.7, "praxeology": 0.9, "axiology": 0.9, "mythology": 0.6, "cosmology": 0.7, "teleology": 0.8 },
     "facetSummaries": { "ontology": "Reality is complex and interconnected.", "epistemology": "Learns from dialogue and negotiation.", "praxeology": "Acts through mediation and bridge-building.", "axiology": "Values harmony, balance, and respect.", "mythology": "Guided by peacemakers and mediators.", "cosmology": "World as a field of relationship.", "teleology": "Purpose is unity and reconciliation." }
   }
-  // ... (Ensure ALL archetypes from archetypes/page.tsx are eventually copied here for full comparison functionality)
+  // Ensure ALL archetypes from archetypes/page.tsx are eventually copied here for full comparison functionality
 ];
-
 
 const mapRawArchetypeToCodexEntry = (raw: any): CodexEntry => {
     if (!raw || typeof raw.name !== 'string') {
       console.error("mapRawArchetypeToCodexEntry: Invalid raw data item", raw);
-      // Return a placeholder or throw an error, depending on desired handling
       return {
         id: `invalid_archetype_${Date.now()}`,
         title: "Invalid Archetype Data",
         summary: "This archetype data could not be processed.",
-        domainScores: FACET_NAMES.map(name => ({ facetName: name, score: 0 })),
+        domainScores: FACET_NAMES.map(name => ({ facetName: name, score: 0.5 })), // Default to 0.5 for invalid
         facetSummaries: {},
         category: "custom",
         isArchetype: true,
@@ -85,9 +82,9 @@ const mapRawArchetypeToCodexEntry = (raw: any): CodexEntry => {
     }
 
     const domainScoresArray: DomainScore[] = FACET_NAMES.map(facetKey => {
-      let score = 0.5; // Default score
+      let score = 0.5; 
       if (raw.facetScores && typeof raw.facetScores === 'object') {
-        const rawScore = raw.facetScores[facetKey.toLowerCase()];
+        const rawScore = raw.facetScores[facetKey.toLowerCase() as keyof typeof raw.facetScores] ?? raw.facetScores[facetKey as keyof typeof raw.facetScores];
         if (typeof rawScore === 'number') {
           score = Math.max(0, Math.min(1, Number(rawScore)));
         }
@@ -98,7 +95,7 @@ const mapRawArchetypeToCodexEntry = (raw: any): CodexEntry => {
     const processedFacetSummaries: { [K_FacetName in FacetName]?: string } = {};
     if (raw.facetSummaries && typeof raw.facetSummaries === 'object') {
       for (const facetKey of FACET_NAMES) {
-        const summary = raw.facetSummaries[facetKey.toLowerCase()];
+        const summary = raw.facetSummaries[facetKey.toLowerCase() as keyof typeof raw.facetSummaries] ?? raw.facetSummaries[facetKey as keyof typeof raw.facetSummaries];
         if (typeof summary === 'string') {
           processedFacetSummaries[facetKey] = summary;
         }
@@ -113,7 +110,7 @@ const mapRawArchetypeToCodexEntry = (raw: any): CodexEntry => {
       facetSummaries: processedFacetSummaries,
       category: "archetypal",
       isArchetype: true,
-      createdAt: new Date().toISOString(),
+      createdAt: raw.createdAt || new Date().toISOString(),
       tags: raw.tags || [raw.name.toLowerCase().replace(/\s+/g, '_'), "archetype"],
     };
   };
@@ -138,12 +135,32 @@ const calculateSimilarity = (userScores: DomainScore[], archetypeScores: DomainS
   archetypeMagnitude = Math.sqrt(archetypeMagnitude);
   if (userMagnitude === 0 || archetypeMagnitude === 0) return 0;
   const similarity = (dotProduct / (userMagnitude * archetypeMagnitude)) * 100;
-  return Math.max(0, Math.min(100, similarity)); // Clamp between 0 and 100
+  return Math.max(0, Math.min(100, similarity));
 };
-
 
 const defaultNeutralScores: DomainScore[] = FACET_NAMES.map(name => ({ facetName: name, score: 0.5 }));
 
+// Define DomainFeedbackBar within the DashboardPage component or import if it's a shared component
+function DomainFeedbackBar({ facetName, score, anchorLeft, anchorRight }: { facetName: FacetName, score: number, anchorLeft: string, anchorRight: string }) {
+  const facetConfig = FACETS[facetName];
+  // If facetConfig is not found, we still render a fallback bar to avoid blank sections.
+  const colorHsl = facetConfig ? getFacetColorHsl(facetName) : getFacetColorHsl(undefined); // Fallback color for HSL
+  const displayName = facetConfig ? facetConfig.name : facetName;
+
+  return (
+    <div className="mb-4 p-3 rounded-md border border-border/30 bg-background/40">
+      <div className="flex justify-between items-center mb-1">
+        <span className="text-sm font-medium" style={{ color: colorHsl }}>{displayName}</span>
+        <span className="text-xs font-semibold" style={{ color: colorHsl }}>{Math.round(score * 100)}%</span>
+      </div>
+      <Progress value={score * 100} className="h-3" indicatorStyle={{ backgroundColor: colorHsl }} />
+      <div className="flex justify-between text-xs text-muted-foreground mt-1">
+        <span>{anchorLeft}</span>
+        <span>{anchorRight}</span>
+      </div>
+    </div>
+  );
+}
 
 export default function DashboardPage() {
   const { domainScores: userDomainScores, currentUser, openAuthModal, savedWorldviews } = useWorldview();
@@ -156,10 +173,6 @@ export default function DashboardPage() {
   const [comparisonProfileB, setComparisonProfileB] = useState<WorldviewProfile | CodexEntry | null>(null);
   const [sortFacetComparisonByDifference, setSortFacetComparisonByDifference] = useState(false);
 
-  const hasAssessmentData = useMemo(() => {
-    return userDomainScores && userDomainScores.some(ds => ds.score !== 0.5); 
-  }, [userDomainScores]);
-
   const mappedArchetypes = useMemo(() => {
     try {
       return rawArchetypeData.filter(item => item && item.name).map(mapRawArchetypeToCodexEntry);
@@ -168,9 +181,23 @@ export default function DashboardPage() {
       return [];
     }
   }, []);
+  
+  // Check if an assessment has been completed or loaded (i.e., scores are not the initial all-zero state from context)
+  const assessmentScoresArePresent = useMemo(() => {
+    if (!userDomainScores) return false;
+    // Context initializes scores to all 0. If any score is not 0, an assessment was taken/loaded.
+    return userDomainScores.some(ds => ds.score !== 0); 
+  }, [userDomainScores]);
+
+  const scoresForMainTriangle = useMemo(() => {
+      // If actual assessment scores are present (not all 0s), use them. 
+      // Otherwise, use the neutral 0.5 scores for the placeholder triangle.
+      return assessmentScoresArePresent ? userDomainScores : defaultNeutralScores;
+  }, [userDomainScores, assessmentScoresArePresent]);
+
 
   const topThreeMatches = useMemo(() => {
-    if (!hasAssessmentData || !userDomainScores || mappedArchetypes.length === 0) return [];
+    if (!assessmentScoresArePresent || !userDomainScores || mappedArchetypes.length === 0) return [];
     return mappedArchetypes
       .map(archetype => ({
         ...archetype,
@@ -178,11 +205,11 @@ export default function DashboardPage() {
       }))
       .sort((a, b) => b.similarity - a.similarity)
       .slice(0, 3);
-  }, [userDomainScores, mappedArchetypes, hasAssessmentData]);
+  }, [userDomainScores, mappedArchetypes, assessmentScoresArePresent]);
 
   const comparisonProfileOptions = useMemo(() => {
     const options: { id: string; title: string; profile: WorldviewProfile | CodexEntry | null }[] = [
-      { id: 'latest_results', title: 'My Latest Results', profile: hasAssessmentData && userDomainScores ? { id: 'latest', title: 'My Latest Results', domainScores: userDomainScores, createdAt: new Date().toISOString() } : null },
+      { id: 'latest_results', title: 'My Latest Results', profile: assessmentScoresArePresent && userDomainScores ? { id: 'latest', title: 'My Latest Results', domainScores: userDomainScores, createdAt: new Date().toISOString() } : null },
       { id: 'neutral_placeholder', title: 'Neutral Baseline (All 50%)', profile: { id: 'neutral', title: 'Neutral Baseline', domainScores: defaultNeutralScores, createdAt: new Date().toISOString() }}
     ];
     if (Array.isArray(savedWorldviews)) {
@@ -190,25 +217,41 @@ export default function DashboardPage() {
     }
     if (Array.isArray(mappedArchetypes)) {
         mappedArchetypes.forEach(arch => {
-            if (arch && arch.id) { // Ensure arch and arch.id are defined
+            if (arch && arch.id) { 
                  options.push({ id: `archetype::${arch.id}`, title: `Archetype: ${arch.title}`, profile: arch })
             }
         });
     }
     options.push({ id: 'none', title: 'None (Compare to Neutral)', profile: null });
     return options;
-  }, [hasAssessmentData, userDomainScores, savedWorldviews, mappedArchetypes]);
+  }, [assessmentScoresArePresent, userDomainScores, savedWorldviews, mappedArchetypes]);
 
 
   useEffect(() => {
     const selectedA = comparisonProfileOptions.find(opt => opt.id === selectedSourceAId);
-    setComparisonProfileA(selectedA?.profile || { id: 'neutral_a', title: 'Profile A (Neutral)', domainScores: defaultNeutralScores, createdAt: new Date().toISOString() });
-  }, [selectedSourceAId, comparisonProfileOptions]);
+    if (selectedSourceAId === 'latest_results') {
+      setComparisonProfileA(assessmentScoresArePresent && userDomainScores 
+        ? { id: 'latest_A', title: 'My Latest Results', domainScores: userDomainScores, createdAt: new Date().toISOString() } 
+        : { id: 'neutral_latest_A', title: 'My Latest Results (Neutral)', domainScores: defaultNeutralScores, createdAt: new Date().toISOString() });
+    } else if (selectedA?.profile) {
+        setComparisonProfileA(selectedA.profile);
+    } else {
+        setComparisonProfileA({ id: 'neutral_a', title: 'Profile A (Neutral)', domainScores: defaultNeutralScores, createdAt: new Date().toISOString() });
+    }
+  }, [selectedSourceAId, comparisonProfileOptions, assessmentScoresArePresent, userDomainScores]);
 
   useEffect(() => {
     const selectedB = comparisonProfileOptions.find(opt => opt.id === selectedSourceBId);
-    setComparisonProfileB(selectedB?.profile || { id: 'neutral_b', title: 'Profile B (Neutral)', domainScores: defaultNeutralScores, createdAt: new Date().toISOString() });
-  }, [selectedSourceBId, comparisonProfileOptions]);
+    if (selectedSourceBId === 'latest_results') {
+      setComparisonProfileB(assessmentScoresArePresent && userDomainScores
+        ? { id: 'latest_B', title: 'My Latest Results', domainScores: userDomainScores, createdAt: new Date().toISOString() }
+        : { id: 'neutral_latest_B', title: 'My Latest Results (Neutral)', domainScores: defaultNeutralScores, createdAt: new Date().toISOString() });
+    } else if (selectedB?.profile) {
+        setComparisonProfileB(selectedB.profile);
+    } else {
+        setComparisonProfileB({ id: 'neutral_b', title: 'Profile B (Neutral)', domainScores: defaultNeutralScores, createdAt: new Date().toISOString() });
+    }
+  }, [selectedSourceBId, comparisonProfileOptions, assessmentScoresArePresent, userDomainScores]);
 
   const facetComparisonDisplayData = useMemo(() => {
     if (!comparisonProfileA || !comparisonProfileA.domainScores || !comparisonProfileB || !comparisonProfileB.domainScores) return [];
@@ -219,7 +262,7 @@ export default function DashboardPage() {
       const scoreB = comparisonProfileB.domainScores.find(s => s.facetName === facetName)?.score ?? 0.5;
       return {
         facetName,
-        facetConfig,
+        facetConfig: facetConfig || { name: facetName, tagline: "Unknown Facet", colorVariable: "--foreground" }, // Fallback for facetConfig
         scoreA,
         scoreB,
         difference: Math.abs(scoreA - scoreB),
@@ -236,19 +279,6 @@ export default function DashboardPage() {
   const handleOpenArchetypeDrawer = (archetype: CodexEntry) => {
     setSelectedArchetypeForDrawer(archetype);
     setIsArchetypeDrawerOpen(true);
-  };
-
-  const renderDomainFeedbackBars = () => {
-    const scoresToDisplay = hasAssessmentData && userDomainScores ? userDomainScores : defaultNeutralScores;
-    return scoresToDisplay.map(ds => (
-      <DomainFeedbackBar
-        key={ds.facetName}
-        facetName={ds.facetName}
-        score={ds.score}
-        anchorLeft={hasAssessmentData ? `${FACETS[ds.facetName]?.name || ds.facetName} Low` : "Spectrum Low"}
-        anchorRight={hasAssessmentData ? `${FACETS[ds.facetName]?.name || ds.facetName} High` : "Spectrum High"}
-      />
-    ));
   };
 
   return (
@@ -273,12 +303,12 @@ export default function DashboardPage() {
       <Card className="glassmorphic-card">
         <CardHeader className="text-center">
           <CardTitle className="text-2xl font-bold text-primary">Your Worldview Signature</CardTitle>
-          {!hasAssessmentData && <CardDescription>Complete the assessment to reveal your unique pattern.</CardDescription>}
+          {!assessmentScoresArePresent && <CardDescription>Complete the assessment to reveal your unique pattern.</CardDescription>}
         </CardHeader>
         <CardContent className="flex justify-center items-center min-h-[280px] p-0">
-          <TriangleChart scores={hasAssessmentData ? userDomainScores : defaultNeutralScores} interactive={false} width={320} height={277} className="!p-0 !bg-transparent !shadow-none !backdrop-blur-none" />
+          <TriangleChart scores={scoresForMainTriangle} interactive={false} width={320} height={277} className="!p-0 !bg-transparent !shadow-none !backdrop-blur-none" />
         </CardContent>
-         {!hasAssessmentData && (
+         {!assessmentScoresArePresent && (
             <CardFooter className="flex-col items-center gap-3 pt-4 border-t border-border/20">
                  <p className="text-sm text-muted-foreground text-center">Your results will appear here once you complete the assessment.</p>
                 <Button asChild>
@@ -293,14 +323,41 @@ export default function DashboardPage() {
           <CardHeader>
             <CardTitle className="text-xl">Facet Breakdown</CardTitle>
             <CardDescription>
-              {hasAssessmentData 
+              {assessmentScoresArePresent
                 ? "Your scores across the 7 worldview dimensions."
-                : "Neutral placeholder scores. Complete the assessment to see your breakdown."
+                : "Take the assessment to see your detailed breakdown." // More direct CTA
               }
             </CardDescription>
           </CardHeader>
           <CardContent>
-            {renderDomainFeedbackBars()}
+            {/* Always render bars based on userDomainScores from context.
+                If initial (all 0s), bars will be 0%. If populated, they show actual scores.
+                assessmentScoresArePresent primarily controls text labels. */}
+            {(userDomainScores && userDomainScores.length === FACET_NAMES.length) ? (
+                userDomainScores.map(ds => {
+                    const facetConfig = FACETS[ds.facetName];
+                    return (
+                        <DomainFeedbackBar
+                            key={ds.facetName}
+                            facetName={ds.facetName}
+                            score={ds.score}
+                            anchorLeft={assessmentScoresArePresent && facetConfig ? `${facetConfig.name} Low` : "Spectrum Low"}
+                            anchorRight={assessmentScoresArePresent && facetConfig ? `${facetConfig.name} High` : "Spectrum High"}
+                        />
+                    );
+                })
+            ) : (
+                 // Fallback if userDomainScores is not yet an array of 7 (should be rare with context init)
+                FACET_NAMES.map(name => (
+                     <DomainFeedbackBar
+                        key={name}
+                        facetName={name}
+                        score={0.5} // Default placeholder score for this visual fallback
+                        anchorLeft={"Spectrum Low"}
+                        anchorRight={"Spectrum High"}
+                    />
+                ))
+            )}
           </CardContent>
         </Card>
 
@@ -310,7 +367,7 @@ export default function DashboardPage() {
             <CardDescription className="text-xs">Powered by AI (placeholder)</CardDescription>
           </CardHeader>
           <CardContent>
-            {hasAssessmentData && userDomainScores ? (
+            {assessmentScoresArePresent && userDomainScores ? (
               <p className="text-muted-foreground text-sm">
                 Reflective prompts based on your scores will appear here.
                 Your dominant facet appears to be <span className="font-semibold" style={{color: getFacetColorHsl(getDominantFacet(userDomainScores))}}>{getDominantFacet(userDomainScores)}</span>.
@@ -327,7 +384,7 @@ export default function DashboardPage() {
           <CardTitle className="text-2xl font-bold text-primary roygbiv-gradient-underline pb-2">Closest Archetype Matches</CardTitle>
         </CardHeader>
         <CardContent>
-          {!hasAssessmentData ? (
+          {!assessmentScoresArePresent ? (
             <div className="text-center py-8">
               <TriangleChart scores={defaultNeutralScores} width={200} height={173} interactive={false} className="mx-auto mb-4 !p-0 !bg-transparent !shadow-none !backdrop-blur-none opacity-50" />
               <p className="text-muted-foreground">Take the Assessment to Discover Your Archetypal Matches.</p>
@@ -400,7 +457,7 @@ export default function DashboardPage() {
                 </SelectTrigger>
                 <SelectContent>
                   {comparisonProfileOptions.map(opt => (
-                    <SelectItem key={opt.id} value={opt.id}>{opt.title}</SelectItem>
+                    <SelectItem key={opt.id} value={opt.id} disabled={opt.id === selectedSourceBId && opt.id !== 'none' && opt.id !== 'neutral_placeholder'}>{opt.title}</SelectItem>
                   ))}
                 </SelectContent>
               </Select>
@@ -460,9 +517,10 @@ export default function DashboardPage() {
               </div>
             ))}
           </div>
-          {!hasAssessmentData && comparisonProfileA?.id === 'latest' && (
+          {/* Show message if 'My Latest Results' is selected for comparison but no assessment data exists */}
+          {!assessmentScoresArePresent && (selectedSourceAId === 'latest_results' || selectedSourceBId === 'latest_results') && (
             <p className="text-center text-muted-foreground text-sm pt-4">
-              Complete the assessment to compare your results with other profiles.
+              Complete the assessment to compare your actual results. Currently showing neutral baseline for "My Latest Results".
             </p>
           )}
         </CardContent>
@@ -505,7 +563,7 @@ export default function DashboardPage() {
                           </h4>
                           <span className="text-sm font-bold" style={{color: getFacetColorHsl(facetName)}}>{Math.round(score * 100)}%</span>
                         </div>
-                        <p className="text-xs text-muted-foreground italic mb-1">{facetConfig.tagline}</p>
+                        <p className="text-xs text-muted-foreground italic mb-1">{facetConfig?.tagline || "..."}</p>
                         <p className="text-sm text-muted-foreground">{facetSummary}</p>
                       </div>
                     );
@@ -516,38 +574,6 @@ export default function DashboardPage() {
           </SheetContent>
         </Sheet>
       )}
-
     </div>
   );
-}
-
-// Helper for domain feedback bars
-function DomainFeedbackBar({ facetName, score, anchorLeft, anchorRight }: { facetName: FacetName, score: number, anchorLeft: string, anchorRight: string }) {
-  const facetConfig = FACETS[facetName];
-  if (!facetConfig) return null; // Safety check
-  const colorHsl = getFacetColorHsl(facetName);
-
-  return (
-    <div className="mb-4 p-3 rounded-md border border-border/30 bg-background/40">
-      <div className="flex justify-between items-center mb-1">
-        <span className="text-sm font-medium" style={{ color: colorHsl }}>{facetName}</span>
-        <span className="text-xs font-semibold" style={{ color: colorHsl }}>{Math.round(score * 100)}%</span>
-      </div>
-      <Progress value={score * 100} className="h-3" indicatorStyle={{ backgroundColor: colorHsl }} />
-      <div className="flex justify-between text-xs text-muted-foreground mt-1">
-        <span>{anchorLeft}</span>
-        <span>{anchorRight}</span>
-      </div>
-    </div>
-  );
-}
-
-// Ensure Progress component can take indicatorClassName
-// This declaration might be better in a global .d.ts file or next to the component itself if it's a common pattern
-// For now, keeping it here to satisfy TypeScript in this context.
-declare module "@/components/ui/progress" {
-  interface ProgressProps extends React.ComponentPropsWithoutRef<typeof ProgressPrimitive.Root> {
-    indicatorClassName?: string;
-    indicatorStyle?: React.CSSProperties;
-  }
 }
