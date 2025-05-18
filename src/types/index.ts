@@ -73,6 +73,8 @@ export interface WorldviewProfile {
   createdAt: string; // ISO date string
   summary?: string;
   isArchetype?: boolean;
+  icon?: string; // Added for CodexEntry consistency
+  facetSummaries?: { [K_FacetName in FacetName]?: string }; // Added for CodexEntry consistency
   // For Firebase, you might add:
   // userId?: string;
   // lastUpdated?: any; // Firestore Timestamp
@@ -81,7 +83,8 @@ export interface WorldviewProfile {
 export interface CodexEntry extends WorldviewProfile {
   category: "religious" | "philosophical" | "archetypal" | "custom";
   tags?: string[];
-  facetSummaries?: { [K_FacetName in FacetName]?: string };
+  // icon?: string; // Already in WorldviewProfile
+  // facetSummaries?: { [K_FacetName in FacetName]?: string }; // Already in WorldviewProfile
 }
 
 export interface WorldviewContextType {
