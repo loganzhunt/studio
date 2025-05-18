@@ -17,6 +17,23 @@ export type FacetName =
   | "Cosmology" 
   | "Teleology";
 
+interface FacetDeepDive {
+  introduction: string;
+  spectrumExplanation: string;
+  spectrumAnchors: string[];
+  exampleWorldviews: Array<{
+    title: string;
+    summary: string;
+    exampleScore: number; // e.g., 0.2 (low), 0.5 (mid), 0.8 (high) on the facet's spectrum
+    type: 'codex' | 'archetype';
+    id?: string; // Optional: if linking to a specific codex/archetype entry
+  }>;
+  reflectionPrompts: string[];
+  strengthsPlaceholder?: string;
+  tensionsPlaceholder?: string;
+  blindSpotsPlaceholder?: string;
+}
+
 export interface Facet {
   name: FacetName;
   icon: LucideIcon | ((props: React.SVGProps<SVGSVGElement>) => JSX.Element); // Allow LucideIcon or custom SVG component
@@ -24,6 +41,7 @@ export interface Facet {
   tagline: string;
   description: string;
   questions: string[]; // 10 Likert-scale questions
+  deepDive: FacetDeepDive;
 }
 
 export interface DomainScore {
@@ -43,6 +61,9 @@ export interface WorldviewProfile {
   createdAt: string; // ISO date string
   summary?: string;
   isArchetype?: boolean;
+  // For Firebase, you might add:
+  // userId?: string;
+  // lastUpdated?: any; // Firestore Timestamp
 }
 
 export interface CodexEntry extends WorldviewProfile {
@@ -52,28 +73,35 @@ export interface CodexEntry extends WorldviewProfile {
 }
 
 export interface WorldviewContextType {
-  currentUser: LocalUser; 
-  signInLocally: (name: string) => void; // Only name is required
+  currentUser: LocalUser; // Updated for local demo
+  signInLocally: (name: string) => void; // Simplified for local demo
   signOutUser: () => void;
-
+  
   isAuthModalOpen: boolean;
   openAuthModal: () => void;
   closeAuthModal: () => void;
 
   activeProfile: WorldviewProfile | null;
   setActiveProfile: (profile: WorldviewProfile | null) => void;
+  
   assessmentAnswers: AssessmentAnswers;
   setAssessmentAnswers: (answers: AssessmentAnswers) => void;
   updateAssessmentAnswer: (questionId: string, value: number) => void;
+  
   domainScores: DomainScore[];
-  calculateDomainScores: () => DomainScore[];
+  calculateDomainScores: () => DomainScore[]; 
+  hasAssessmentBeenRun: boolean;
+
+
   savedWorldviews: WorldviewProfile[];
   addSavedWorldview: (profile: WorldviewProfile) => void; 
   updateSavedWorldview: (profile: WorldviewProfile) => void;
   deleteSavedWorldview: (profileId: string) => void;
+  
   facetSelections: { [K_FacetName in FacetName]?: string };
   selectWorldviewForFacet: (facetName: FacetName, worldviewId: string) => void;
   clearFacetSelection: (facetName: FacetName) => void;
+  
   loadStateFromLocalStorage: () => void;
 }
 
