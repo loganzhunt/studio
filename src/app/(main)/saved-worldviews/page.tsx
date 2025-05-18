@@ -4,13 +4,16 @@ import { useWorldview } from "@/hooks/use-worldview";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Icons } from "@/components/icons";
-import { TriangleChart } from "@/components/triangle-chart";
+import { TriangleChart } from "@/components/visualization/TriangleChart"; // Corrected import path
 import Link from "next/link";
 import { format } from 'date-fns';
-
+import { useRouter } from 'next/navigation';
+import { useToast } from "@/hooks/use-toast";
 
 export default function SavedWorldviewsPage() {
-  const { savedWorldviews, deleteSavedWorldview, setActiveProfile } = useWorldview();
+  const { savedWorldviews, deleteSavedWorldview, setActiveProfile, activeProfile } = useWorldview();
+  const router = useRouter();
+  const { toast } = useToast();
 
   if (savedWorldviews.length === 0) {
     return (
@@ -28,60 +31,57 @@ export default function SavedWorldviewsPage() {
     );
   }
 
+  const handleLoadAndNavigate = (profile: typeof savedWorldviews[0], path: string) => {
+    setActiveProfile(profile);
+    router.push(path);
+    toast({ title: `Profile "${profile.title}" loaded.`});
+  };
+
   return (
     <div className="container mx-auto py-8">
       <h1 className="text-3xl font-bold mb-8 text-center">Your Saved Worldviews</h1>
       
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {savedWorldviews.map(profile => (
-          <Card key={profile.id} className="flex flex-col glassmorphic-card hover:shadow-primary/20 transition-shadow duration-300">
+          <Card key={profile.id} className={`flex flex-col glassmorphic-card hover:shadow-primary/20 transition-shadow duration-300 ${activeProfile?.id === profile.id ? 'ring-2 ring-primary' : ''}`}>
             <CardHeader>
               <CardTitle className="text-xl">{profile.title}</CardTitle>
               <CardDescription>
                 Saved on: {format(new Date(profile.createdAt), "MMM d, yyyy 'at' h:mm a")}
               </CardDescription>
             </CardHeader>
-            <CardContent className="flex-grow">
+            <CardContent className="flex-grow flex flex-col justify-center items-center">
                <TriangleChart scores={profile.domainScores} width={200} height={173} className="mx-auto mb-4 !p-0 !bg-transparent !shadow-none !backdrop-blur-none" />
               {profile.summary && <p className="text-sm text-muted-foreground line-clamp-2">{profile.summary}</p>}
             </CardContent>
-            <CardFooter className="flex flex-col sm:flex-row gap-2 pt-4 border-t border-border/30">
+            <CardFooter className="grid grid-cols-3 gap-2 pt-4 border-t border-border/30">
               <Button 
                 variant="default" 
                 size="sm" 
-                className="w-full sm:flex-1" 
-                onClick={() => {
-                  setActiveProfile(profile);
-                  // router.push('/results'); // Or dashboard, depending on flow
-                  alert(`Profile "${profile.title}" loaded as active. Navigating to results... (placeholder)`);
-                }}
+                className="w-full" 
+                onClick={() => handleLoadAndNavigate(profile, '/results')}
               >
-                <Icons.view className="mr-2 h-4 w-4" /> View/Load
+                <Icons.view className="mr-1 sm:mr-2 h-4 w-4" /> View
               </Button>
               <Button 
                 variant="outline" 
                 size="sm" 
-                className="w-full sm:w-auto"
-                onClick={() => {
-                  // Placeholder for edit functionality
-                  // Might involve loading into builder or a dedicated edit UI
-                  setActiveProfile(profile);
-                  alert(`Editing "${profile.title}"... (placeholder - navigate to builder or edit UI)`);
-                }}
+                className="w-full"
+                onClick={() => handleLoadAndNavigate(profile, '/builder')}
               >
-                <Icons.edit className="h-4 w-4" />
+                <Icons.edit className="mr-1 sm:mr-2 h-4 w-4" /> Edit
               </Button>
               <Button 
                 variant="destructive" 
                 size="sm" 
-                className="w-full sm:w-auto"
+                className="w-full"
                 onClick={() => {
-                  if(confirm(`Are you sure you want to delete "${profile.title}"?`)) {
+                  if(confirm(`Are you sure you want to delete "${profile.title}"? This action cannot be undone.`)) {
                     deleteSavedWorldview(profile.id);
                   }
                 }}
               >
-                <Icons.delete className="h-4 w-4" />
+                <Icons.delete className="mr-1 sm:mr-2 h-4 w-4" /> Delete
               </Button>
             </CardFooter>
           </Card>
