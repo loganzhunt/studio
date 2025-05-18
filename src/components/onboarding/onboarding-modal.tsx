@@ -17,22 +17,22 @@ interface OnboardingModalProps {
 const onboardingStepsData = [
   {
     icon: Icons.sparkles,
-    headline: "See Your Worldview Through a New Lens",
     title: "Welcome to Meta-Prism",
+    headline: "See Your Worldview Through a New Lens",
     text: "This interactive tool reveals how you filter, interpret, and create meaning—across seven symbolic dimensions of reality."
   },
   {
-    icon: Icons.logo, // Assuming Icons.logo exists and is suitable
-    headline: "Your Symbolic Prism",
+    icon: Icons.logo,
     title: "What is Meta-Prism?",
+    headline: "Your Symbolic Prism",
     text: "Your worldview acts as a symbolic “prism,” refracting experience into color and pattern.\nVisualize your hidden assumptions, and explore how you see the world."
   },
   {
-    icon: Icons.list, // Example, choose a suitable generic icon
-    headline: "Explore the Seven Facets",
+    icon: Icons.list,
     title: "Meet the 7 Facets",
+    headline: "Explore the Seven Facets",
     text: "Each lens reveals a different dimension of your perspective:",
-    facets: [ // Populating with actual facet data for display
+    facets: [ 
       { name: "Ontology" as const, question: FACETS.Ontology.tagline },
       { name: "Epistemology" as const, question: FACETS.Epistemology.tagline },
       { name: "Praxeology" as const, question: FACETS.Praxeology.tagline },
@@ -43,15 +43,15 @@ const onboardingStepsData = [
     ]
   },
   {
-    icon: Icons.assessment, // Example
-    headline: "Map Your Spectrum",
+    icon: Icons.assessment,
     title: "How the Assessment Works",
+    headline: "Map Your Spectrum",
     text: "Answer 70 rapid-fire statements (10 per domain).\nYour answers generate a unique “worldview signature”—a color-coded triangle chart that maps your symbolic spectrum."
   },
   {
-    icon: Icons.results, // Example
-    headline: "Ready to Discover Your Meta-Prism Signature?",
+    icon: Icons.results,
     title: "Begin Your Journey",
+    headline: "Ready to Discover Your Meta-Prism Signature?",
     text: "Your journey is private, intuitive, and always in your control.\nLet’s begin!"
   }
 ];
@@ -64,7 +64,7 @@ export function OnboardingModal({ isOpen, onClose }: OnboardingModalProps) {
     if (currentStep < totalSteps - 1) {
       setCurrentStep(currentStep + 1);
     } else {
-      onClose(); // Finish
+      onClose(); 
     }
   };
 
@@ -75,7 +75,7 @@ export function OnboardingModal({ isOpen, onClose }: OnboardingModalProps) {
   };
 
   const handleDotClick = (stepIndex: number) => {
-    if (stepIndex <= currentStep || stepIndex < totalSteps) { // Allow jumping to any step for easier review
+    if (stepIndex <= currentStep || stepIndex < totalSteps) { 
       setCurrentStep(stepIndex);
     }
   };
@@ -98,7 +98,7 @@ export function OnboardingModal({ isOpen, onClose }: OnboardingModalProps) {
   return (
     <Dialog open={isOpen} onOpenChange={(open) => { if (!open) onClose(); }}>
       <DialogContent 
-        className="glassmorphic-card !bg-card/80 backdrop-blur-lg !border-border/50 !rounded-2xl !shadow-xl p-4 sm:p-6 md:p-6 flex flex-col max-w-lg w-[95vw] max-h-[90vh] sm:max-h-[85vh] overflow-y-auto"
+        className="glassmorphic-card !bg-card/80 backdrop-blur-lg !border-border/50 !rounded-2xl !shadow-xl p-3 sm:p-4 md:p-6 flex flex-col max-w-lg w-[95vw] max-h-[90vh] sm:max-h-[85vh] overflow-y-auto"
         onInteractOutside={(e) => e.preventDefault()} 
       >
         <DialogHeader className="pt-2 pb-1 text-center relative">
@@ -108,7 +108,7 @@ export function OnboardingModal({ isOpen, onClose }: OnboardingModalProps) {
                 key={index}
                 onClick={() => handleDotClick(index)}
                 className={cn(
-                  "h-2 w-2 rounded-full transition-all duration-300 ease-in-out",
+                  "h-2 w-2 sm:h-2.5 sm:w-2.5 rounded-full transition-all duration-300 ease-in-out",
                   currentStep === index ? "bg-primary scale-125" : "bg-muted/50",
                   "cursor-pointer hover:bg-muted"
                 )}
@@ -117,29 +117,37 @@ export function OnboardingModal({ isOpen, onClose }: OnboardingModalProps) {
             ))}
           </div>
           <div className="flex justify-center items-center mb-1 mt-2">
-            {React.createElement(currentStepData.icon, { className: "h-8 w-8 sm:h-10 sm:w-10 text-primary" })}
+            {currentStepData.icon && React.createElement(currentStepData.icon, { className: "h-8 w-8 sm:h-10 sm:w-10 text-primary" })}
           </div>
            <DialogTitle className="text-lg sm:text-xl md:text-2xl font-semibold text-foreground">{currentStepData.title}</DialogTitle>
         </DialogHeader>
 
-        {/* This div handles the main content scrolling */}
-        <div className="flex-grow overflow-y-auto px-1 sm:px-2 py-2 space-y-3 text-center min-h-[100px] sm:min-h-[120px]">
-          <h2 className="text-md sm:text-lg font-semibold text-foreground">{currentStepData.headline}</h2>
+        <div className={cn(
+          "space-y-3 text-sm sm:text-base min-h-[100px] sm:min-h-[120px] px-1 sm:px-2 py-1",
+          currentStep <= 1 ? "text-left" : "text-center" // Apply text-left for step 0 and 1
+        )}>
+          <h2 className={cn(
+            "text-md sm:text-lg font-semibold text-foreground",
+            currentStep <= 1 ? "text-left" : "text-center"
+          )}>{currentStepData.headline}</h2>
           
           {currentStepData.text.split('\n').map((paragraph, index) => (
-            <p key={index} className="text-sm text-muted-foreground leading-relaxed">
+            <p key={index} className={cn(
+              "text-muted-foreground leading-relaxed",
+              currentStep <= 1 ? "text-left" : "text-center"
+            )}>
               {paragraph}
             </p>
           ))}
 
-          {currentStepData.facets && (
-            <div className="mt-3 flex flex-col space-y-1 text-xs sm:text-sm text-muted-foreground/90 p-2 bg-muted/30 rounded-md max-w-md mx-auto">
+          {currentStepData.facets && currentStep === 2 && (
+            <div className="mt-3 flex flex-col space-y-2 text-xs sm:text-sm text-muted-foreground/90 p-2 bg-muted/30 rounded-md max-w-md mx-auto">
               {currentStepData.facets.map(facet => (
-                <div key={facet.name} className="flex items-start space-x-2 p-1 text-left"> {/* items-start for better multi-line text alignment */}
-                  <FacetIcon facetName={facet.name} className="h-4 w-4 shrink-0 mt-0.5" /> {/* Adjusted icon size and alignment */}
-                  <div className="flex-1"> {/* Allow text to take available space and wrap */}
+                <div key={facet.name} className="flex items-start space-x-1.5 sm:space-x-2 p-1 text-left">
+                  <FacetIcon facetName={facet.name} className="h-4 w-4 sm:h-5 sm:w-5 shrink-0 mt-0.5" />
+                  <div className="flex-1">
                     <span className="font-medium text-foreground/90">{facet.name}</span>
-                    <span className="text-xs block"> – {facet.question}</span> {/* Ensured block for proper wrapping */}
+                    <span className="text-xs block"> – {facet.question}</span>
                   </div>
                 </div>
               ))}
