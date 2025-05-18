@@ -4,7 +4,7 @@
 import { useParams, useRouter } from 'next/navigation';
 import { FACETS, FACET_NAMES } from '@/config/facets';
 import type { FacetName } from '@/types';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Icons } from '@/components/icons';
 import { FacetIcon } from '@/components/facet-icon';
@@ -14,6 +14,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import React, { useState, useMemo } from 'react';
 import { getFacetColorHsl } from '@/lib/colors';
+import chroma from 'chroma-js'; // Import chroma-js
 
 export default function FacetDeepDivePage() {
   const params = useParams();
@@ -228,10 +229,3 @@ export default function FacetDeepDivePage() {
     </div>
   );
 }
-
-// Helper for chroma.js if it's not globally available - should be imported if used project-wide
-// For now, assuming it's available or will be added if this script is used
-// You might need to `npm install chroma-js` and `npm install --save-dev @types/chroma-js`
-// Then import: import chroma from 'chroma-js';
-declare var chroma: any; // Temporary declaration if chroma-js is not properly typed/imported yet
-
