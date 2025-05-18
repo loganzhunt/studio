@@ -7,19 +7,18 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter }
 import { Button } from "@/components/ui/button";
 import { Icons } from "@/components/icons";
 import Link from "next/link";
-import { FACETS, FACET_NAMES, FacetName, getFacetByName } from "@/config/facets"; 
+import { FACETS, FACET_NAMES, FacetName, getFacetByName } from "@/config/facets";
 import type { DomainScore, CodexEntry, WorldviewProfile, LocalUser } from "@/types";
 import React, { useState, useMemo, useEffect } from 'react';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from "@/components/ui/sheet";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { getFacetColorHsl, getBandColor } from '@/lib/colors';
+import { getFacetColorHsl } from '@/lib/colors';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from "@/components/ui/progress";
 import { cn } from "@/lib/utils";
 import { FacetIcon } from "@/components/facet-icon";
 
 // --- Archetype Data & Helpers (Copied from archetypes/page.tsx for dashboard use) ---
-// This data should ideally be in a shared location or fetched.
 const rawArchetypeData: any[] = [
   {
     "name": "The Philosopher",
@@ -38,8 +37,6 @@ const rawArchetypeData: any[] = [
     "summary": "Believes reality is material, truth comes from reason and science, and meaning is self-created.",
     "facetScores": { "ontology": 0.1, "epistemology": 0.2, "praxeology": 0.3, "axiology": 0.5, "mythology": 0.3, "cosmology": 0.4, "teleology": 0.2 }
   },
-  // ... (Include ALL archetypes from archetypes/page.tsx here for full comparison)
-  // For brevity, I'm only including a few. Ensure all are copied for full functionality.
   {
     "name": "The Diplomat",
     "summary": "Mediates conflict, builds bridges, and seeks harmony among differences.",
@@ -64,7 +61,7 @@ const mapRawArchetypeToCodexEntry = (raw: any): CodexEntry => {
       };
     }
     const domainScoresArray: DomainScore[] = FACET_NAMES.map(facetKey => {
-      let score = 0.5; 
+      let score = 0.5;
       if (raw.facetScores && typeof raw.facetScores === 'object') {
         const rawScore = raw.facetScores[facetKey.toLowerCase() as keyof typeof raw.facetScores] ?? raw.facetScores[facetKey as keyof typeof raw.facetScores];
         if (typeof rawScore === 'number') {
@@ -141,22 +138,22 @@ function DomainFeedbackBar({ facetName, score, anchorLeft, anchorRight }: { face
         <span className="text-xs font-semibold" style={{ color: colorHsl }}>{Math.round(score * 100)}%</span>
       </div>
       <Progress value={score * 100} className="h-3" indicatorStyle={{ backgroundColor: colorHsl }} />
-      <div className="flex justify-between text-xs text-muted-foreground font-semibold mt-1">
-        <span>{anchorLeft}</span>
-        <span>{anchorRight}</span>
+      <div className="flex justify-between text-xs text-muted-foreground mt-1">
+        <span className="font-semibold">{anchorLeft}</span>
+        <span className="font-semibold">{anchorRight}</span>
       </div>
     </div>
   );
 }
 
 export default function DashboardPage() {
-  const { 
-    domainScores: userDomainScoresFromContext, 
-    currentUser, 
-    openAuthModal, 
-    hasAssessmentBeenRun 
+  const {
+    domainScores: userDomainScoresFromContext,
+    currentUser,
+    openAuthModal,
+    hasAssessmentBeenRun
   } = useWorldview();
-  
+
   const [selectedArchetypeForDrawer, setSelectedArchetypeForDrawer] = useState<CodexEntry | null>(null);
   const [isArchetypeDrawerOpen, setIsArchetypeDrawerOpen] = useState(false);
 
@@ -178,7 +175,7 @@ export default function DashboardPage() {
       return [];
     }
   }, []);
-  
+
   const scoresForMainTriangle = useMemo(() => {
       return hasAssessmentBeenRun ? userDomainScores : defaultNeutralScores;
   }, [userDomainScores, hasAssessmentBeenRun]);
@@ -229,17 +226,16 @@ export default function DashboardPage() {
 
       <Card className="glassmorphic-card">
         <CardHeader className="text-center">
-          <CardTitle className="text-2xl font-bold text-primary">Your Worldview Signature</CardTitle>
+          <CardTitle className="text-2xl font-bold text-primary roygbiv-gradient-underline pb-2">Your Worldview Signature</CardTitle>
           {!hasAssessmentBeenRun && <CardDescription>Complete the assessment to reveal your unique pattern.</CardDescription>}
         </CardHeader>
         <CardContent className="flex justify-center items-center min-h-[280px] p-0">
-          <TriangleChart 
-            scores={scoresForMainTriangle} 
+          <TriangleChart
+            scores={scoresForMainTriangle}
             interactive={true}
             onLayerClick={handleTriangleLayerClick}
-            width={320} 
-            height={277} 
-            className="!p-0 !bg-transparent !shadow-none !backdrop-blur-none" 
+            width={320}
+            height={277}
           />
         </CardContent>
          {!hasAssessmentBeenRun && (
@@ -259,16 +255,19 @@ export default function DashboardPage() {
             <CardDescription>
               {hasAssessmentBeenRun
                 ? "Your scores across the 7 worldview dimensions."
-                : "Take the assessment to see your detailed breakdown." 
+                : "Take the assessment to see your detailed breakdown."
               }
             </CardDescription>
           </CardHeader>
           <CardContent>
-            {(userDomainScores && userDomainScores.length === FACET_NAMES.length) ? (
+            {userDomainScores && userDomainScores.length > 0 ? (
                 userDomainScores.map(ds => {
                     const facetConfig = FACETS[ds.facetName];
-                    if (!facetConfig) return null; 
-                    
+                    if (!facetConfig) {
+                        console.warn(`Facet configuration not found for: ${ds.facetName} in Facet Breakdown`);
+                        return null;
+                    }
+
                     let anchorLeftText = "Spectrum Low";
                     let anchorRightText = "Spectrum High";
 
@@ -293,16 +292,16 @@ export default function DashboardPage() {
                     );
                 })
             ) : (
-                FACET_NAMES.map(name => {
-                    // This block should ideally not be reached if userDomainScores is initialized correctly
+                 FACET_NAMES.map(name => {
                     const facetConfig = FACETS[name];
+                     if (!facetConfig) return null;
                     let anchorLeftText = "Spectrum Low";
                     let anchorRightText = "Spectrum High";
                      return (
                         <DomainFeedbackBar
                             key={name}
                             facetName={name}
-                            score={0.5} // Neutral score for placeholder
+                            score={0.5}
                             anchorLeft={anchorLeftText}
                             anchorRight={anchorRightText}
                         />
@@ -318,7 +317,7 @@ export default function DashboardPage() {
             <CardDescription className="text-xs">AI-generated insights (placeholder)</CardDescription>
           </CardHeader>
           <CardContent>
-            {hasAssessmentBeenRun && userDomainScores && userDomainScores.length > 0 && userDomainScores.some(s => s.score !== 0.5) ? ( // Check if scores are not just the default neutral
+            {hasAssessmentBeenRun && userDomainScores && userDomainScores.length > 0 && userDomainScores.some(s => s.score !== 0.5 && s.score !== 0) ? (
               <p className="text-muted-foreground text-sm">
                 Reflective prompts based on your scores will appear here.
                 Your dominant facet appears to be <span className="font-semibold" style={{color: getFacetColorHsl(getDominantFacet(userDomainScores))}}>{getDominantFacet(userDomainScores)}</span>.
@@ -361,7 +360,7 @@ export default function DashboardPage() {
                   </CardHeader>
                   <CardContent className="grid grid-cols-1 md:grid-cols-3 gap-4 items-center">
                     <div className="md:col-span-1 flex justify-center">
-                        <TriangleChart scores={topThreeMatches[0].domainScores} width={180} height={156} className="!p-0 !bg-transparent !shadow-none !backdrop-blur-none" />
+                        <TriangleChart scores={topThreeMatches[0].domainScores} width={180} height={156} />
                     </div>
                     <p className="md:col-span-2 text-sm text-muted-foreground line-clamp-4">{topThreeMatches[0].summary}</p>
                   </CardContent>
@@ -380,7 +379,7 @@ export default function DashboardPage() {
                         </div>
                       </CardHeader>
                       <CardContent className="flex flex-col items-center">
-                        <TriangleChart scores={match.domainScores} width={150} height={130} className="!p-0 !bg-transparent !shadow-none !backdrop-blur-none mb-3" />
+                        <TriangleChart scores={match.domainScores} width={150} height={130} className="mb-3" />
                          <Button size="xs" variant="ghost" className="w-full mt-2" onClick={() => handleOpenArchetypeDrawer(match)}>View Details</Button>
                       </CardContent>
                     </Card>
@@ -393,7 +392,7 @@ export default function DashboardPage() {
           )}
         </CardContent>
       </Card>
-      
+
       {/* Drawer for Archetype Details */}
       {selectedArchetypeForDrawer && (
         <Sheet open={isArchetypeDrawerOpen} onOpenChange={setIsArchetypeDrawerOpen}>
@@ -408,7 +407,6 @@ export default function DashboardPage() {
                       </SheetTitle>
                       <SheetDescription className="text-base capitalize">{selectedArchetypeForDrawer.category} Profile</SheetDescription>
                     </div>
-                    {/* SheetClose is automatically rendered by SheetContent. No need for explicit one here. */}
                   </div>
                 </SheetHeader>
                 <p className="mb-6 text-muted-foreground leading-relaxed">{selectedArchetypeForDrawer.summary}</p>
@@ -419,7 +417,7 @@ export default function DashboardPage() {
                     const score = scoreObj ? scoreObj.score : 0;
                     const facetConfig = FACETS[facetName];
                     const facetSummary = selectedArchetypeForDrawer.facetSummaries?.[facetName] || `Insights into how ${selectedArchetypeForDrawer.title} relates to ${facetName.toLowerCase()}...`;
-                    
+
                     return (
                       <div key={facetName} className="p-4 rounded-md border border-border/30 bg-background/40">
                         <div className="flex justify-between items-center mb-1">
@@ -447,8 +445,8 @@ export default function DashboardPage() {
             <ScrollArea className="h-full">
               <div className="p-6">
                 <SheetHeader className="mb-6">
-                  <div className="flex justify-between items-start"> 
-                    <div className="flex items-center gap-3"> 
+                  <div className="flex justify-between items-start">
+                    <div className="flex items-center gap-3">
                        <FacetIcon facetName={currentSelectedFacetData.name} className="h-10 w-10" />
                        <div>
                         <SheetTitle className="text-3xl mb-0" style={{color: getFacetColorHsl(currentSelectedFacetData.name)}}>
@@ -480,11 +478,11 @@ export default function DashboardPage() {
                     </p>
                     {currentUserScoreForSelectedFacet !== undefined && (
                          <p className="text-sm text-muted-foreground leading-relaxed mt-2 italic">
-                            A {currentUserScoreForSelectedFacet > 0.66 ? 'higher' : currentUserScoreForSelectedFacet > 0.33 ? 'moderate' : 'lower'} score in {currentSelectedFacetData.name} often suggests... {currentSelectedFacetData.deepDive.strengthsPlaceholder || "Further exploration needed."} 
+                            A {currentUserScoreForSelectedFacet > 0.66 ? 'higher' : currentUserScoreForSelectedFacet > 0.33 ? 'moderate' : 'lower'} score in {currentSelectedFacetData.name} often suggests... {currentSelectedFacetData.deepDive.strengthsPlaceholder || "Further exploration needed."}
                         </p>
                     )}
                   </Card>
-                  
+
                   <Card className="bg-background/40 p-4">
                     <h3 className="text-lg font-semibold mb-2">Potential Strengths</h3>
                     <p className="text-sm text-muted-foreground">
@@ -522,7 +520,6 @@ export default function DashboardPage() {
           </SheetContent>
         </Sheet>
       )}
-
     </div>
   );
 }
