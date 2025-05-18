@@ -1,12 +1,10 @@
 
-import * as React from 'react';
-import type { Facet, FacetName, FacetDeepDive } from '@/types'; // Ensure FacetDeepDive is imported
+import type { Facet, FacetName, FacetDeepDive } from '@/types';
 import { Atom, Brain, Zap, Heart, BookOpen, Globe, Target, HelpCircle } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import type { Icons } from '@/components/icons';
+import React from 'react';
 
-
-// Helper to ensure all props are passed to LucideIcon if it's used directly.
 const IconWrapper = (IconComponent: React.ComponentType<React.SVGProps<SVGSVGElement>>)
   : React.FC<React.SVGProps<SVGSVGElement>> =>
 {
@@ -18,7 +16,6 @@ const IconWrapper = (IconComponent: React.ComponentType<React.SVGProps<SVGSVGEle
   return WrappedComponent;
 };
 
-
 export const FACET_NAMES: FacetName[] = [
   "Ontology", 
   "Epistemology", 
@@ -29,20 +26,19 @@ export const FACET_NAMES: FacetName[] = [
   "Teleology"
 ];
 
-// Default Deep Dive content - can be used as a fallback or template
 const getDefaultDeepDive = (facetName: string): FacetDeepDive => ({
   introduction: `This is the deep dive introduction for ${facetName}. It explores the fundamental questions and concepts related to how we perceive and understand this dimension of reality.`,
   spectrumExplanation: `The spectrum of ${facetName} ranges from one pole (e.g., purely materialistic views) to another (e.g., highly idealistic or spiritual views), with many nuanced positions in between. Understanding where one orients on this spectrum can reveal much about their underlying assumptions.`,
   spectrumAnchors: ["Materialistic/Literal", "Balanced/Pragmatic", "Idealistic/Symbolic"],
   exampleWorldviews: [
-    { title: `Example ${facetName} Worldview 1 (Low)`, summary: `This worldview emphasizes a concrete, often empirical approach to ${facetName}.`, exampleScore: 0.2, type: 'codex', id: 'scientific_materialism', icon: '🧪' },
-    { title: `Example ${facetName} Worldview 2 (Mid)`, summary: `This worldview balances different perspectives on ${facetName}, often integrating practical and theoretical aspects.`, exampleScore: 0.5, type: 'codex', id: 'stoicism', icon: '🏛️' },
-    { title: `Example ${facetName} Worldview 3 (High)`, summary: `This worldview explores the more abstract, often intuitive or transcendent aspects of ${facetName}.`, exampleScore: 0.8, type: 'archetype', id: 'the_mystic', icon: '✨' }
+    { icon: "🧪", title: `Example ${facetName} Worldview 1 (Low)`, summary: `This worldview emphasizes a concrete, often empirical approach to ${facetName}.`, exampleScore: 0.2, type: 'codex', id: 'scientific_materialism' },
+    { icon: "🏛️", title: `Example ${facetName} Worldview 2 (Mid)`, summary: `This worldview balances different perspectives on ${facetName}, often integrating practical and theoretical aspects.`, exampleScore: 0.5, type: 'codex', id: 'stoicism' },
+    { icon: "✨", title: `Example ${facetName} Worldview 3 (High)`, summary: `This worldview explores the more abstract, often intuitive or transcendent aspects of ${facetName}.`, exampleScore: 0.8, type: 'archetype', id: 'the_mystic' }
   ],
   archetypalPatterns: [
-    { title: `The ${facetName} Realist`, scoreRange: "Low (0.0-0.33)", description: `Focuses on tangible aspects of ${facetName}.`, icon: "atom" },
-    { title: `The ${facetName} Pragmatist`, scoreRange: "Mid (0.34-0.66)", description: `Balances different views on ${facetName}.`, icon: "atom" },
-    { title: `The ${facetName} Visionary`, scoreRange: "High (0.67-1.0)", description: `Explores abstract dimensions of ${facetName}.`, icon: "atom" }
+    { title: `The ${facetName} Realist`, scoreRange: "Low (0.0-0.33)", description: `Focuses on tangible aspects of ${facetName}.`, icon: "atom" as keyof typeof Icons },
+    { title: `The ${facetName} Pragmatist`, scoreRange: "Mid (0.34-0.66)", description: `Balances different views on ${facetName}.`, icon: "atom" as keyof typeof Icons },
+    { title: `The ${facetName} Visionary`, scoreRange: "High (0.67-1.0)", description: `Explores abstract dimensions of ${facetName}.`, icon: "atom" as keyof typeof Icons }
   ],
   reflectionPrompts: [
     `How do your current beliefs about ${facetName} influence your daily decisions?`,
@@ -57,7 +53,6 @@ const getDefaultDeepDive = (facetName: string): FacetDeepDive => ({
   tensionsPlaceholder: `Possible tensions might arise when your ${facetName} view interacts with perspectives that strongly emphasize [opposing_aspect].`,
   blindSpotsPlaceholder: `Consider if your ${facetName} orientation might lead to overlooking the value of [alternative_viewpoint] or its implications.`,
 });
-
 
 export const FACETS: Record<FacetName, Facet> = {
   Ontology: {
@@ -80,18 +75,18 @@ export const FACETS: Record<FacetName, Facet> = {
     ],
     deepDive: {
       introduction: "Ontology addresses the fundamental question: What is real? It is the facet that shapes your metaphysical assumptions—whether the universe is made of matter, mind, energy, spirit, illusion, or code. Every belief, every experience, passes through an ontological filter, whether it’s inherited, chosen, or unconscious.",
-      spectrumExplanation: "Ontology spans a symbolic continuum from materialism (0.0), where only physical matter is real, to idealism or non-dualism (1.0), where reality is rooted in consciousness or sacred unity. Most worldviews fall somewhere between, integrating various ontological frames.",
-      spectrumAnchors: ["Materialist", "Relational / Dualist", "Idealist / Non-Dualist"],
+      spectrumExplanation: "Ontology spans a symbolic continuum from Materialism (where only physical matter is real) to Idealism or Non-Dualism (where reality is rooted in consciousness or sacred unity). Most worldviews fall somewhere between, integrating various ontological frames.",
+      spectrumAnchors: ["Materialism", "Relational / Dualist", "Idealism / Non-Dualist"],
       exampleWorldviews: [
         { icon: "🧪", title: "Scientific Humanism", exampleScore: 0.15, summary: "Reality is composed of physical matter and measurable energy. Mind arises from the brain.", type: 'codex', id: 'scientific_humanism' },
-        { icon: "☸️", title: "Classical Buddhism (Madhyamaka)", exampleScore: 0.55, summary: "Reality is empty of inherent existence, co-arising in relation. Neither substance nor void.", type: 'codex', id: 'classical_buddhism_madhyamaka' },
-        { icon: "🕉️", title: "Vedantic Hinduism", exampleScore: 0.90, summary: "All appearances arise from Brahman—pure consciousness. The world is illusion-like (maya).", type: 'codex', id: 'vedantic_hinduism' },
-        { icon: "🌿", title: "Indigenous Animism", exampleScore: 0.85, summary: "All things—trees, rivers, rocks—have spirit and presence. Reality is alive and relational.", type: 'codex', id: 'indigenous_animism' }
+        { icon: "☸️", title: "Classical Buddhism (Madhyamaka)", exampleScore: 0.55, summary: "Reality is empty of inherent existence, co-arising in relation. Neither substance nor void.", type: 'codex', id: 'buddhism' }, // Assuming 'buddhism' is a valid ID in your codex
+        { icon: "🕉️", title: "Vedantic Hinduism", exampleScore: 0.90, summary: "All appearances arise from Brahman—pure consciousness. The world is illusion-like (maya).", type: 'codex', id: 'hinduism' }, // Assuming 'hinduism' is a valid ID
+        { icon: "🌿", title: "Indigenous Animism", exampleScore: 0.85, summary: "All things—trees, rivers, rocks—have spirit and presence. Reality is alive and relational.", type: 'codex', id: 'animism' }
       ],
       archetypalPatterns: [
-        { title: "The Rational Skeptic", scoreRange: "Low (approx 0.20)", description: "Prioritizes scientific realism. Truth is derived from measurable evidence and logic.", icon: "search" },
-        { title: "The Integral Synthesizer", scoreRange: "Mid (approx 0.55)", description: "Holds multiple ontologies together—material and spiritual, inner and outer.", icon: "library" },
-        { title: "The Transcendent Mystic", scoreRange: "High (approx 0.95)", description: "Sees all phenomena as reflections of a single underlying consciousness or spirit.", icon: "sparkles" }
+        { title: "The Rational Skeptic", scoreRange: "Aligns with Materialism (approx 0.20)", description: "Prioritizes scientific realism. Truth is derived from measurable evidence and logic.", icon: "search" as keyof typeof Icons },
+        { title: "The Integral Synthesizer", scoreRange: "Aligns with Relational / Dualist (approx 0.55)", description: "Holds multiple ontologies together—material and spiritual, inner and outer.", icon: "library" as keyof typeof Icons },
+        { title: "The Transcendent Mystic", scoreRange: "Aligns with Idealism / Non-Dualist (approx 0.95)", description: "Sees all phenomena as reflections of a single underlying consciousness or spirit.", icon: "sparkles" as keyof typeof Icons }
       ],
       reflectionPrompts: [
         "What do you believe is ultimately real?",
@@ -99,13 +94,13 @@ export const FACETS: Record<FacetName, Facet> = {
         "How does your answer about what's real shape how you respond to life's events and experiences?"
       ],
       whatIfInterpretations: {
-        low: "A low score in Ontology suggests a perspective where reality is primarily defined by tangible, observable phenomena. You likely prioritize evidence-based understanding and may be skeptical of claims that lack empirical support. Focus is on the material world and its mechanics.",
-        mid: "A mid-range score in Ontology indicates a more balanced or nuanced view. You might see reality as having multiple layers, perhaps acknowledging both physical and non-physical aspects, or you may adopt a pragmatic stance, focusing on what works without committing to a single ultimate definition of reality.",
-        high: "A high score in Ontology points towards a belief in a reality that transcends the purely physical. You may see consciousness, spirit, or interconnectedness as fundamental, with the material world being an expression or manifestation of these deeper, less tangible dimensions."
+        low: "A score in this range suggests a stronger alignment with Materialism. Reality is primarily understood through physical matter and observable phenomena. You likely prioritize empirical evidence and may be skeptical of claims that lack tangible proof.",
+        mid: "A mid-range score in Ontology points to a more Relational or Dualist perspective. You might see reality as having multiple layers, perhaps acknowledging both physical and non-physical aspects, or you may adopt a pragmatic stance integrating various frameworks.",
+        high: "A score in this range suggests a stronger alignment with Idealism or Non-Dualism. Reality is seen as fundamentally rooted in consciousness, spirit, or interconnected unity. The material world may be viewed as an expression of these deeper dimensions."
       },
-      strengthsPlaceholder: "For instance, a materialist view might excel in scientific analysis and problem-solving, while an idealist view fosters deep empathy and symbolic understanding.",
-      tensionsPlaceholder: "Materialism might struggle with subjective meaning or purpose, while idealism might find it hard to ground abstract concepts in practical, everyday reality or scientific frameworks.",
-      blindSpotsPlaceholder: "A strong materialist focus might overlook symbolic meaning or the validity of subjective experiences. Conversely, a highly spiritual or idealist ontology could discount physical limitations or the importance of empirical evidence."
+      strengthsPlaceholder: "Alignment with Materialism can foster rigorous scientific analysis. A Relational/Dualist view may excel at integrative thinking. Alignment with Idealism can nurture deep empathy and symbolic understanding.",
+      tensionsPlaceholder: "Materialism might grapple with subjective meaning. Idealism might find it hard to ground concepts in practical reality. Relational views may need to clearly define interactions between distinct realities.",
+      blindSpotsPlaceholder: "A strong Materialist focus might overlook symbolic meaning. A highly Idealist view could discount physical limitations. Relational views might struggle with defining clear boundaries or priorities."
     }
   },
   Epistemology: {
@@ -128,17 +123,17 @@ export const FACETS: Record<FacetName, Facet> = {
     ],
     deepDive: {
       introduction: "Epistemology asks: What can be known—and how? This facet governs your philosophy of knowledge, belief, and truth. It shapes what counts as evidence, whether you trust reason, intuition, tradition, revelation, or direct experience.",
-      spectrumExplanation: "Epistemology ranges from strict empiricism (0.0)—knowledge is gained only through the senses—to intuitional or revelatory (1.0), where knowledge is direct, innate, or transmitted through sacred sources. Most worldviews blend empirical, rational, and mystical approaches to truth.",
-      spectrumAnchors: ["Empiricist", "Balanced / Integrative", "Revelatory / Intuitional"],
+      spectrumExplanation: "Epistemology ranges from a strictly Empirical approach (knowledge is gained only through the senses) to an Intuitional or Revelatory stance (where knowledge is direct, innate, or transmitted through sacred sources). Most worldviews blend these approaches.",
+      spectrumAnchors: ["Empirical", "Balanced / Integrative", "Revelatory / Intuitional"],
       exampleWorldviews: [
-        { icon: "🧪", title: "Scientific Rationalism", exampleScore: 0.20, summary: "Truth is established through observation, experiment, and logical reasoning.", type: 'codex', id: 'scientific_rationalism' },
-        { icon: "🔮", title: "Hermetic Mysticism", exampleScore: 0.80, summary: "Knowledge is unveiled through direct intuition, symbol, or esoteric revelation.", type: 'codex', id: 'hermetic_mysticism' },
-        { icon: "🕊️", title: "Religious Faith", exampleScore: 0.95, summary: "Ultimate truth is revealed by sacred scripture, prophets, or divine encounter.", type: 'codex', id: 'religious_faith' }
+        { icon: "🧪", title: "Scientific Rationalism", exampleScore: 0.20, summary: "Truth is established through observation, experiment, and logical reasoning.", type: 'codex', id: 'rationalism' }, // Assuming 'rationalism' or 'scientific_rationalism'
+        { icon: "🔮", title: "Hermetic Mysticism", exampleScore: 0.80, summary: "Knowledge is unveiled through direct intuition, symbol, or esoteric revelation.", type: 'codex', id: 'gnosticism' }, // Example ID
+        { icon: "🕊️", title: "Religious Faith", exampleScore: 0.95, summary: "Ultimate truth is revealed by sacred scripture, prophets, or divine encounter.", type: 'codex', id: 'christianity' } // Example ID
       ],
       archetypalPatterns: [
-        { title: "The Empiricist", scoreRange: "Low (approx 0.10)", description: "Values observable facts and measurable proof; questions all else.", icon: "brain" },
-        { title: "The Integrator", scoreRange: "Mid (approx 0.55)", description: "Balances science, reason, and intuitive knowing; open to multiple sources.", icon: "brain" },
-        { title: "The Visionary Seer", scoreRange: "High (approx 0.95)", description: "Trusts inner vision, spiritual insight, or direct revelation as highest knowing.", icon: "brain" }
+        { title: "The Empiricist", scoreRange: "Aligns with Empirical (approx 0.10)", description: "Values observable facts and measurable proof; questions all else.", icon: "brain" as keyof typeof Icons },
+        { title: "The Integrator", scoreRange: "Aligns with Balanced / Integrative (approx 0.55)", description: "Balances science, reason, and intuitive knowing; open to multiple sources.", icon: "brain" as keyof typeof Icons },
+        { title: "The Visionary Seer", scoreRange: "Aligns with Revelatory / Intuitional (approx 0.95)", description: "Trusts inner vision, spiritual insight, or direct revelation as highest knowing.", icon: "brain" as keyof typeof Icons }
       ],
       reflectionPrompts: [
         "How do you decide what is true?",
@@ -146,13 +141,13 @@ export const FACETS: Record<FacetName, Facet> = {
         "How do you respond when your beliefs are challenged?"
       ],
       whatIfInterpretations: {
-        low: "A low Epistemology score suggests a preference for knowledge derived from sensory experience and empirical evidence. You likely value concrete facts and scientific methods.",
-        mid: "A mid-range Epistemology score indicates a balanced approach, integrating reason, experience, and perhaps intuition to form understanding. You may value multiple perspectives.",
-        high: "A high Epistemology score points to an openness to knowledge from intuitive, experiential, or even revelatory sources, believing some truths transcend purely rational or empirical methods."
+        low: "A score in this range suggests a stronger alignment with an Empirical approach to knowledge. You likely value truth derived from sensory experience, observation, and scientific methodology.",
+        mid: "A mid-range score in Epistemology indicates a Balanced or Integrative view. You likely value multiple ways of knowing, including reason, experience, and perhaps intuition, to form understanding.",
+        high: "A score in this range suggests a stronger alignment with Revelatory or Intuitional ways of knowing. You may trust inner vision, direct insight, or sacred sources as primary paths to truth."
       },
-      strengthsPlaceholder: "Strengths may include critical thinking and analytical skills (low-mid) or profound intuitive insight and openness to novel ideas (mid-high).",
-      tensionsPlaceholder: "Tensions can arise between objective evidence and subjective conviction, or the limits of reason versus the call of faith or intuition.",
-      blindSpotsPlaceholder: "Over-reliance on empiricism might dismiss valid subjective truths, while a purely intuitive approach might neglect critical assessment or factual grounding."
+      strengthsPlaceholder: "An Empirical stance fosters critical thinking. An Integrative approach allows for holistic understanding. A Revelatory/Intuitional stance can lead to profound insights.",
+      tensionsPlaceholder: "Tensions can arise between objective evidence (Empirical) and subjective conviction (Revelatory/Intuitional), or in synthesizing diverse knowledge sources (Integrative).",
+      blindSpotsPlaceholder: "Over-reliance on empiricism might dismiss valid subjective truths. A purely intuitive approach might neglect critical assessment. Integrative views must navigate potential contradictions."
     }
   },
   Praxeology: {
@@ -175,30 +170,31 @@ export const FACETS: Record<FacetName, Facet> = {
     ],
     deepDive: {
       introduction: "Praxeology asks: How should we act? This domain shapes your approach to will, action, and agency. It guides your sense of purpose, choice, and responsibility.",
-      spectrumExplanation: "Praxeology spans from strict determinism (0.0), where actions are determined by external causes, to radical free will or nondual agency (1.0), where agency is seen as sovereign, sacred, or fundamentally creative.",
-      spectrumAnchors: ["Determinist / Mechanistic", "Balanced / Existential", "Free Will / Nondual Agency"],
+      spectrumExplanation: "Praxeology spans from a Hierarchical or rule-based approach to ethics and action, to a more Egalitarian or context-driven approach. It explores whether actions are guided by universal principles or by individual autonomy and situational ethics.",
+      spectrumAnchors: ["Hierarchical / Rule-Based", "Balanced / Contextual", "Egalitarian / Autonomous"],
       exampleWorldviews: [
-        { icon: "🔬", title: "Behaviorism", exampleScore: 0.10, summary: "Behavior is entirely conditioned by environment and history; choice is an illusion.", type: 'codex', id: 'behaviorism' },
-        { icon: "🧑‍🚀", title: "Existentialism", exampleScore: 0.55, summary: "Humans are radically free to choose and responsible for shaping their own existence.", type: 'codex', id: 'existentialism' },
-        { icon: "🧘‍♂️", title: "Advaita Vedanta (Nondualism)", exampleScore: 0.90, summary: "Action and non-action are unified; the doer is an illusion—reality flows through.", type: 'codex', id: 'advaita_vedanta_nondualism' }
+        { icon: "⚖️", title: "Traditional Conservatism", exampleScore: 0.20, summary: "Emphasizes established hierarchies, order, and adherence to proven principles.", type: 'codex', id: 'traditionalism' }, // Example ID
+        { icon: "🤝", title: "Situational Ethics", exampleScore: 0.55, summary: "Moral judgments depend on the context; flexibility and empathy are key.", type: 'codex', id: 'existentialism' }, // Example ID
+        { icon: "🕊️", title: "Anarcho-Pacifism", exampleScore: 0.85, summary: "Rejects all coercive hierarchies, advocating for voluntary cooperation and non-violence.", type: 'codex', id: 'animism' } // Example ID, needs better fit.
       ],
       archetypalPatterns: [
-        { title: "The Automaton", scoreRange: "Low (approx 0.10)", description: "Sees self as shaped entirely by outside forces; acts by habit or programming.", icon: "zap" },
-        { title: "The Existential Agent", scoreRange: "Mid (approx 0.55)", description: "Recognizes personal responsibility and freedom within a world of constraints.", icon: "zap" },
-        { title: "The Liberated Sage", scoreRange: "High (approx 0.90)", description: "Acts spontaneously, in harmony with the whole, unbound by ego or outcome.", icon: "zap" }
+        { title: "The Lawkeeper", scoreRange: "Aligns with Hierarchical / Rule-Based (approx 0.20)", description: "Upholds established structures, rules, and duties; values order and tradition.", icon: "zap" as keyof typeof Icons },
+        { title: "The Pragmatist", scoreRange: "Aligns with Balanced / Contextual (approx 0.55)", description: "Adapts actions to the situation, balancing principles with practical outcomes.", icon: "zap" as keyof typeof Icons },
+        { title: "The Liberator", scoreRange: "Aligns with Egalitarian / Autonomous (approx 0.85)", description: "Challenges hierarchies, champions individual freedom and self-governance.", icon: "zap" as keyof typeof Icons }
       ],
       reflectionPrompts: [
-        "Do you feel free to choose your actions? Why or why not?",
-        "How do you relate to responsibility, agency, and fate?"
+        "Are your actions primarily guided by universal rules or by the specific context?",
+        "How do you balance personal freedom with social responsibility?",
+        "What role do authority and hierarchy play in your decision-making?"
       ],
       whatIfInterpretations: {
-        low: "A low Praxeology score suggests a view where actions are largely determined by external factors, conditioning, or immutable laws. Free will might be seen as limited or illusory.",
-        mid: "A mid-range Praxeology score often reflects a belief in personal agency and choice within a framework of existing conditions and responsibilities. It's a balance of freedom and determinism.",
-        high: "A high Praxeology score indicates a strong belief in free will, individual sovereignty, or even a nondual perspective where agency is an expression of a larger universal will or creative force."
+        low: "A score in this range suggests an alignment with a Hierarchical or Rule-Based approach to action. You likely value clear structures, established principles, and duty.",
+        mid: "A mid-range score in Praxeology often reflects a Balanced or Contextual perspective. You may adapt your actions based on the situation, considering both principles and practical consequences.",
+        high: "A score in this range suggests an alignment with an Egalitarian or Autonomous approach. You likely champion individual freedom, question authority, and prefer self-governance or consensus-based action."
       },
-      strengthsPlaceholder: "Understanding systemic influences (low), taking personal responsibility (mid), or acting with profound freedom and spontaneity (high).",
-      tensionsPlaceholder: "Individual freedom versus societal constraints, the nature of causality, the experience of choice versus deterministic views.",
-      blindSpotsPlaceholder: "Underestimating personal agency (low), overemphasizing individual control without systemic awareness (mid-high), or difficulty with structured, rule-based systems (high)."
+      strengthsPlaceholder: "A Hierarchical approach provides stability. A Contextual view allows for adaptable solutions. An Egalitarian stance fosters innovation and individual empowerment.",
+      tensionsPlaceholder: "Tensions can arise between maintaining order (Hierarchical) and allowing for individual expression (Egalitarian), or between following rules and responding to unique situations (Contextual).",
+      blindSpotsPlaceholder: "A Hierarchical view might be resistant to necessary change. An Egalitarian view might struggle with large-scale coordination. A Contextual view might lack consistent principles."
     }
   },
   Axiology: {
@@ -220,31 +216,32 @@ export const FACETS: Record<FacetName, Facet> = {
       "Goodness exists independently of human opinion."
     ],
     deepDive: {
-      introduction: "Axiology explores the question: What matters most? It’s the domain of value, desire, and emotional salience—what you love, fear, protect, or pursue.",
-      spectrumExplanation: "Axiology runs from material/hedonic values (0.0)—focused on pleasure, success, or gain—to sacred/transpersonal values (1.0), which prioritize unity, truth, beauty, or selfless devotion.",
-      spectrumAnchors: ["Hedonic / Material", "Humanist / Balanced", "Sacred / Transpersonal"],
+      introduction: "Axiology explores the question: What matters most? It’s the domain of value, desire, and emotional salience—what you love, fear, protect, or pursue. It defines your moral compass and sense of what is good, beautiful, and meaningful.",
+      spectrumExplanation: "Axiology ranges from Individualism (where personal well-being, autonomy, and achievement are primary) to Collectivism (where group harmony, social justice, and shared well-being are paramount). Many value systems integrate both.",
+      spectrumAnchors: ["Individualism", "Balanced / Relational", "Collectivism"],
       exampleWorldviews: [
-        { icon: "💰", title: "Capitalist Individualism", exampleScore: 0.25, summary: "Values individual achievement, material success, and personal freedom.", type: 'codex', id: 'capitalist_individualism' },
-        { icon: "🌍", title: "Ubuntu Ethics", exampleScore: 0.55, summary: "Emphasizes interconnectedness, community well-being, and compassion.", type: 'codex', id: 'ubuntu_ethics' },
-        { icon: "🙏", title: "Mystical Devotion (Bhakti)", exampleScore: 0.90, summary: "Values selfless love, surrender to the divine, and spiritual union.", type: 'codex', id: 'mystical_devotion_bhakti' }
+        { icon: "💰", title: "Libertarianism", exampleScore: 0.15, summary: "Prioritizes individual liberty, free markets, and minimal government intervention.", type: 'codex', id: 'capitalist_individualism' }, // Using existing ID
+        { icon: "🌍", title: "Communitarianism", exampleScore: 0.60, summary: "Emphasizes community bonds, shared values, and social responsibilities.", type: 'codex', id: 'ubuntu_ethics' }, // Using existing ID
+        { icon: "🙏", title: "Engaged Buddhism", exampleScore: 0.85, summary: "Applies Buddhist principles to social and environmental justice, valuing universal compassion.", type: 'codex', id: 'mahayana_buddhism' } // Example ID
       ],
       archetypalPatterns: [
-        { title: "The Achiever", scoreRange: "Low (approx 0.25)", description: "Values success, personal gain, and tangible accomplishments.", icon: "heart" },
-        { title: "The Ethicist", scoreRange: "Mid (approx 0.55)", description: "Values justice, fairness, human dignity, and ethical principles.", icon: "heart" },
-        { title: "The Mystic Pilgrim", scoreRange: "High (approx 0.90)", description: "Values spiritual growth, transcendence, and connection to the sacred.", icon: "heart" }
+        { title: "The Self-Reliant Individual", scoreRange: "Aligns with Individualism (approx 0.25)", description: "Values personal achievement, autonomy, and self-interest as drivers of good.", icon: "heart" as keyof typeof Icons },
+        { title: "The Harmonizer", scoreRange: "Aligns with Balanced / Relational (approx 0.55)", description: "Seeks to balance individual needs with the well-being of relationships and small groups.", icon: "heart" as keyof typeof Icons },
+        { title: "The Global Citizen", scoreRange: "Aligns with Collectivism (approx 0.90)", description: "Prioritizes the welfare of the larger community, society, or even all sentient beings.", icon: "heart" as keyof typeof Icons }
       ],
       reflectionPrompts: [
         "What do you truly value—and how did you come to value it?",
-        "What sits at the core of your moral compass?"
+        "When individual desires conflict with group needs, which do you prioritize?",
+        "What does 'a good life' or 'a good society' mean to you?"
       ],
       whatIfInterpretations: {
-        low: "A low Axiology score might indicate values centered on material well-being, personal pleasure, or tangible achievements. Practical outcomes and self-interest can be primary drivers.",
-        mid: "A mid-range Axiology score often reflects humanistic or ethical values, such as justice, compassion, community, and fairness. There's a balance between personal and collective good.",
-        high: "A high Axiology score suggests values that are transpersonal, spiritual, or sacred. This could involve prioritizing truth, beauty, unity, selfless service, or a connection to something larger than oneself."
+        low: "A score in this range suggests values aligning more with Individualism. Personal well-being, autonomy, freedom, and achievement are likely primary drivers.",
+        mid: "A mid-range score in Axiology often reflects Balanced or Relational values. You may seek to harmonize individual needs with the well-being of your immediate community or relationships, valuing fairness and mutual respect.",
+        high: "A score in this range suggests values aligning more with Collectivism. The well-being of the larger group, social justice, equality, and shared responsibilities are likely paramount."
       },
-      strengthsPlaceholder: "Pragmatism and resourcefulness (low), strong moral compass and empathy (mid), or profound inspiration and devotion (high).",
-      tensionsPlaceholder: "Personal gain versus collective good, relative versus absolute values, the nature of beauty or truth.",
-      blindSpotsPlaceholder: "Overlooking non-material values (low), difficulty with pragmatic compromises if values are too rigid (mid), or neglecting practical needs in pursuit of higher ideals (high)."
+      strengthsPlaceholder: "Individualism can foster innovation and self-reliance. A Balanced/Relational view promotes strong interpersonal bonds. Collectivism can drive large-scale social good.",
+      tensionsPlaceholder: "Tensions can arise between individual freedoms and collective responsibilities, or between personal ambition and the needs of the community.",
+      blindSpotsPlaceholder: "Strong Individualism might overlook systemic inequalities. Strong Collectivism might undervalue individual dissent or uniqueness. A Balanced view may struggle with large-scale systemic issues."
     }
   },
   Mythology: {
@@ -266,31 +263,32 @@ export const FACETS: Record<FacetName, Facet> = {
       "The myths we live by shape our personal identities."
     ],
     deepDive: {
-      introduction: "Mythology asks: What stories define us? It reveals the patterns, symbols, and cultural narratives that shape meaning, belonging, and imagination.",
-      spectrumExplanation: "Mythology spans from literalist stories (0.0)—taken as historical fact—to archetypal or mythopoetic (1.0), where stories are living symbols and sources of ongoing meaning.",
-      spectrumAnchors: ["Literalist / Historical", "Psychological / Integrative", "Archetypal / Mythopoetic"],
+      introduction: "Mythology asks: What stories define us? It reveals the patterns, symbols, and cultural narratives that shape meaning, belonging, and imagination. It's about the grand narratives we live by, whether ancient or modern, sacred or secular.",
+      spectrumExplanation: "Mythology spans from a Linear view (emphasizing historical progression, singular truths, and often one-time creation events) to a Cyclical view (emphasizing recurring patterns, eternal return, and interconnected cycles of time and existence).",
+      spectrumAnchors: ["Linear / Singular", "Integrative / Archetypal", "Cyclical / Eternal"],
       exampleWorldviews: [
-        { icon: "✝️", title: "Biblical Literalism", exampleScore: 0.10, summary: "Sacred stories are taken as literal historical events and absolute truth.", type: 'codex', id: 'biblical_literalism' },
-        { icon: "🧠", title: "Jungian Depth Psychology", exampleScore: 0.60, summary: "Myths are psychological blueprints; stories embody inner archetypes and processes.", type: 'codex', id: 'jungian_depth_psychology' },
-        { icon: "🌌", title: "Mythopoetic Revival", exampleScore: 0.85, summary: "Stories and symbols are living, evolving, and express universal patterns beyond history.", type: 'codex', id: 'mythopoetic_revival' }
+        { icon: "✝️", title: "Abrahamic Traditions (Linear History)", exampleScore: 0.15, summary: "History is often seen as a linear progression from creation towards a final judgment or redemption.", type: 'codex', id: 'christianity' }, // Example
+        { icon: "🧠", title: "Jungian Psychology (Archetypal Patterns)", exampleScore: 0.50, summary: "Myths embody universal archetypes and recurring psychological patterns that are timeless.", type: 'codex', id: 'jungian_depth_psychology' }, // Using existing ID
+        { icon: "🕉️", title: "Hindu Cosmology (Cyclical Time)", exampleScore: 0.85, summary: "Time is seen in vast, repeating cycles (Yugas); creation and destruction are ongoing.", type: 'codex', id: 'hinduism' } // Example
       ],
       archetypalPatterns: [
-        { title: "The Literalist", scoreRange: "Low (approx 0.10)", description: "Adheres to tradition, takes stories as concrete reality.", icon: "bookOpen" },
-        { title: "The Psychological Explorer", scoreRange: "Mid (approx 0.60)", description: "Sees stories as maps of the soul; seeks meaning beneath the surface.", icon: "bookOpen" },
-        { title: "The Mythic Poet", scoreRange: "High (approx 0.85)", description: "Lives in symbolic imagination; finds truth in metaphor and mythic narrative.", icon: "bookOpen" }
+        { title: "The Chronicler", scoreRange: "Aligns with Linear / Singular (approx 0.15)", description: "Focuses on historical narratives, origin stories, and a sense of unique, unfolding destiny.", icon: "bookOpen" as keyof typeof Icons },
+        { title: "The Symbolist", scoreRange: "Aligns with Integrative / Archetypal (approx 0.50)", description: "Sees myths as symbolic maps of the human psyche and timeless truths.", icon: "bookOpen" as keyof typeof Icons },
+        { title: "The Weaver of Cycles", scoreRange: "Aligns with Cyclical / Eternal (approx 0.85)", description: "Perceives life and cosmos through recurring patterns, seasons, and the eternal return.", icon: "bookOpen" as keyof typeof Icons }
       ],
       reflectionPrompts: [
-        "What stories or myths shape your worldview?",
-        "Do you see them as literal, symbolic, or both?"
+        "What core stories or myths (personal, cultural, religious) most shape your understanding of life?",
+        "Do you see time and history as primarily linear or cyclical? How does this affect your worldview?",
+        "How do you find or create meaning through narrative?"
       ],
       whatIfInterpretations: {
-        low: "A low Mythology score might indicate a view of stories as historical accounts or literal truths, with less emphasis on symbolic or metaphorical meaning. Or it could reflect a skepticism towards grand narratives.",
-        mid: "A mid-range Mythology score suggests an understanding of myths and stories as psychologically or culturally significant, perhaps as metaphors or tools for understanding human nature, without necessarily taking them as literal fact.",
-        high: "A high Mythology score points to a deep engagement with the archetypal, symbolic, and transformative power of stories. You likely see myths as living expressions of profound truths and patterns of existence."
+        low: "A score in this range suggests an alignment with Linear or Singular narratives. You may find meaning in historical progression, unique events, and stories with clear beginnings and ends.",
+        mid: "A mid-range score in Mythology indicates an Integrative or Archetypal understanding. You likely see stories as rich in symbolic meaning, reflecting universal human patterns or psychological truths.",
+        high: "A score in this range points to an alignment with Cyclical or Eternal narratives. You may perceive time and existence through recurring patterns, seasons, and the idea of eternal return or interconnected cycles."
       },
-      strengthsPlaceholder: "Strong adherence to tradition (low), insightful psychological understanding (mid), or rich imaginative and symbolic capacity (high).",
-      tensionsPlaceholder: "Fact versus fiction, literal versus metaphorical interpretation, the role of ancient myths in modern contexts.",
-      blindSpotsPlaceholder: "Dismissing the symbolic power of stories (low), over-intellectualizing narratives without feeling their impact (mid), or difficulty distinguishing personal fantasy from shared archetypal patterns (high)."
+      strengthsPlaceholder: "A Linear view can provide a strong sense of direction. An Archetypal view offers deep psychological insight. A Cyclical view fosters an appreciation for natural rhythms and resilience.",
+      tensionsPlaceholder: "Tensions can arise between historical accounts and symbolic interpretations, or between a sense of unique destiny and the perception of recurring patterns.",
+      blindSpotsPlaceholder: "A strong Linear view might overlook recurring themes. An Archetypal view might over-psychologize concrete events. A strong Cyclical view might underemphasize the significance of unique historical moments."
     }
   },
   Cosmology: {
@@ -312,31 +310,32 @@ export const FACETS: Record<FacetName, Facet> = {
       "Science and spirituality can both inform cosmology."
     ],
     deepDive: {
-      introduction: "Cosmology asks: How is the universe structured? It reflects your assumptions about origins, order, cycles, and ultimate context—science, myth, and spiritual systems all offer cosmologies.",
-      spectrumExplanation: "Cosmology ranges from mechanistic (0.0)—the universe as a machine, random or deterministic—to sacred or spiritual (1.0), where cosmos is alive, meaningful, or divinely ordered.",
-      spectrumAnchors: ["Mechanistic / Secular", "Interconnected / Organic", "Sacred / Spiritual"],
+      introduction: "Cosmology asks: How is the universe structured? It reflects your assumptions about origins, order, cycles, and ultimate context—science, myth, and spiritual systems all offer cosmologies. It's your map of everything.",
+      spectrumExplanation: "Cosmology ranges from a Mechanistic view (the universe as a machine, governed by impersonal laws, possibly random) to a Holistic view (the cosmos as an interconnected, living system, perhaps imbued with consciousness or spirit).",
+      spectrumAnchors: ["Mechanistic", "Interconnected / Organic", "Holistic / Conscious"],
       exampleWorldviews: [
-        { icon: "🧑‍🔬", title: "Scientific Naturalism", exampleScore: 0.10, summary: "The cosmos is a self-organizing, evolving system governed by natural laws.", type: 'codex', id: 'scientific_naturalism' },
-        { icon: "🌱", title: "Gaia Theory", exampleScore: 0.60, summary: "Earth is a living, self-regulating organism; all systems are interdependent.", type: 'codex', id: 'gaia_theory' },
-        { icon: "🌠", title: "Mystical Cosmology", exampleScore: 0.90, summary: "The universe is sacred, purposeful, and animated by spiritual intelligence.", type: 'codex', id: 'mystical_cosmology' }
+        { icon: "🧑‍🔬", title: "Scientific Naturalism", exampleScore: 0.10, summary: "The cosmos is a self-organizing, evolving system governed by physical laws, without inherent purpose.", type: 'codex', id: 'scientific_materialism' }, // Using existing ID
+        { icon: "🌱", title: "Gaia Theory / Deep Ecology", exampleScore: 0.60, summary: "Earth and its ecosystems are seen as a complex, interconnected living system requiring balance.", type: 'codex', id: 'animism' }, // Example, could be refined
+        { icon: "🌠", title: "Pantheism / Panentheism", exampleScore: 0.90, summary: "The universe itself is divine, or God is immanent in and transcendent to the cosmos; all is sacred.", type: 'codex', id: 'pantheism' } // Using existing ID
       ],
       archetypalPatterns: [
-        { title: "The Mechanist", scoreRange: "Low (approx 0.10)", description: "Sees the universe as impersonal, governed by law or chance.", icon: "globe" },
-        { title: "The Systems Thinker", scoreRange: "Mid (approx 0.60)", description: "Recognizes complex interdependence; sees cosmos as a living network.", icon: "globe" },
-        { title: "The Mystic Cosmologist", scoreRange: "High (approx 0.90)", description: "Experiences the universe as a conscious whole, rich with meaning.", icon: "globe" }
+        { title: "The Cosmic Engineer", scoreRange: "Aligns with Mechanistic (approx 0.15)", description: "Sees the universe as a complex machine governed by discoverable physical laws.", icon: "globe" as keyof typeof Icons },
+        { title: "The Web Weaver", scoreRange: "Aligns with Interconnected / Organic (approx 0.55)", description: "Perceives the cosmos as a vast network of relationships and interdependent systems.", icon: "globe" as keyof typeof Icons },
+        { title: "The Universal Mystic", scoreRange: "Aligns with Holistic / Conscious (approx 0.85)", description: "Experiences the universe as a living, conscious whole, often feeling a profound sense of unity.", icon: "globe" as keyof typeof Icons }
       ],
       reflectionPrompts: [
         "How do you imagine the universe and your place in it?",
-        "What feels most true—mechanism, mystery, or both?"
+        "Do you perceive the cosmos as primarily material, energetic, or conscious?",
+        "What feels most true—is the universe indifferent, purposeful, or a living entity?"
       ],
       whatIfInterpretations: {
-        low: "A low Cosmology score often aligns with a mechanistic or secular view of the universe, emphasizing physical laws and natural processes without inherent spiritual dimensions or overarching purpose.",
-        mid: "A mid-range Cosmology score suggests a view of the cosmos as an interconnected, possibly organic system. There might be an appreciation for complexity and emergent order, balancing scientific and philosophical perspectives.",
-        high: "A high Cosmology score indicates a perception of the universe as sacred, spiritual, or imbued with consciousness and meaning. You may feel a deep connection to a living cosmos or a divine order."
+        low: "A score in this range suggests an alignment with a Mechanistic view of the cosmos. You likely see the universe as operating according to physical laws, without inherent spiritual dimensions or overarching purpose.",
+        mid: "A mid-range score in Cosmology indicates an Interconnected or Organic view. You may see the universe as a complex web of relationships and systems, possibly with emergent properties like life and consciousness.",
+        high: "A score in this range points to a Holistic or Conscious view of the cosmos. You might perceive the universe as a living entity, imbued with spirit, meaning, or a universal consciousness."
       },
-      strengthsPlaceholder: "Scientific understanding of cosmic structures (low), appreciation for ecological interconnectedness (mid), or a profound sense of wonder and unity with the cosmos (high).",
-      tensionsPlaceholder: "Randomness versus design, the anthropic principle, the relationship between scientific models and spiritual or mythic cosmologies.",
-      blindSpotsPlaceholder: "Dismissing non-material aspects of the cosmos (low), underestimating the role of randomness or chaos (mid-high), or difficulty reconciling personal cosmic views with scientific evidence (high)."
+      strengthsPlaceholder: "A Mechanistic view excels in scientific analysis. An Interconnected view fosters ecological awareness. A Holistic view can inspire a profound sense of wonder and unity.",
+      tensionsPlaceholder: "Tensions can arise between scientific models of a material universe and experiences of a living or conscious cosmos, or between randomness and perceived order/design.",
+      blindSpotsPlaceholder: "A strong Mechanistic view might dismiss subjective experiences of cosmic connection. A strong Holistic view might find it hard to reconcile with aspects of cosmic indifference or chaos."
     }
   },
   Teleology: {
@@ -358,75 +357,50 @@ export const FACETS: Record<FacetName, Facet> = {
       "Love and awareness are the highest purposes of life."
     ],
     deepDive: {
-      introduction: "Teleology asks: What is the ultimate purpose? It expresses your beliefs about destiny, meaning, and direction—whether existence is random, self-authored, or part of a cosmic plan.",
-      spectrumExplanation: "Teleology spans from a view of life as random or without inherent meaning (0.0) to one of ultimate purpose, destiny, or cosmic significance (1.0). Most people’s teleology blends personal, collective, and transcendent aims.",
-      spectrumAnchors: ["Random / Non-Teleological", "Self-Authored / Existential", "Purposeful / Cosmic"],
+      introduction: "Teleology asks: What is the ultimate purpose? It expresses your beliefs about destiny, meaning, and direction—whether existence is random, self-authored, or part of a cosmic plan. It is about the 'why' behind existence and action.",
+      spectrumExplanation: "Teleology spans from a view where purpose is Divinely ordained or inherent in the cosmos, to one where purpose is entirely Existential, meaning it is self-created by individuals in a universe without intrinsic goals.",
+      spectrumAnchors: ["Divine / Cosmic Purpose", "Relational / Emergent Purpose", "Existential / Self-Created Purpose"], // Reversed from original to match low=divine, high=existential logic
       exampleWorldviews: [
-        { icon: "🎲", title: "Existential Nihilism", exampleScore: 0.05, summary: "Life is ultimately without intrinsic meaning; any meaning must be created by the individual.", type: 'codex', id: 'existential_nihilism' },
-        { icon: "🏔️", title: "Hero’s Journey (Monomyth)", exampleScore: 0.55, summary: "Purpose emerges through challenge, transformation, and story—meaning is discovered and authored.", type: 'codex', id: 'heros_journey_monomyth' },
-        { icon: "🌈", title: "Divine Teleology", exampleScore: 0.95, summary: "Existence is imbued with a higher purpose or destiny—everything unfolds according to a cosmic plan.", type: 'codex', id: 'divine_teleology' }
+        { icon: "🙏", title: "Theistic Religions (e.g., Christianity, Islam)", exampleScore: 0.15, summary: "Human purpose is often seen as fulfilling God's will, achieving salvation, or communion with the Divine.", type: 'codex', id: 'christianity' }, // Example
+        { icon: "🤝", title: "Humanistic Ethics", exampleScore: 0.50, summary: "Purpose is found in human flourishing, contributing to society, and realizing potential.", type: 'codex', id: 'humanism' }, // Example
+        { icon: "🧑‍🚀", title: "Atheistic Existentialism", exampleScore: 0.90, summary: "There is no preordained purpose; individuals are radically free to create their own meaning and values.", type: 'codex', id: 'existentialism' } // Example
       ],
       archetypalPatterns: [
-        { title: "The Existential Wanderer", scoreRange: "Low (approx 0.05)", description: "Moves through life without certainty or fixed purpose; creates meaning moment by moment.", icon: "target" },
-        { title: "The Heroic Seeker", scoreRange: "Mid (approx 0.55)", description: "Finds purpose through growth, challenge, and conscious choice.", icon: "target" },
-        { title: "The Destiny Believer", scoreRange: "High (approx 0.95)", description: "Feels guided by a larger plan or spiritual calling; sees purpose everywhere.", icon: "target" }
+        { title: "The Disciple", scoreRange: "Aligns with Divine / Cosmic Purpose (approx 0.20)", description: "Believes in a preordained plan or higher calling; seeks to align with and fulfill this purpose.", icon: "target" as keyof typeof Icons },
+        { title: "The Contributor", scoreRange: "Aligns with Relational / Emergent Purpose (approx 0.55)", description: "Finds meaning in personal growth, service to others, and contributing to a better world.", icon: "target" as keyof typeof Icons },
+        { title: "The Self-Creator", scoreRange: "Aligns with Existential / Self-Created Purpose (approx 0.85)", description: "Asserts that meaning is not found but made; embraces freedom and responsibility to define one's own purpose.", icon: "target" as keyof typeof Icons }
       ],
       reflectionPrompts: [
-        "What do you believe is the ultimate purpose of life, if any?",
-        "How does this belief guide your choices and sense of meaning?"
+        "What do you believe is the ultimate purpose of life, if any? Is it discovered or created?",
+        "How does this belief guide your choices and sense of meaning, especially in challenging times?",
+        "If you have a sense of purpose, where does it come from?"
       ],
       whatIfInterpretations: {
-        low: "A low Teleology score suggests a perspective where life has no inherent, pre-ordained purpose. Meaning is likely seen as something individuals create for themselves, or perhaps an illusion.",
-        mid: "A mid-range Teleology score indicates a belief in purpose that is often human-centered, developmental, or social. This could involve personal growth, achieving potential, or contributing to community.",
-        high: "A high Teleology score points to a strong belief in an intrinsic, transcendent, or ultimate purpose, whether spiritual, cosmic, or divinely ordained. You likely see life as part of a larger plan or a journey towards a significant end-goal."
+        low: "A score in this range suggests an alignment with a Divine or Cosmic Purpose. You likely believe that life has an inherent, pre-ordained meaning or direction, possibly guided by a higher power or universal plan.",
+        mid: "A mid-range score in Teleology indicates a Relational or Emergent Purpose. You may find meaning through personal growth, connections with others, contributing to community, or fulfilling a perceived potential within a broader context.",
+        high: "A score in this range points to an Existential or Self-Created Purpose. You likely believe that meaning is not inherent but is something individuals must forge for themselves in a universe without intrinsic goals."
       },
-      strengthsPlaceholder: "Adaptability and freedom in creating meaning (low), strong personal drive and goal-orientation (mid), or a profound sense of direction and resilience from a higher calling (high).",
-      tensionsPlaceholder: "Finding meaning in suffering, reconciling free will with a perceived destiny, the individual's purpose versus a collective or cosmic purpose.",
-      blindSpotsPlaceholder: "Difficulty finding motivation if no inherent purpose is perceived (low), over-focus on personal achievement at the expense of broader connection (mid), or rigidly adhering to a specific purpose and overlooking other sources of meaning (high)."
+      strengthsPlaceholder: "A Divine/Cosmic view can provide profound resilience. An Emergent view fosters strong community ties. An Existential view champions individual freedom and creativity.",
+      tensionsPlaceholder: "Tensions can arise between a preordained plan (Divine) and personal free will (Existential), or between individual fulfillment and collective purpose (Relational).",
+      blindSpotsPlaceholder: "A strong Divine/Cosmic view might struggle with ambiguity. An Existential view might feel overwhelming without external guidance. A Relational view might overlook broader systemic purposes or individual callings."
     }
   },
 };
 
 export const getFacetByName = (name: FacetName): Facet => FACETS[name];
-
 export const DEFAULT_FACET_ICON: React.FC<React.SVGProps<SVGSVGElement>> = IconWrapper(HelpCircle as LucideIcon);
 
-// Ensure that the 'Atom' icon used in getDefaultDeepDive is imported and correctly wrapped if it's from lucide-react
-// For example, if 'atom' is a key in your Icons object:
-// const DefaultArchetypeIcon = Icons['atom'] || HelpCircle; // Or a generic fallback
-// Or ensure Atom is wrapped:
-// const WrappedAtom = IconWrapper(Atom);
-// ... and then use WrappedAtom in getDefaultDeepDive
-// For now, I'm assuming 'atom' as a string is a placeholder for an icon key
-// which would be resolved by your FacetIcon component or similar logic.
-// If 'atom' is meant to be a Lucide icon directly, it should be imported and wrapped:
-// const DefaultArchetypeIcon = IconWrapper(Atom);
-// And then used: icon: DefaultArchetypeIcon (if FacetIcon expects a component) or 'atom' (if FacetIcon expects a key)
-// The FacetIcon component currently expects a facetName string, and looks up the icon from FACETS config.
-// For archetypalPatterns, we are providing a keyof typeof Icons.
-// So getDefaultDeepDive should also use a keyof typeof Icons.
-// Let's use a generic icon key as a fallback.
-const defaultArchetypeIconKey: keyof typeof Icons = "sparkles"; // Or any other generic key from your Icons
-(getDefaultDeepDive("Default").archetypalPatterns as any[]).forEach(p => {
-  if (!p.icon) p.icon = defaultArchetypeIconKey;
+const defaultArchetypeIconKey: keyof typeof Icons = "sparkles"; 
+Object.values(FACETS).forEach(facet => {
+  if (facet.deepDive.archetypalPatterns) {
+    facet.deepDive.archetypalPatterns.forEach(p => {
+      if (!p.icon) {
+        // Assign a more relevant default based on the facet's main icon, if possible
+        const facetMainIconKey = Object.keys(Icons).find(
+          key => Icons[key as keyof typeof Icons] === (facet.icon as any) // This comparison might be tricky
+        );
+        p.icon = (facetMainIconKey || defaultArchetypeIconKey) as keyof typeof Icons;
+      }
+    });
+  }
 });
-
-// Update: Re-checked how archetypalPatterns[].icon is used in facet/[facetName]/page.tsx.
-// It expects a keyof typeof Icons. So the getDefaultDeepDive should be fine with string keys.
-// The placeholder icons in the newly added content were: "brain", "zap", "heart", "bookOpen", "globe", "target".
-// These need to ensure they are valid keys in the Icons object.
-// I will update the placeholder icon assignments to be more robust or use a generic one if specific ones don't match.
-// For simplicity now, I'll use the main facet icon key for its archetypes for now.
-// For example, Epistemology archetypes would get 'brain' if 'brain' is a key in Icons.
-// Let's correct the assigned icons for archetypalPatterns in the new data:
-// Epistemology -> 'brain'
-// Praxeology -> 'zap'
-// Axiology -> 'heart'
-// Mythology -> 'bookOpen'
-// Cosmology -> 'globe'
-// Teleology -> 'target'
-// This assumes these strings are valid keys in your Icons object.
-// If not, they will fall back to Icons.archetypes in the facet/[facetName]/page.tsx.
-// Let's ensure the placeholder text for whatIf, strengths, tensions, blindspots are distinct and meaningful for each facet.
-// I've already added placeholders during the mapping in the previous step, so this should be fine.
-// The main task is integrating the large JSON block.
