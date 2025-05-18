@@ -59,25 +59,28 @@ export default function AssessmentPage() {
       setCurrentFacetIndex(currentFacetIndex + 1);
       setTimeout(() => setIsProcessing(false), 300); 
     } else {
+      // Navigate immediately
       router.push('/results'); 
 
+      // Perform scoring and final saving in the background
       setTimeout(() => {
         try {
-          const calculatedScores = calculateDomainScores(); 
-          localStorage.setItem("metaPrismAssessmentScores", JSON.stringify(calculatedScores));
+          // This function now updates context and context handles localStorage persistence of domainScores
+          calculateDomainScores(); 
           
           toast({
             title: "Assessment Complete!",
-            description: "Your scores have been calculated and saved. You are being redirected to the results page.", // Updated toast message
+            description: "Your scores have been calculated. You are being redirected to the results page.",
           });
         } catch (error) {
           console.error("Error during background score calculation/saving:", error);
           toast({
             title: "Scoring Error",
-            description: "There was an issue calculating or saving your scores. Your answers are saved, you can try viewing results later or retaking the assessment.",
+            description: "There was an issue calculating your scores. Your answers are saved, you can try viewing results later or retaking the assessment.",
             variant: "destructive",
           });
         }
+        // setIsProcessing(false); // Already navigated, processing state on this page isn't as critical
       }, 0); 
     }
   };
@@ -114,7 +117,7 @@ export default function AssessmentPage() {
           </div>
           <Progress value={progress} className="w-full mt-4 h-3" />
         </CardHeader>
-        <CardContent className="space-y-8" key={currentFacetName}> {/* Added key here */}
+        <CardContent className="space-y-8" key={currentFacetName}> {/* Key added here */}
           <form onSubmit={(e) => { e.preventDefault(); handleNext(); }}>
             {currentFacet.questions.map((question, index) => (
               <div 

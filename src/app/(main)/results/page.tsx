@@ -2,32 +2,32 @@
 "use client";
 
 import { useWorldview } from "@/hooks/use-worldview";
-import { TriangleChart } from "@/components/triangle-chart";
+import { TriangleChart } from "@/components/visualization/TriangleChart";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Icons } from "@/components/icons";
 import Link from "next/link";
-import { FACETS } from "@/config/facets";
+import { FACETS, FACET_NAMES, FacetName } from "@/config/facets"; // Ensure FacetName is imported if used directly
+import { Progress } from "@/components/ui/progress";
+import { getFacetColorHsl } from '@/lib/colors';
 
-// Insight Summary View: Dynamic Domain Feedback component
-function DomainFeedbackBar({ facetName, score, anchorLeft, anchorRight }: { facetName: string, score: number, anchorLeft: string, anchorRight: string }) {
-  const facetConfig = FACETS[facetName as keyof typeof FACETS];
-  if (!facetConfig) { // Added safety check for facetConfig
+
+// DomainFeedbackBar component, consistent with dashboard
+function DomainFeedbackBar({ facetName, score, anchorLeft, anchorRight }: { facetName: FacetName, score: number, anchorLeft: string, anchorRight: string }) {
+  const facetConfig = FACETS[facetName];
+  if (!facetConfig) {
     console.warn(`DomainFeedbackBar: Facet configuration for ${facetName} not found.`);
     return null;
   }
+  const colorHsl = getFacetColorHsl(facetName);
+
   return (
-    <div className="mb-4 p-3 rounded-md border border-border bg-card/50">
+    <div className="mb-4 p-3 rounded-md border border-border/30 bg-background/40">
       <div className="flex justify-between items-center mb-1">
-        <span className="text-sm font-medium" style={{ color: `hsl(var(${facetConfig.colorVariable.slice(2)}))` }}>{facetName}</span>
-        <span className="text-xs text-muted-foreground">{Math.round(score * 100)}%</span>
+        <span className="text-sm font-medium" style={{ color: colorHsl }}>{facetName}</span>
+        <span className="text-xs font-semibold" style={{ color: colorHsl }}>{Math.round(score * 100)}%</span>
       </div>
-      <div className="relative w-full h-6 bg-muted rounded overflow-hidden">
-        <div 
-          className="absolute top-0 left-0 h-full transition-all duration-500 ease-out"
-          style={{ width: `${score * 100}%`, backgroundColor: `hsl(var(${facetConfig.colorVariable.slice(2)}))` }}
-        ></div>
-      </div>
+      <Progress value={score * 100} className="h-3" indicatorStyle={{ backgroundColor: colorHsl }} />
       <div className="flex justify-between text-xs text-muted-foreground mt-1">
         <span>{anchorLeft}</span>
         <span>{anchorRight}</span>
@@ -40,25 +40,22 @@ function DomainFeedbackBar({ facetName, score, anchorLeft, anchorRight }: { face
 export default function ResultsPage() {
   const { domainScores, activeProfile } = useWorldview();
 
-  // Check if scores are present and if at least one score is not the default (0)
-  const hasMeaningfulScores = domainScores && domainScores.length > 0 && domainScores.some(ds => ds.score !== 0);
-
-  if (!hasMeaningfulScores) {
+  // If domainScores aren't loaded yet (e.g. context not initialized, which shouldn't happen)
+  // or if it's an empty array for some unexpected reason.
+  if (!domainScores || domainScores.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center h-[calc(100vh-10rem)] text-center">
-        <Icons.search className="w-16 h-16 text-muted-foreground mb-4" />
-        <h2 className="text-2xl font-semibold mb-2">No Results Yet</h2>
+        <Icons.loader className="w-16 h-16 text-muted-foreground mb-4 animate-spin" />
+        <h2 className="text-2xl font-semibold mb-2">Loading Results...</h2>
         <p className="text-muted-foreground mb-4">
-          Complete the assessment to see your worldview signature. Your results will appear here once calculated.
+          Please wait while your worldview signature is being prepared.
         </p>
-        <Button asChild>
-          <Link href="/assessment">Start Assessment</Link>
-        </Button>
       </div>
     );
   }
   
   const currentTitle = activeProfile?.title || "Your Current Worldview";
+  const hasTakenAssessment = domainScores.some(ds => ds.score !== 0.5); // Check if any score differs from default 0.5
 
   return (
     <div className="container mx-auto py-8">
@@ -69,7 +66,12 @@ export default function ResultsPage() {
         <Card className="lg:col-span-2 glassmorphic-card">
           <CardHeader>
             <CardTitle className="text-2xl">Facet Breakdown</CardTitle>
-            <CardDescription>Your scores across the 7 worldview dimensions.</CardDescription>
+            <CardDescription>
+              {hasTakenAssessment 
+                ? "Your scores across the 7 worldview dimensions." 
+                : "Placeholder scores. Complete the assessment to see your true breakdown."
+              }
+            </CardDescription>
           </CardHeader>
           <CardContent>
             {domainScores.map(ds => (
@@ -77,9 +79,8 @@ export default function ResultsPage() {
                 key={ds.facetName}
                 facetName={ds.facetName}
                 score={ds.score}
-                // Placeholder anchors - these should be dynamic or configured
-                anchorLeft={`${ds.facetName} Low`} 
-                anchorRight={`${ds.facetName} High`}
+                anchorLeft={hasTakenAssessment ? `${FACETS[ds.facetName]?.name || ds.facetName} Low` : "Spectrum Low"}
+                anchorRight={hasTakenAssessment ? `${FACETS[ds.facetName]?.name || ds.facetName} High` : "Spectrum High"}
               />
             ))}
           </CardContent>
@@ -91,24 +92,26 @@ export default function ResultsPage() {
               <CardTitle className="text-2xl">Your Signature</CardTitle>
             </CardHeader>
             <CardContent>
-              <TriangleChart scores={domainScores} className="mx-auto" />
+              <TriangleChart scores={domainScores} width={250} height={217} className="mx-auto !p-0 !bg-transparent !shadow-none !backdrop-blur-none" />
             </CardContent>
           </Card>
           
-          {/* Placeholder for InsightPanel */}
           <Card className="glassmorphic-card">
             <CardHeader>
               <CardTitle>Insights & Reflections</CardTitle>
             </CardHeader>
             <CardContent>
-              <p className="text-muted-foreground">Symbolic interpretations and reflective prompts will appear here.</p>
-              {/* <InsightPanel scores={domainScores} /> */}
+              <p className="text-muted-foreground">
+                {hasTakenAssessment 
+                  ? "Symbolic interpretations and reflective prompts based on your scores will appear here."
+                  : "Complete the assessment to unlock insights."
+                }
+              </p>
             </CardContent>
           </Card>
         </div>
       </div>
 
-      {/* Placeholder for Save & Share Footer */}
       <Card className="mt-8 glassmorphic-card">
         <CardHeader>
           <CardTitle>Actions</CardTitle>
