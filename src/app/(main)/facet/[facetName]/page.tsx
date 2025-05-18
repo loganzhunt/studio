@@ -13,16 +13,21 @@ import { Slider } from "@/components/ui/slider";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import React, { useState, useMemo } from 'react';
-import { getFacetColorHsl } from '@/lib/colors';
-import chroma from 'chroma-js'; // Import chroma-js
+import { getFacetColorHsl, DOMAIN_COLORS } from '@/lib/colors'; // Import DOMAIN_COLORS
+import chroma from 'chroma-js';
 
 export default function FacetDeepDivePage() {
   const params = useParams();
   const router = useRouter();
   const facetNameParam = params.facetName as string;
-  const capitalizedFacetName = facetNameParam.charAt(0).toUpperCase() + facetNameParam.slice(1) as FacetName;
   
-  const facet = FACETS[capitalizedFacetName];
+  // Ensure facetNameParam is correctly capitalized to match FacetName type
+  const capitalizedFacetName = useMemo(() => {
+    if (!facetNameParam) return undefined;
+    return facetNameParam.charAt(0).toUpperCase() + facetNameParam.slice(1) as FacetName;
+  }, [facetNameParam]);
+
+  const facet = capitalizedFacetName ? FACETS[capitalizedFacetName] : undefined;
 
   const [whatIfScore, setWhatIfScore] = useState(0.5);
 
@@ -33,13 +38,13 @@ export default function FacetDeepDivePage() {
     return facet.deepDive.whatIfInterpretations.high;
   }, [whatIfScore, facet]);
 
-  if (!facet) {
+  if (!facet || !capitalizedFacetName) {
     return (
       <div className="container mx-auto py-8 text-center">
         <Icons.search className="w-16 h-16 text-muted-foreground mb-4 mx-auto" />
         <h1 className="text-2xl font-semibold mb-2">Facet Not Found</h1>
         <p className="text-muted-foreground mb-4">
-          The facet "{capitalizedFacetName}" could not be found.
+          The facet "{facetNameParam}" could not be found.
         </p>
         <Button asChild variant="outline">
           <Link href="/dashboard">Back to Dashboard</Link>
@@ -48,27 +53,28 @@ export default function FacetDeepDivePage() {
     );
   }
 
-  const facetColor = getFacetColorHsl(facet.name);
+  const facetColorHslString = getFacetColorHsl(facet.name); // Used for direct CSS styling where HSL var is needed
+  const baseHexColorForChroma = DOMAIN_COLORS[facet.name as FacetName] || '#CCCCCC'; // Fallback hex for chroma
 
   return (
     <div className="container mx-auto py-8 space-y-10">
       {/* Facet Header */}
-      <header className="text-center border-b-2 pb-6 mb-8 relative" style={{ borderColor: facetColor }}>
+      <header className="text-center border-b-2 pb-6 mb-8 relative" style={{ borderColor: facetColorHslString }}>
         <FacetIcon facetName={facet.name} className="w-20 h-20 mx-auto mb-4" />
-        <h1 className="text-4xl font-bold mb-2" style={{ color: facetColor }}>
+        <h1 className="text-4xl font-bold mb-2" style={{ color: facetColorHslString }}>
           Deep Dive: The {facet.name} Facet
         </h1>
         <p className="text-xl text-muted-foreground">{facet.tagline}</p>
         <div 
           className="absolute bottom-[-2px] left-0 w-full h-[3px]"
-          style={{ background: `linear-gradient(to right, transparent, ${facetColor}, transparent)` }}
+          style={{ background: `linear-gradient(to right, transparent, ${facetColorHslString}, transparent)` }}
         />
       </header>
 
       {/* Introduction Block */}
       <Card className="glassmorphic-card">
         <CardHeader>
-          <CardTitle className="text-2xl" style={{ color: facetColor }}>Introduction: {facet.deepDive.introduction.split(':')[0]}</CardTitle>
+          <CardTitle className="text-2xl" style={{ color: facetColorHslString }}>Introduction: {facet.deepDive.introduction.split(':')[0]}</CardTitle>
         </CardHeader>
         <CardContent>
           <p className="text-muted-foreground leading-relaxed">{facet.deepDive.introduction.substring(facet.deepDive.introduction.indexOf(':') + 1).trim() || facet.description}</p>
@@ -78,7 +84,7 @@ export default function FacetDeepDivePage() {
       {/* Spectrum and Symbolic Range */}
       <Card className="glassmorphic-card">
         <CardHeader>
-          <CardTitle className="text-2xl" style={{ color: facetColor }}>Spectrum & Symbolic Range</CardTitle>
+          <CardTitle className="text-2xl" style={{ color: facetColorHslString }}>Spectrum & Symbolic Range</CardTitle>
         </CardHeader>
         <CardContent>
           <p className="text-muted-foreground mb-4 leading-relaxed">{facet.deepDive.spectrumExplanation}</p>
@@ -88,8 +94,8 @@ export default function FacetDeepDivePage() {
                 key={anchor} 
                 className="flex-1 h-full flex items-center justify-center text-xs font-medium text-background transition-all duration-300"
                 style={{ 
-                  backgroundColor: chroma(facetColor).darken(1 - (index / (arr.length -1)) * 2 + 1).alpha(0.7 + (index / (arr.length -1)) * 0.3 ).hex(),
-                  color: chroma.contrast(chroma(facetColor).darken(1 - (index / (arr.length -1)) * 2 + 1).hex(), '#fff') > 4.5 ? '#fff' : '#000'
+                  backgroundColor: chroma(baseHexColorForChroma).darken(1 - (index / (arr.length -1)) * 2 + 1).alpha(0.7 + (index / (arr.length -1)) * 0.3 ).hex(),
+                  color: chroma.contrast(chroma(baseHexColorForChroma).darken(1 - (index / (arr.length -1)) * 2 + 1).hex(), '#fff') > 4.5 ? '#fff' : '#000'
                 }}
                 title={anchor}
               >
@@ -103,7 +109,7 @@ export default function FacetDeepDivePage() {
       {/* Codex and Archetype Examples */}
       <Card className="glassmorphic-card">
         <CardHeader>
-          <CardTitle className="text-2xl" style={{ color: facetColor }}>Codex & Archetype Examples</CardTitle>
+          <CardTitle className="text-2xl" style={{ color: facetColorHslString }}>Codex & Archetype Examples</CardTitle>
           <CardDescription>Illustrative worldviews and archetypes related to {facet.name}.</CardDescription>
         </CardHeader>
         <CardContent className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -111,19 +117,17 @@ export default function FacetDeepDivePage() {
             <Card key={idx} className="bg-background/30 p-1 flex flex-col">
               <CardHeader className="pb-2">
                 <div className="flex items-center gap-2 mb-1">
-                  {/* Placeholder for Icon */}
-                  <Icons.sparkles className="h-5 w-5" style={{ color: facetColor }} /> 
+                  <Icons.sparkles className="h-5 w-5" style={{ color: facetColorHslString }} /> 
                   <CardTitle className="text-lg">{example.title}</CardTitle>
                 </div>
                 <CardDescription className="text-xs">{example.type === 'codex' ? "Codex Entry" : "Archetype"} - Score: {example.exampleScore}</CardDescription>
               </CardHeader>
               <CardContent className="flex-grow">
                 <p className="text-sm text-muted-foreground line-clamp-3">{example.summary}</p>
-                {/* Placeholder for mini triangle visual */}
               </CardContent>
               {example.id && (
                 <CardFooter className="mt-auto pt-3">
-                  <Button variant="link" size="sm" className="p-0 h-auto text-xs" asChild style={{ color: facetColor }}>
+                  <Button variant="link" size="sm" className="p-0 h-auto text-xs" asChild style={{ color: facetColorHslString }}>
                     <Link href={example.type === 'codex' ? `/codex/${example.id}` : `/archetypes#${example.id}`}>
                       Learn more <Icons.chevronRight className="ml-1 h-3 w-3"/>
                     </Link>
@@ -139,7 +143,7 @@ export default function FacetDeepDivePage() {
        {facet.deepDive.archetypalPatterns && facet.deepDive.archetypalPatterns.length > 0 && (
         <Card className="glassmorphic-card">
           <CardHeader>
-            <CardTitle className="text-2xl" style={{ color: facetColor }}>Archetypal Patterns</CardTitle>
+            <CardTitle className="text-2xl" style={{ color: facetColorHslString }}>Archetypal Patterns</CardTitle>
             <CardDescription>Common archetypal expressions related to {facet.name}.</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
@@ -147,8 +151,8 @@ export default function FacetDeepDivePage() {
               <div key={idx} className="p-3 rounded-md border border-border/50 bg-background/30">
                 <div className="flex items-center gap-2 mb-1">
                   {pattern.icon && Icons[pattern.icon] ? 
-                    React.createElement(Icons[pattern.icon], { className: "h-5 w-5", style: { color: facetColor } }) : 
-                    <Icons.users className="h-5 w-5" style={{ color: facetColor }} />
+                    React.createElement(Icons[pattern.icon], { className: "h-5 w-5", style: { color: facetColorHslString } }) : 
+                    <Icons.users className="h-5 w-5" style={{ color: facetColorHslString }} />
                   }
                   <h4 className="font-semibold text-foreground">{pattern.title} <span className="text-xs text-muted-foreground">({pattern.scoreRange})</span></h4>
                 </div>
@@ -162,7 +166,7 @@ export default function FacetDeepDivePage() {
       {/* "What If?" Exploration Mode */}
       <Card className="glassmorphic-card">
         <CardHeader>
-          <CardTitle className="text-2xl" style={{ color: facetColor }}>'What If?' Exploration</CardTitle>
+          <CardTitle className="text-2xl" style={{ color: facetColorHslString }}>'What If?' Exploration</CardTitle>
           <CardDescription>Adjust the slider to see how different scores in {facet.name} might be interpreted.</CardDescription>
         </CardHeader>
         <CardContent>
@@ -174,7 +178,7 @@ export default function FacetDeepDivePage() {
               onValueChange={(value) => setWhatIfScore(value[0])}
               className="w-full"
             />
-            <span className="text-lg font-semibold tabular-nums" style={{ color: facetColor, minWidth: '50px' }}>
+            <span className="text-lg font-semibold tabular-nums" style={{ color: facetColorHslString, minWidth: '50px' }}>
               {Math.round(whatIfScore * 100)}%
             </span>
           </div>
@@ -187,7 +191,7 @@ export default function FacetDeepDivePage() {
       {/* Reflection/Journaling Prompt */}
       <Card className="glassmorphic-card">
         <CardHeader>
-          <CardTitle className="text-2xl" style={{ color: facetColor }}>Reflection: Your {facet.name}</CardTitle>
+          <CardTitle className="text-2xl" style={{ color: facetColorHslString }}>Reflection: Your {facet.name}</CardTitle>
         </CardHeader>
         <CardContent>
           {facet.deepDive.reflectionPrompts.map((prompt, idx) => (
