@@ -35,6 +35,10 @@ export default function AssessmentPage() {
   const totalFacets = FACET_NAMES.length;
   const progress = ((currentFacetIndex + 1) / totalFacets) * 100;
 
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [currentFacetName]);
+
   const areAllCurrentQuestionsAnswered = useMemo(() => {
     if (!currentFacet) return false;
     return currentFacet.questions.every((_, index) => {
@@ -57,6 +61,7 @@ export default function AssessmentPage() {
 
     if (currentFacetIndex < totalFacets - 1) {
       setCurrentFacetIndex(currentFacetIndex + 1);
+      // Scroll to top will be handled by useEffect listening to currentFacetName change
       setTimeout(() => setIsProcessing(false), 300); 
     } else {
       // Navigate immediately
@@ -66,8 +71,9 @@ export default function AssessmentPage() {
       setTimeout(() => {
         try {
           // This function now updates context and context handles localStorage persistence of domainScores
-          calculateDomainScores(); 
-          
+          const calculatedScores = calculateDomainScores(); 
+          // localStorage.setItem("metaPrismAssessmentScores", JSON.stringify(calculatedScores)); // Removed as context handles main score persistence
+
           toast({
             title: "Assessment Complete!",
             description: "Your scores have been calculated. You are being redirected to the results page.",
@@ -89,6 +95,7 @@ export default function AssessmentPage() {
     if (currentFacetIndex > 0) {
       setIsProcessing(true);
       setCurrentFacetIndex(currentFacetIndex - 1);
+      // Scroll to top will be handled by useEffect listening to currentFacetName change
       setTimeout(() => setIsProcessing(false), 300);
     }
   };
