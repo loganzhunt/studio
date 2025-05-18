@@ -13,16 +13,15 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { TriangleChart } from "@/components/visualization/TriangleChart";
 import type { CodexEntry, FacetName, DomainScore } from "@/types";
-import { FACETS, FACET_NAMES } from "@/config/facets"; 
+import { FACETS, FACET_NAMES } from "@/config/facets";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription, SheetClose } from "@/components/ui/sheet";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Badge } from '@/components/ui/badge'; 
-import { getFacetColorHsl } from '@/lib/colors'; 
+import { Badge } from '@/components/ui/badge';
+import { getFacetColorHsl } from '@/lib/colors';
 import { useWorldview } from '@/hooks/use-worldview';
 import { useToast } from '@/hooks/use-toast';
 
 // --- Data Definitions ---
-
 // Base set of worldviews, might be overridden by later batches if names match.
 const BASE_CODEX_DATA: any[] = [
   {
@@ -156,7 +155,7 @@ const ADDITIONAL_CODEX_DATA: any[] = [
     "title": "Gnosticism",
     "category": "religious - Worldview",
     "summary": "A mystical and dualistic tradition emphasizing secret knowledge (gnosis) and inner spiritual awakening.",
-    "icon": "\u25B3",  // ⟁ (White up-pointing triangle) 
+    "icon": "\u25B3",  // ⟁ (White up-pointing triangle)
     "scores": { "ontology": 0.90, "epistemology": 0.80, "praxeology": 0.50, "axiology": 0.60, "mythology": 0.95, "cosmology": 0.75, "teleology": 0.80 },
     "facetDescriptions": { "ontology": "Idealist; spiritual reality is primary, material world is shadow.", "epistemology": "Highly revelatory; true knowledge is inner and secret.", "praxeology": "Balancing individual ascent with esoteric community.", "axiology": "Values liberation, spiritual truth, and transcendence.", "mythology": "Rich in cosmological myth and allegory.", "cosmology": "Dualistic; cosmic battle of light and darkness.", "teleology": "Divine purpose is return to the source, spiritual union." },
     "tags": ["mystical", "dualism", "spiritual"]
@@ -249,8 +248,8 @@ const ADDITIONAL_CODEX_DATA: any[] = [
     "facetDescriptions": { "ontology": "Primarily materialist but open to progress and innovation.", "epistemology": "Strongly empirical; rationality and science dominate.", "praxeology": "Emphasizes agency, progress, and individual achievement.", "axiology": "Values advancement, mastery, and efficiency.", "mythology": "Skeptical of myth; uses narrative of progress.", "cosmology": "Mechanistic; universe is understandable and improvable.", "teleology": "Purpose is constructed; focus on progress and mastery." }
   },
   {
-    "title": "Mystical Sufism", // This might duplicate an earlier "Mystical Sufism" or just "Sufism"
-    "category": "religious - Worldview", 
+    "title": "Mystical Sufism", 
+    "category": "religious - Worldview",
     "summary": "A mystical Islamic tradition seeking direct experience of the Divine through love, devotion, and spiritual practice.",
     "icon": "\u262B",  // ☫ (Farsi symbol)
     "scores": { "ontology": 0.90, "epistemology": 0.85, "praxeology": 0.60, "axiology": 0.80, "mythology": 0.90, "cosmology": 0.80, "teleology": 0.95 },
@@ -346,7 +345,7 @@ const ADDITIONAL_CODEX_DATA: any[] = [
   },
   {
     "title": "Romanticism",
-    "category": "custom - Worldview", // Note: category is "custom" for this example
+    "category": "custom - Worldview", 
     "summary": "A cultural and philosophical movement emphasizing emotion, nature, and the creative imagination.",
     "icon": "\u10E6",  // ღ (Heart, poetic/romantic)
     "scores": { "ontology": 0.50, "epistemology": 0.60, "praxeology": 0.60, "axiology": 0.75, "mythology": 0.70, "cosmology": 0.60, "teleology": 0.60 },
