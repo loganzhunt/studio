@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState } from 'react';
@@ -6,7 +7,7 @@ import type { FacetName, DomainScore } from '@/types';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { TriangleChart } from '@/components/triangle-chart';
+import { TriangleChart } from '@/components/visualization/TriangleChart'; // Corrected import path
 import { Icons } from '@/components/icons';
 import { useWorldview } from '@/hooks/use-worldview';
 import Link from 'next/link';
@@ -111,7 +112,7 @@ export default function BuilderPage() {
               <CardTitle>Live Preview</CardTitle>
             </CardHeader>
             <CardContent>
-              <TriangleChart scores={builderDomainScores} className="mx-auto mb-6" />
+              <TriangleChart scores={builderDomainScores} className="mx-auto mb-6 !p-0 !bg-transparent !shadow-none !backdrop-blur-none" width={250} height={217} />
               <div className="mb-4">
                 <label htmlFor="worldview-title" className="block text-sm font-medium mb-1">Worldview Title</label>
                 <input 
@@ -124,7 +125,7 @@ export default function BuilderPage() {
                 />
               </div>
               <div className="flex flex-col space-y-2">
-                <Button onClick={handleSaveWorldview}><Icons.save className="mr-2 h-4 w-4" /> Save Worldview to Library</Button>
+                <Button onClick={handleSaveWorldview}><Icons.saved className="mr-2 h-4 w-4" /> Save Worldview to Library</Button>
                 <Button variant="outline" onClick={handleClearSelections}><Icons.delete className="mr-2 h-4 w-4" /> Clear All Selections</Button>
               </div>
             </CardContent>
