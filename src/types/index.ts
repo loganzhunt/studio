@@ -27,11 +27,23 @@ interface FacetDeepDive {
     exampleScore: number; // e.g., 0.2 (low), 0.5 (mid), 0.8 (high) on the facet's spectrum
     type: 'codex' | 'archetype';
     id?: string; // Optional: if linking to a specific codex/archetype entry
+    icon?: string; // For emoji or simple string representation of an icon
   }>;
   reflectionPrompts: string[];
   strengthsPlaceholder?: string;
   tensionsPlaceholder?: string;
   blindSpotsPlaceholder?: string;
+  archetypalPatterns?: Array<{ 
+    title: string; 
+    scoreRange: string; // e.g., "Low (0.0-0.33)"
+    description: string; 
+    icon?: keyof typeof Icons; 
+  }>;
+  whatIfInterpretations?: { 
+    low: string; 
+    mid: string; 
+    high: string; 
+  };
 }
 
 export interface Facet {
@@ -73,8 +85,8 @@ export interface CodexEntry extends WorldviewProfile {
 }
 
 export interface WorldviewContextType {
-  currentUser: LocalUser; // Updated for local demo
-  signInLocally: (name: string) => void; // Simplified for local demo
+  currentUser: LocalUser; 
+  signInLocally: (name: string) => void; 
   signOutUser: () => void;
   
   isAuthModalOpen: boolean;
