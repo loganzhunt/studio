@@ -2,7 +2,7 @@
 "use client";
 
 // Always ensure a valid React component is exported as default.
-// Large data blocks must be defined above the component or imported from separate files.
+// Large data blocks should be defined above the component or imported from separate files.
 
 import React, { useState, useMemo, useEffect } from 'react';
 import Link from "next/link";
@@ -21,499 +21,384 @@ import { getFacetColorHsl } from '@/lib/colors';
 import { useWorldview } from '@/hooks/use-worldview';
 import { useToast } from '@/hooks/use-toast';
 
-// --- Data Definitions ---
+// Import data from separate files
+import { BASE_CODEX_DATA } from '@/data/codex/base-codex-data';
+import { LATEST_CODEX_UPDATE_BATCH } from '@/data/codex/latest-codex-update-batch';
+import { ADDITIONAL_CODEX_DATA } from '@/data/codex/additional-codex-data';
 
-const BASE_CODEX_DATA: any[] = [
-  {
-    "name": "Taoism",
-    "summary": "A spiritual tradition rooted in the Tao, the ineffable source of all. Emphasizes harmony, non-action, and flowing with nature.",
-    "domainScores": { "ontology": 0.65, "epistemology": 0.7, "praxeology": 0.55, "axiology": 0.8, "mythology": 0.75, "cosmology": 0.8, "teleology": 0.65 },
-    "facetSummary": { "ontology": "Ultimate reality is the Tao.", "epistemology": "Wisdom arises from attunement, not analysis.", "praxeology": "Wu wei (non-action) and flexibility.", "axiology": "Harmony is the supreme value.", "mythology": "Rich in cosmological myth and parable.", "cosmology": "Cosmos flows as a spontaneous order.", "teleology": "Purpose is spontaneous unfolding." },
-    "tags": ["spiritual", "eastern", "nature"]
-  },
-  {
-    "name": "Scientific Materialism",
-    "summary": "A worldview grounded in physicalism and empirical science. Reality is ultimately material and measurable.",
-    "domainScores": { "ontology": 0.95, "epistemology": 0.9, "praxeology": 0.6, "axiology": 0.6, "mythology": 0.15, "cosmology": 0.85, "teleology": 0.2 },
-    "facetSummary": { "ontology": "Only physical matter truly exists.", "epistemology": "Knowledge is gained through observation and experiment.", "praxeology": "Actions should be evidence-based.", "axiology": "Value arises from outcomes and utility.", "mythology": "Skeptical of myth and legend.", "cosmology": "The universe is physical and governed by laws.", "teleology": "No inherent purpose beyond survival." },
-    "tags": ["scientific", "empirical", "modern"]
-  },
-  {
-    "name": "Mystical Sufism", 
-    "summary": "A mystical Islamic tradition seeking direct experience of the Divine through love, devotion, and spiritual practice.",
-    "domainScores": { "ontology": 0.75, "epistemology": 0.75, "praxeology": 0.8, "axiology": 0.85, "mythology": 0.8, "cosmology": 0.7, "teleology": 0.95 },
-    "facetSummary": { "ontology": "God is immanent and transcendent.", "epistemology": "Inner knowing (gnosis) and revelation.", "praxeology": "Love and devotion as practice.", "axiology": "Union with God is the highest value.", "mythology": "Sufi poetry and parables.", "cosmology": "Creation as reflection of the Divine.", "teleology": "Purpose is return to the Beloved." },
-    "tags": ["mystical", "islamic", "spiritual"]
-  }
-];
+// --- Helper Functions ---
+const getDominantFacet = (scores: DomainScore[]): FacetName => {
+  if (!scores || scores.length === 0) return FACET_NAMES[0];
+  const validScores = scores.filter(s => s && typeof s.score === 'number');
+  if (validScores.length === 0) return FACET_NAMES[0];
+  return validScores.reduce((prev, current) => (current.score > prev.score) ? current : prev).facetName || FACET_NAMES[0];
+};
 
-const LATEST_CODEX_UPDATE_BATCH: any[] = [
-  {
-    "title": "Agnosticism",
-    "category": "philosophical - Worldview",
-    "summary": "A position of suspended belief about the existence of deities or ultimate reality, prioritizing uncertainty or open inquiry.",
-    "icon": "\u003F",
-    "scores": { "ontology": 0.45, "epistemology": 0.50, "praxeology": 0.40, "axiology": 0.45, "mythology": 0.40, "cosmology": 0.50, "teleology": 0.35 },
-    "facetDescriptions": { "ontology": "Suspends judgment between materialism and idealism; maintains open possibilities.", "epistemology": "Balances empirical inquiry and openness to revelation; prioritizes skepticism.", "praxeology": "Hesitant between hierarchical and egalitarian action; flexible stance.", "axiology": "Values open-ended inquiry over fixed ideals; avoids absolute individualism or collectivism.", "mythology": "Cautious regarding overarching narratives; no fixed mythos.", "cosmology": "Keeps cosmological assumptions ambiguous; neither mechanistic nor holistic.", "teleology": "Uncommitted to existential or divine purposes; embraces uncertainty." }
-  },
-  {
-    "title": "Animism",
-    "category": "religious - Worldview",
-    "summary": "A worldview that sees spirit or consciousness as present in all beings, places, and phenomena. Emphasizes relationship and reciprocity.",
-    "icon": "\u273F",
-    "scores": { "ontology": 0.80, "epistemology": 0.70, "praxeology": 0.40, "axiology": 0.70, "mythology": 0.80, "cosmology": 0.90, "teleology": 0.80 },
-    "facetDescriptions": { "ontology": "Leans toward idealism; reality is alive and consciousness is fundamental.", "epistemology": "Emphasizes revelatory knowledge, intuition, and direct communion with nature.", "praxeology": "Balances individual and collective action, often valuing reciprocal relationship.", "axiology": "Emphasizes interconnectedness and community well-being.", "mythology": "Rich in mythic stories of spirits, ancestors, and the sacred world.", "cosmology": "Holistic; the cosmos is a web of relations, not just mechanism.", "teleology": "Purpose is entwined with harmony, ancestral lineage, and spiritual ecology." }
-  },
-  {
-    "title": "Aristotelianism",
-    "category": "philosophical - Worldview",
-    "summary": "A naturalist and teleological philosophy grounded in empirical observation, virtue ethics, and the inherent order of nature.",
-    "icon": "\u03A9",
-    "scores": { "ontology": 0.35, "epistemology": 0.45, "praxeology": 0.65, "axiology": 0.50, "mythology": 0.30, "cosmology": 0.40, "teleology": 0.75 },
-    "facetDescriptions": { "ontology": "Material-leaning; reality is composed of substances with form and purpose.", "epistemology": "Favors empirical observation but recognizes reason and potentiality.", "praxeology": "Moderately hierarchical; focuses on virtue ethics and natural roles.", "axiology": "Balances individual flourishing with the common good.", "mythology": "Minimal mythos; philosophical narratives take precedence.", "cosmology": "Primarily mechanistic but open to inherent purpose/order.", "teleology": "Strong teleological focus; all things strive toward their end (telos)." }
-  },
-  {
-    "title": "Atheism",
-    "category": "philosophical - Worldview",
-    "summary": "The absence of belief in deities, often grounded in skepticism, rationalism, or naturalism.",
-    "icon": "\u2205",
-    "scores": { "ontology": 0.10, "epistemology": 0.20, "praxeology": 0.40, "axiology": 0.35, "mythology": 0.15, "cosmology": 0.10, "teleology": 0.10 },
-    "facetDescriptions": { "ontology": "Firmly materialist; only the physical world is considered real.", "epistemology": "Highly empirical; knowledge must be justified by evidence.", "praxeology": "Leans individualist; moral action is grounded in human judgment.", "axiology": "Values human well-being, autonomy, and critical reason.", "mythology": "Rejects traditional myths; may embrace secular narratives.", "cosmology": "Mechanistic view of the universe; natural laws reign.", "teleology": "Existential; purpose is self-created, not divinely ordained." }
-  },
-  {
-    "title": "Buddhism",
-    "category": "religious - Worldview",
-    "summary": "A spiritual philosophy emphasizing awakening, impermanence, and the end of suffering through the Eightfold Path.",
-    "icon": "\u2638",
-    "scores": { "ontology": 0.55, "epistemology": 0.55, "praxeology": 0.60, "axiology": 0.70, "mythology": 0.70, "cosmology": 0.60, "teleology": 0.70 },
-    "facetDescriptions": { "ontology": "Middle path between materialism and idealism; reality is interdependent and empty of fixed nature.", "epistemology": "Balanced; uses both empirical observation (mindfulness) and revelatory insight.", "praxeology": "Balances personal effort with collective compassion.", "axiology": "Values compassion, wisdom, and liberation from suffering.", "mythology": "Rich symbolic stories (e.g., Buddha’s life, bodhisattvas).", "cosmology": "Integrates cycles (samsara), karma, and multiple realms.", "teleology": "Seeks awakening (nirvana); transcends self-centered purposes." }
-  },
-  {
-    "title": "Catholicism",
-    "category": "religious - Worldview",
-    "summary": "The largest Christian tradition, emphasizing the sacraments, apostolic succession, and the universal church.",
-    "icon": "\u271D",
-    "scores": { "ontology": 0.70, "epistemology": 0.50, "praxeology": 0.55, "axiology": 0.60, "mythology": 0.80, "cosmology": 0.60, "teleology": 0.85 },
-    "facetDescriptions": { "ontology": "Idealist-leaning; physical and spiritual realms are both real.", "epistemology": "Balances reason and revelation through scripture and tradition.", "praxeology": "Hierarchical, guided by church authority and sacramental practice.", "axiology": "Centers on love, charity, and the value of the soul.", "mythology": "Rich mythos—saints, miracles, salvation history.", "cosmology": "Holistic integration of heaven, earth, and afterlife.", "teleology": "Divine purpose oriented toward salvation and union with God." }
-  },
-  {
-    "title": "Christianity",
-    "category": "religious - Worldview",
-    "summary": "A monotheistic religious tradition centered on Jesus Christ, emphasizing love, redemption, and eternal purpose.",
-    "icon": "\u271A",
-    "scores": { "ontology": 0.70, "epistemology": 0.50, "praxeology": 0.60, "axiology": 0.65, "mythology": 0.80, "cosmology": 0.70, "teleology": 0.90 },
-    "facetDescriptions": { "ontology": "Idealist-leaning; reality encompasses visible and invisible realms.", "epistemology": "Integrates faith, revelation, and reason.", "praxeology": "Moderately hierarchical, emphasizing love and discipleship.", "axiology": "Values sacrificial love, redemption, and intrinsic human worth.", "mythology": "Central narrative of creation, fall, redemption, and resurrection.", "cosmology": "Holistic, with cosmic struggle and ultimate reconciliation.", "teleology": "Ultimate purpose found in relationship with the Divine." }
-  },
-  {
-    "title": "Deism",
-    "category": "philosophical - Worldview",
-    "summary": "A belief in a creator God who does not intervene in the universe, emphasizing reason and observation of the natural world.",
-    "icon": "\u2609",
-    "scores": { "ontology": 0.60, "epistemology": 0.60, "praxeology": 0.35, "axiology": 0.55, "mythology": 0.45, "cosmology": 0.60, "teleology": 0.50 },
-    "facetDescriptions": { "ontology": "Leans idealist; the world is created by divine intelligence.", "epistemology": "Values reason and natural theology over revelation.", "praxeology": "Individualist; action guided by reason, not divine command.", "axiology": "Centers on reason, natural order, and human dignity.", "mythology": "Minimal mythos; natural law replaces sacred story.", "cosmology": "Universe is ordered, rational, but not actively managed.", "teleology": "Purpose is embedded in creation’s design, but not actively governed." }
-  },
-  {
-    "title": "Druze Faith",
-    "category": "religious - Worldview",
-    "summary": "A secretive Middle Eastern tradition blending elements of Islam, Gnosticism, Neoplatonism, and more.",
-    "icon": "\u25A0",
-    "scores": { "ontology": 0.60, "epistemology": 0.60, "praxeology": 0.45, "axiology": 0.60, "mythology": 0.80, "cosmology": 0.65, "teleology": 0.75 },
-    "facetDescriptions": { "ontology": "Combines material and spiritual realities; reality is layered and esoteric.", "epistemology": "Values esoteric knowledge and initiatory revelation.", "praxeology": "Moderate, blending communal tradition with secretive hierarchy.", "axiology": "Prioritizes fidelity, wisdom, and communal bonds.", "mythology": "Deeply mythic and allegorical, with secret teachings.", "cosmology": "Holistic and cyclical; cosmic order is central.", "teleology": "Purpose tied to spiritual ascent and hidden unity." }
-  },
-  {
-    "title": "Empiricism",
-    "category": "philosophical - Worldview",
-    "summary": "A philosophical stance that asserts knowledge comes primarily from sensory experience and observation.",
-    "icon": "\u25B2",
-    "scores": { "ontology": 0.15, "epistemology": 0.10, "praxeology": 0.40, "axiology": 0.30, "mythology": 0.20, "cosmology": 0.20, "teleology": 0.15 },
-    "facetDescriptions": { "ontology": "Strongly materialist; what is real is what can be sensed.", "epistemology": "Radically empirical; all knowledge begins with experience.", "praxeology": "Moderate individualism; action guided by evidence.", "axiology": "Values truth, clarity, and observational reliability.", "mythology": "Rejects myth; trusts only observed reality.", "cosmology": "Mechanistic; reality is a lawful, observable system.", "teleology": "Purpose is emergent, not predetermined." }
+const mapRawDataToCodexEntries = (rawItems: any[]): CodexEntry[] => {
+  if (!Array.isArray(rawItems)) {
+    console.error("mapRawDataToCodexEntries received non-array input:", rawItems);
+    return [];
   }
-];
+  return rawItems.map((item: any, index: number) => {
+    if (!item || (typeof item.name !== 'string' && typeof item.title !== 'string')) {
+      // console.warn(`Skipping invalid item at index ${index} in rawCodexData (missing name/title):`, item);
+      return null; 
+    }
 
-const ADDITIONAL_CODEX_DATA: any[] = [
-  {
-    "name": "Platonism",
-    "summary": "A philosophical tradition centered on transcendent forms and the pursuit of the Good. Emphasizes reason, idealism, and the distinction between appearances and true reality.",
-    "domainScores": { "ontology": 0.85, "epistemology": 0.9, "praxeology": 0.55, "axiology": 0.85, "mythology": 0.7, "cosmology": 0.8, "teleology": 0.8 },
-    "facetSummary": { "ontology": "Reality is ultimately composed of ideal Forms.", "epistemology": "True knowledge is apprehended through reason.", "praxeology": "Right action aligns with the Form of the Good.", "axiology": "The Good is the supreme value.", "mythology": "Uses allegory and myth for teaching.", "cosmology": "The cosmos reflects perfect order.", "teleology": "Life’s purpose is to ascend toward the Good." },
-    "tags": ["philosophical", "idealism", "classical"]
-  },
-  {
-    "name": "Aristotelianism",
-    "summary": "A naturalist and teleological philosophy grounded in empirical observation, virtue ethics, and the inherent order of nature.",
-    "domainScores": { "ontology": 0.75, "epistemology": 0.75, "praxeology": 0.8, "axiology": 0.7, "mythology": 0.3, "cosmology": 0.75, "teleology": 0.85 },
-    "facetSummary": { "ontology": "Reality is substance and form.", "epistemology": "Knowledge is gained through empirical study.", "praxeology": "Ethical action fulfills one’s purpose.", "axiology": "Virtue is cultivated by habit.", "mythology": "Limited use of myth.", "cosmology": "Nature has intrinsic order.", "teleology": "Everything has a natural end." },
-    "tags": ["philosophical", "naturalism", "classical"]
-  },
-  {
-    "name": "Stoicism",
-    "summary": "A philosophy of rational resilience and self-mastery, emphasizing the cultivation of virtue and acceptance of nature.",
-    "domainScores": { "ontology": 0.65, "epistemology": 0.7, "praxeology": 0.9, "axiology": 0.85, "mythology": 0.4, "cosmology": 0.7, "teleology": 0.7 },
-    "facetSummary": { "ontology": "Reality is rational and ordered.", "epistemology": "Truth is discerned through reason.", "praxeology": "Act in accordance with nature.", "axiology": "Virtue is the highest good.", "mythology": "Myth used for ethical teaching.", "cosmology": "The cosmos is governed by Logos.", "teleology": "Purpose is acceptance of fate." },
-    "tags": ["philosophical", "ethics", "resilience"]
-  },
-  {
-    "name": "Christianity",
-    "summary": "A monotheistic religious tradition centered on Jesus Christ, emphasizing love, redemption, and eternal purpose.",
-    "domainScores": { "ontology": 0.8, "epistemology": 0.65, "praxeology": 0.8, "axiology": 0.95, "mythology": 0.85, "cosmology": 0.85, "teleology": 0.95 },
-    "facetSummary": { "ontology": "God is the ultimate reality.", "epistemology": "Faith and revelation as sources of truth.", "praxeology": "Live according to Christ’s example.", "axiology": "Love and redemption are central values.", "mythology": "Scripture rich in myth and symbol.", "cosmology": "Creation is divinely ordered.", "teleology": "Life’s purpose is communion with God." },
-    "tags": ["religious", "monotheistic", "western"]
-  },
-  {
-    "name": "Buddhism",
-    "summary": "A spiritual philosophy emphasizing awakening, impermanence, and the end of suffering through the Eightfold Path.",
-    "domainScores": { "ontology": 0.4, "epistemology": 0.8, "praxeology": 0.9, "axiology": 0.75, "mythology": 0.7, "cosmology": 0.7, "teleology": 0.85 },
-    "facetSummary": { "ontology": "All phenomena are impermanent and interdependent.", "epistemology": "Direct experience and insight.", "praxeology": "Ethical conduct and meditation.", "axiology": "Compassion and wisdom are highest values.", "mythology": "Buddhist cosmology and Jataka tales.", "cosmology": "Cyclic universes, realms, and karma.", "teleology": "Purpose is liberation from suffering." },
-    "tags": ["spiritual", "eastern", "awakening"]
-  },
-  {
-    "name": "Existentialism",
-    "summary": "A modern philosophy focusing on authentic existence, choice, and the creation of meaning in an indifferent universe.",
-    "domainScores": { "ontology": 0.5, "epistemology": 0.6, "praxeology": 0.8, "axiology": 0.65, "mythology": 0.25, "cosmology": 0.4, "teleology": 0.6 },
-    "facetSummary": { "ontology": "Reality is ambiguous and contingent.", "epistemology": "Truth emerges from subjective experience.", "praxeology": "Authentic action defines existence.", "axiology": "Value is self-created.", "mythology": "Rejects inherited myth; values story.", "cosmology": "The universe is indifferent.", "teleology": "Purpose is made, not given." },
-    "tags": ["philosophical", "modern", "authenticity"]
-  },
-  {
-    "name": "Animism",
-    "summary": "A worldview that sees spirit or consciousness as present in all beings, places, and phenomena. Emphasizes relationship and reciprocity.",
-    "domainScores": { "ontology": 0.8, "epistemology": 0.6, "praxeology": 0.7, "axiology": 0.7, "mythology": 0.9, "cosmology": 0.75, "teleology": 0.6 },
-    "facetSummary": { "ontology": "All things possess spirit.", "epistemology": "Knowledge is relational and experiential.", "praxeology": "Reciprocity with the more-than-human world.", "axiology": "Balance and respect are highest values.", "mythology": "Stories of spirits, ancestors, and place.", "cosmology": "The world is alive and interconnected.", "teleology": "Purpose is right relationship." },
-    "tags": ["indigenous", "spiritual", "nature"]
-  },
-  {
-    "title": "Epicureanism",
-    "category": "philosophical - Worldview",
-    "summary": "An ancient philosophy prioritizing the pursuit of pleasure and avoidance of pain through modest living and rational thought.",
-    "icon": "\u2698",
-    "scores": { "ontology": 0.25, "epistemology": 0.15, "praxeology": 0.40, "axiology": 0.45, "mythology": 0.20, "cosmology": 0.20, "teleology": 0.20 },
-    "facetDescriptions": { "ontology": "Materialist-leaning; reality is physical, pleasure and pain are bodily.", "epistemology": "Radically empirical; knowledge from sensation and experience.", "praxeology": "Moderate individualism; seeks personal tranquility and prudence.", "axiology": "Values ataraxia (peace of mind), friendship, and absence of pain.", "mythology": "Minimal mythos; challenges superstitions and fears.", "cosmology": "Mechanistic and naturalistic; no intervention by gods.", "teleology": "Purpose is self-directed happiness, not divine destiny." }
-  },
-  {
-    "title": "Gnosticism",
-    "category": "religious - Worldview",
-    "summary": "A mystical and dualistic tradition emphasizing secret knowledge (gnosis) and inner spiritual awakening.",
-    "icon": "\u25B3",
-    "scores": { "ontology": 0.90, "epistemology": 0.80, "praxeology": 0.50, "axiology": 0.60, "mythology": 0.95, "cosmology": 0.75, "teleology": 0.80 },
-    "facetDescriptions": { "ontology": "Idealist; spiritual reality is primary, material world is shadow.", "epistemology": "Highly revelatory; true knowledge is inner and secret.", "praxeology": "Balancing individual ascent with esoteric community.", "axiology": "Values liberation, spiritual truth, and transcendence.", "mythology": "Rich in cosmological myth and allegory.", "cosmology": "Dualistic; cosmic battle of light and darkness.", "teleology": "Divine purpose is return to the source, spiritual union." }
-  },
-  {
-    "title": "Hinduism",
-    "category": "religious - Worldview",
-    "summary": "A diverse religious tradition rooted in India, focusing on dharma, karma, reincarnation, and the pursuit of liberation (moksha).",
-    "icon": "\u0950",
-    "scores": { "ontology": 0.85, "epistemology": 0.80, "praxeology": 0.50, "axiology": 0.80, "mythology": 0.90, "cosmology": 0.90, "teleology": 0.95 },
-    "facetDescriptions": { "ontology": "Idealist; all forms are expressions of ultimate consciousness (Brahman).", "epistemology": "Blends revelatory scripture (Veda) with personal realization.", "praxeology": "Balances individual and communal dharma (duty/ethics).", "axiology": "Values liberation, devotion, and spiritual harmony.", "mythology": "Rich and multi-layered, full of gods, avatars, and epics.", "cosmology": "Holistic and cyclical; creation and dissolution are infinite.", "teleology": "Ultimate purpose is moksha—liberation and union with the divine." }
-  },
-  {
-    "title": "Humanism",
-    "category": "philosophical - Worldview",
-    "summary": "A philosophical and ethical stance that values human agency, rationality, and well-being, often without reliance on the supernatural.",
-    "icon": "\u26A4",
-    "scores": { "ontology": 0.30, "epistemology": 0.20, "praxeology": 0.45, "axiology": 0.45, "mythology": 0.15, "cosmology": 0.20, "teleology": 0.10 },
-    "facetDescriptions": { "ontology": "Materialist; reality is human-centered and empirical.", "epistemology": "Leans empirical, values science and critical inquiry.", "praxeology": "Values individual agency and collective progress.", "axiology": "Prioritizes dignity, ethics, and human flourishing.", "mythology": "Rejects supernatural myth; may use secular narratives.", "cosmology": "Mechanistic; universe is knowable and non-personal.", "teleology": "Purpose is human-created and existential." }
-  },
-  {
-    "title": "Islam",
-    "category": "religious - Worldview",
-    "summary": "A monotheistic Abrahamic faith rooted in the revelation to Muhammad, emphasizing submission to God (Allah) and the unity of creation.",
-    "icon": "\u262A",
-    "scores": { "ontology": 0.70, "epistemology": 0.75, "praxeology": 0.60, "axiology": 0.65, "mythology": 0.80, "cosmology": 0.85, "teleology": 0.90 },
-    "facetDescriptions": { "ontology": "Idealist; Allah is the ultimate reality, creation is meaningful.", "epistemology": "Strongly revelatory; the Qur’an and prophetic tradition.", "praxeology": "Moderately hierarchical; guided by Sharia and tradition.", "axiology": "Centers on submission, justice, and mercy.", "mythology": "Rich mythos—prophets, angels, creation, judgment.", "cosmology": "Holistic; universe is ordered and purposeful.", "teleology": "Ultimate purpose is to submit to God and attain paradise." }
-  },
-  {
-    "title": "Jainism",
-    "category": "religious - Worldview",
-    "summary": "An ancient Indian religion emphasizing non-violence (ahimsa), karma, and the liberation of the soul through self-discipline.",
-    "icon": "\u534D",
-    "scores": { "ontology": 0.80, "epistemology": 0.70, "praxeology": 0.45, "axiology": 0.85, "mythology": 0.60, "cosmology": 0.70, "teleology": 0.90 },
-    "facetDescriptions": { "ontology": "Idealist; consciousness (jiva) is the core of reality.", "epistemology": "Revelatory and experiential; emphasizes inner purity.", "praxeology": "Balance between strict discipline and communal harmony.", "axiology": "Prioritizes non-violence, self-restraint, and compassion.", "mythology": "Stories of tirthankaras and cosmic cycles.", "cosmology": "Cyclical universe with moral causality.", "teleology": "Purpose is spiritual liberation from karma." }
-  },
-  {
-    "title": "Judaism",
-    "category": "religious - Worldview",
-    "summary": "An ancient monotheistic tradition centered on covenant, law (Torah), and the ongoing relationship between God and the Jewish people.",
-    "icon": "\u2721",
-    "scores": { "ontology": 0.60, "epistemology": 0.70, "praxeology": 0.60, "axiology": 0.65, "mythology": 0.85, "cosmology": 0.75, "teleology": 0.75 },
-    "facetDescriptions": { "ontology": "Idealist; God is ultimate reality, covenant is foundational.", "epistemology": "Blends revelation (Torah) and communal interpretation.", "praxeology": "Moderate hierarchy; follows halakha (Jewish law).", "axiology": "Values justice, community, and remembrance.", "mythology": "Rich stories—Exodus, prophets, exile, return.", "cosmology": "Holistic, with sacred time and divine order.", "teleology": "Purpose is tikkun olam (repairing the world) and covenantal faithfulness." }
-  },
-  {
-    "title": "Kabbalah",
-    "category": "religious - Worldview",
-    "summary": "A mystical tradition within Judaism that explores the hidden dimensions of God, creation, and the human soul.",
-    "icon": "\u05CE",
-    "scores": { "ontology": 0.80, "epistemology": 0.80, "praxeology": 0.60, "axiology": 0.70, "mythology": 0.90, "cosmology": 0.90, "teleology": 0.90 },
-    "facetDescriptions": { "ontology": "Idealist and mystical; reality is multi-layered and symbolic.", "epistemology": "Revelatory and esoteric; knowledge through mystical insight.", "praxeology": "Ritual and symbolic acts connect microcosm and macrocosm.", "axiology": "Values spiritual transformation and alignment with divine.", "mythology": "Complex mythos—sefirot, emanations, and cosmic repair.", "cosmology": "Holistic and interwoven; all creation reflects divine order.", "teleology": "Purpose is mystical union and tikkun (healing the world)." }
-  },
-  {
-    "title": "Mahayana Buddhism",
-    "category": "religious - Worldview",
-    "summary": "A broad Buddhist tradition emphasizing universal compassion, the bodhisattva path, and emptiness (shunyata).",
-    "icon": "\u06DE",
-    "scores": { "ontology": 0.55, "epistemology": 0.55, "praxeology": 0.65, "axiology": 0.80, "mythology": 0.75, "cosmology": 0.70, "teleology": 0.80 },
-    "facetDescriptions": { "ontology": "Middle way; reality is empty, relational, and compassionate.", "epistemology": "Balances empirical practice and revelatory wisdom.", "praxeology": "Focus on universal compassion (bodhisattva ideal).", "axiology": "Values selflessness, compassion, and liberation for all.", "mythology": "Expansive mythos—Buddhas, bodhisattvas, cosmic Buddhalands.", "cosmology": "Cyclical worlds and realms; interconnectedness.", "teleology": "Purpose is universal awakening (Buddhahood) for all beings." }
-  },
-  {
-    "title": "Manichaeism",
-    "category": "religious - Worldview",
-    "summary": "A dualistic religion founded by Mani, teaching the cosmic struggle between light and darkness.",
-    "icon": "\u25D2",
-    "scores": { "ontology": 0.85, "epistemology": 0.75, "praxeology": 0.45, "axiology": 0.70, "mythology": 0.95, "cosmology": 0.80, "teleology": 0.90 },
-    "facetDescriptions": { "ontology": "Dualist; reality is split between forces of light and darkness.", "epistemology": "Revelatory; emphasizes revealed, esoteric knowledge.", "praxeology": "Balance of asceticism and communal discipline.", "axiology": "Values purity, spiritual light, and the battle against evil.", "mythology": "Extensive dualistic myths and cosmic history.", "cosmology": "Cosmos is battleground; cyclical battles and restoration.", "teleology": "Purpose is liberation of light/soul from matter/darkness." }
-  },
-  {
-    "title": "Materialism",
-    "category": "philosophical - Worldview",
-    "summary": "A worldview holding that matter is the fundamental substance of reality and all phenomena can be explained by material interactions.",
-    "icon": "\u2B20",
-    "scores": { "ontology": 0.05, "epistemology": 0.10, "praxeology": 0.30, "axiology": 0.20, "mythology": 0.05, "cosmology": 0.15, "teleology": 0.05 },
-    "facetDescriptions": { "ontology": "Strongly materialist; only matter and energy are real.", "epistemology": "Empirical; prioritizes observation, science, and reason.", "praxeology": "Leans individualist; values action and progress.", "axiology": "Values tangible achievement, utility, and material well-being.", "mythology": "Low on myth; skeptical of the supernatural.", "cosmology": "Mechanistic universe governed by physical laws.", "teleology": "Existential or pragmatic; no ultimate purpose beyond nature." }
-  },
-  {
-    "title": "Modernism",
-    "category": "philosophical - Worldview",
-    "summary": "A cultural and philosophical movement prioritizing progress, rationality, and mastery over nature through science and technology.",
-    "icon": "\u232C",
-    "scores": { "ontology": 0.20, "epistemology": 0.10, "praxeology": 0.35, "axiology": 0.40, "mythology": 0.15, "cosmology": 0.20, "teleology": 0.20 },
-    "facetDescriptions": { "ontology": "Primarily materialist but open to progress and innovation.", "epistemology": "Strongly empirical; rationality and science dominate.", "praxeology": "Emphasizes agency, progress, and individual achievement.", "axiology": "Values advancement, mastery, and efficiency.", "mythology": "Skeptical of myth; uses narrative of progress.", "cosmology": "Mechanistic; universe is understandable and improvable.", "teleology": "Purpose is constructed; focus on progress and mastery." }
-  },
-  {
-    "title": "Mystical Sufism",
-    "category": "religious - Worldview",
-    "summary": "A mystical Islamic tradition seeking direct experience of the Divine through love, devotion, and spiritual practice.",
-    "icon": "\u262B",
-    "scores": { "ontology": 0.90, "epistemology": 0.85, "praxeology": 0.60, "axiology": 0.80, "mythology": 0.90, "cosmology": 0.80, "teleology": 0.95 },
-    "facetDescriptions": { "ontology": "Idealist; divine presence pervades all reality.", "epistemology": "Revelatory and experiential; knowledge through love and spiritual practice.", "praxeology": "Balances devotion, discipline, and community.", "axiology": "Values love, surrender, and spiritual intimacy.", "mythology": "Rich poetic and symbolic stories of union.", "cosmology": "Holistic; everything is a mirror of the divine.", "teleology": "Purpose is union with the divine beloved." }
-  },
-  {
-    "title": "Mysticism",
-    "category": "religious - Worldview",
-    "summary": "A spiritual orientation focused on direct experience of the divine, transcending ordinary perception and dogma.",
-    "icon": "\u2727",
-    "scores": { "ontology": 0.85, "epistemology": 0.90, "praxeology": 0.70, "axiology": 0.90, "mythology": 0.80, "cosmology": 0.85, "teleology": 0.95 },
-    "facetDescriptions": { "ontology": "Idealist; reality is spiritual and unified.", "epistemology": "Purely revelatory; truth comes from mystical insight.", "praxeology": "Focuses on inner practice, ritual, and contemplation.", "axiology": "Values direct experience, unity, and transcendence.", "mythology": "Uses myth as metaphor for spiritual ascent.", "cosmology": "Holistic; everything points to oneness.", "teleology": "Purpose is direct union with the sacred." }
-  },
-  {
-    "title": "Naturalism",
-    "category": "philosophical - Worldview",
-    "summary": "A worldview asserting that everything arises from natural properties and causes, excluding supernatural explanations.",
-    "icon": "\u2698",
-    "scores": { "ontology": 0.10, "epistemology": 0.15, "praxeology": 0.35, "axiology": 0.30, "mythology": 0.10, "cosmology": 0.20, "teleology": 0.10 },
-    "facetDescriptions": { "ontology": "Materialist; nature is all that exists.", "epistemology": "Strongly empirical; science is primary.", "praxeology": "Focus on practical action and rational inquiry.", "axiology": "Values knowledge, evidence, and progress.", "mythology": "Minimal; avoids supernatural or mythic explanations.", "cosmology": "Mechanistic and lawful; cosmos is self-organizing.", "teleology": "Existential; purpose is self-defined, not transcendent." }
-  },
-  {
-    "title": "Neoplatonism",
-    "category": "philosophical - Worldview",
-    "summary": "A philosophical tradition teaching that all reality emanates from a single source (the One), emphasizing spiritual ascent.",
-    "icon": "\u29BE",
-    "scores": { "ontology": 0.90, "epistemology": 0.80, "praxeology": 0.55, "axiology": 0.75, "mythology": 0.85, "cosmology": 0.90, "teleology": 0.90 },
-    "facetDescriptions": { "ontology": "Idealist; all things emanate from the One.", "epistemology": "Revelatory; knowledge through contemplation and hierarchy.", "praxeology": "Ascent through disciplines, ethics, and community.", "axiology": "Values ascent, contemplation, and the Good.", "mythology": "Uses myth and allegory for spiritual teaching.", "cosmology": "Holistic; cosmos is hierarchical and interrelated.", "teleology": "Ultimate purpose is return to unity with the One." }
-  },
-  {
-    "title": "Nihilism",
-    "category": "philosophical - Worldview",
-    "summary": "A worldview that rejects inherent meaning, purpose, or value in life, often as a response to the collapse of previous certainties.",
-    "icon": "\u25CC",
-    "scores": { "ontology": 0.10, "epistemology": 0.10, "praxeology": 0.15, "axiology": 0.05, "mythology": 0.00, "cosmology": 0.05, "teleology": 0.00 },
-    "facetDescriptions": { "ontology": "Materialist or skeptical; denies higher realities.", "epistemology": "Empirical, skeptical of all dogmas and certainty.", "praxeology": "Often non-committal or individualistic; can be passive.", "axiology": "No ultimate values or sources of meaning.", "mythology": "Absence of narrative; skeptical of myth.", "cosmology": "Mechanistic or arbitrary; cosmos lacks intrinsic order.", "teleology": "No ultimate purpose; existential indifference." }
-  },
-  {
-    "title": "Panpsychism",
-    "category": "philosophical - Worldview",
-    "summary": "A philosophical view that consciousness or mind is a fundamental and ubiquitous aspect of reality.",
-    "icon": "\u2738",
-    "scores": { "ontology": 0.65, "epistemology": 0.50, "praxeology": 0.45, "axiology": 0.50, "mythology": 0.55, "cosmology": 0.60, "teleology": 0.55 },
-    "facetDescriptions": { "ontology": "Relational/idealist; all things possess some degree of mind or experience.", "epistemology": "Balances empirical and revelatory approaches.", "praxeology": "Focus on holistic and respectful engagement with the world.", "axiology": "Values interconnectedness, diversity, and awareness.", "mythology": "Uses narrative to bridge science and spirit.", "cosmology": "Holistic; universe is alive and sentient at all levels.", "teleology": "Purpose is evolving self-awareness and participation in reality." }
-  },
-  {
-    "title": "Pantheism",
-    "category": "philosophical - Worldview",
-    "summary": "A doctrine identifying the universe itself with the divine—God is all, and all is God.",
-    "icon": "\u273A",
-    "scores": { "ontology": 0.95, "epistemology": 0.70, "praxeology": 0.55, "axiology": 0.80, "mythology": 0.85, "cosmology": 0.95, "teleology": 0.90 },
-    "facetDescriptions": { "ontology": "Idealist; the universe and the divine are identical.", "epistemology": "Revelatory; intuition and holistic insight are valued.", "praxeology": "Holistic; harmonious engagement with all things.", "axiology": "Values sacredness of nature, unity, and belonging.", "mythology": "Uses cosmic myths of unity and creation.", "cosmology": "Holistic; universe is divine order and process.", "teleology": "Purpose is realization and celebration of divine unity." }
-  },
-  {
-    "title": "Postmodernism",
-    "category": "philosophical - Worldview",
-    "summary": "A skeptical and critical orientation challenging grand narratives, objectivity, and stable meaning.",
-    "icon": "\u2307",
-    "scores": { "ontology": 0.30, "epistemology": 0.70, "praxeology": 0.45, "axiology": 0.35, "mythology": 0.50, "cosmology": 0.30, "teleology": 0.30 },
-    "facetDescriptions": { "ontology": "Fluid; reality is constructed, not fixed.", "epistemology": "Relativist; knowledge is context-dependent.", "praxeology": "Critical, open-ended, often egalitarian.", "axiology": "Values diversity, pluralism, critique of authority.", "mythology": "Deconstructs grand narratives and meta-myths.", "cosmology": "Rejects fixed cosmic order; emphasizes contingency.", "teleology": "Purpose is provisional, self-chosen, or ironic." }
-  },
-  {
-    "title": "Process Philosophy",
-    "category": "philosophical - Worldview",
-    "summary": "A metaphysical approach emphasizing becoming, change, and relationality as more fundamental than substance.",
-    "icon": "\u2942",
-    "scores": { "ontology": 0.65, "epistemology": 0.55, "praxeology": 0.50, "axiology": 0.60, "mythology": 0.60, "cosmology": 0.70, "teleology": 0.65 },
-    "facetDescriptions": { "ontology": "Relational; process and change are fundamental.", "epistemology": "Dynamic blend of empirical and intuitive insight.", "praxeology": "Emphasizes adaptation and interconnected action.", "axiology": "Values creativity, novelty, mutuality.", "mythology": "Narratives of evolution, emergence, and transformation.", "cosmology": "Holistic; universe as an unfolding process.", "teleology": "Purpose evolves in dynamic, co-creative fashion." }
-  },
-  {
-    "title": "Quakerism",
-    "category": "religious - Worldview",
-    "summary": "A Christian tradition emphasizing direct inner experience, simplicity, pacifism, and equality.",
-    "icon": "\u26AD",
-    "scores": { "ontology": 0.45, "epistemology": 0.65, "praxeology": 0.65, "axiology": 0.80, "mythology": 0.55, "cosmology": 0.50, "teleology": 0.65 },
-    "facetDescriptions": { "ontology": "Balanced; recognizes both inner light and outward world.", "epistemology": "Revelatory; truth comes from inner experience.", "praxeology": "Egalitarian, pacifist, consensus-based.", "axiology": "Values simplicity, peace, justice, equality.", "mythology": "Focuses on testimony and lived story over dogma.", "cosmology": "Holistic; sees spirit at work in the world.", "teleology": "Purpose is living in accord with inner light and community." }
-  },
-  {
-    "title": "Rationalism",
-    "category": "philosophical - Worldview",
-    "summary": "A philosophical approach emphasizing reason and logic as the primary source of knowledge.",
-    "icon": "\u222B",
-    "scores": { "ontology": 0.30, "epistemology": 0.05, "praxeology": 0.35, "axiology": 0.45, "mythology": 0.20, "cosmology": 0.30, "teleology": 0.25 },
-    "facetDescriptions": { "ontology": "Materialist or dualist; world apprehended through intellect.", "epistemology": "Rational; reason is the supreme guide.", "praxeology": "Analytical, often individualist.", "axiology": "Values truth, coherence, clarity.", "mythology": "Skeptical of myth; values philosophical allegory.", "cosmology": "Universe as an ordered, rational structure.", "teleology": "Purpose is intellectual mastery or comprehension." }
-  },
-  {
-    "title": "Romanticism",
-    "category": "custom - Worldview",
-    "summary": "A cultural and philosophical movement emphasizing emotion, nature, and the creative imagination.",
-    "icon": "\u10E6",
-    "scores": { "ontology": 0.50, "epistemology": 0.60, "praxeology": 0.60, "axiology": 0.75, "mythology": 0.70, "cosmology": 0.60, "teleology": 0.60 },
-    "facetDescriptions": { "ontology": "Relational; reality is infused with emotion and spirit.", "epistemology": "Valued intuition, imagination, and subjective experience.", "praxeology": "Creative, expressive, and often rebellious.", "axiology": "Values beauty, authenticity, emotion.", "mythology": "Rich in legend, poetic myth, and symbolism.", "cosmology": "Nature as living, mysterious, and sublime.", "teleology": "Purpose is self-realization and creative fulfillment." }
-  },
-  {
-    "title": "Rosicrucianism",
-    "category": "religious - Worldview",
-    "summary": "A Western esoteric movement blending alchemy, mysticism, and the pursuit of hidden wisdom.",
-    "icon": "\u2720",
-    "scores": { "ontology": 0.75, "epistemology": 0.85, "praxeology": 0.50, "axiology": 0.75, "mythology": 0.80, "cosmology": 0.80, "teleology": 0.80 },
-    "facetDescriptions": { "ontology": "Idealist; spirit is primary, matter as transformation.", "epistemology": "Revelatory; wisdom through mystical insight and symbolism.", "praxeology": "Ritual, discipline, and initiatory practice.", "axiology": "Values wisdom, purity, transformation.", "mythology": "Alchemy, spiritual journeys, symbolic stories.", "cosmology": "Esoteric; cosmos as layered and mysterious.", "teleology": "Purpose is spiritual ascent and universal harmony." }
-  },
-  {
-    "title": "Scientific Materialism",
-    "category": "philosophical - Worldview",
-    "summary": "A worldview grounded in physicalism and empirical science. Reality is ultimately material and measurable.",
-    "icon": "\u23DA",
-    "scores": { "ontology": 0.05, "epistemology": 0.05, "praxeology": 0.35, "axiology": 0.20, "mythology": 0.05, "cosmology": 0.10, "teleology": 0.05 },
-    "facetDescriptions": { "ontology": "Strong materialism; everything is reducible to matter.", "epistemology": "Empirical; only verifiable facts count.", "praxeology": "Applied, rational, technologically oriented.", "axiology": "Values scientific progress, truth, skepticism.", "mythology": "Myth seen as narrative, not truth.", "cosmology": "Mechanistic, governed by physical law.", "teleology": "No transcendent purpose; focus on scientific mastery." }
-  },
-  {
-    "title": "Secular Humanism",
-    "category": "philosophical - Worldview",
-    "summary": "A worldview prioritizing human welfare, ethics, and rationality without reference to the supernatural.",
-    "icon": "\u26A4",
-    "scores": { "ontology": 0.20, "epistemology": 0.15, "praxeology": 0.55, "axiology": 0.65, "mythology": 0.20, "cosmology": 0.20, "teleology": 0.20 },
-    "facetDescriptions": { "ontology": "Naturalist; humanity as part of the natural world.", "epistemology": "Rational and empirical; skeptical of revelation.", "praxeology": "Human-centered; values agency, education, and progress.", "axiology": "Values dignity, autonomy, and human flourishing.", "mythology": "Appreciates myth for metaphor, not literal truth.", "cosmology": "Materialist; universe explained by science.", "teleology": "Purpose is self-chosen, human welfare." }
-  },
-  {
-    "title": "Shamanism",
-    "category": "religious - Worldview",
-    "summary": "A range of animistic traditions emphasizing the healer’s journey between worlds for wisdom and transformation.",
-    "icon": "\u269A",
-    "scores": { "ontology": 0.75, "epistemology": 0.85, "praxeology": 0.60, "axiology": 0.75, "mythology": 0.85, "cosmology": 0.90, "teleology": 0.85 },
-    "facetDescriptions": { "ontology": "Spirit-infused; all things are alive and interconnected.", "epistemology": "Experiential and revelatory; knowledge gained through journeying.", "praxeology": "Healer’s path; transformative rituals and acts.", "axiology": "Values harmony, healing, and respect for all life.", "mythology": "Rich tradition of cosmological journeys and stories.", "cosmology": "Holistic; layered worlds and energies.", "teleology": "Purpose is maintaining balance, harmony, and transformation." }
-  },
-  {
-    "title": "Shinto",
-    "category": "religious - Worldview",
-    "summary": "The indigenous spirituality of Japan, centering on reverence for kami (spirits) in nature and ancestral tradition.",
-    "icon": "\u273E",
-    "scores": { "ontology": 0.75, "epistemology": 0.70, "praxeology": 0.60, "axiology": 0.70, "mythology": 0.80, "cosmology": 0.80, "teleology": 0.75 },
-    "facetDescriptions": { "ontology": "Animist; reality is alive with kami (spirits).", "epistemology": "Tradition and direct, ritual experience.", "praxeology": "Community ritual, respect, seasonal celebration.", "axiology": "Values purity, harmony, gratitude, and nature.", "mythology": "Myths of the kami, creation, and ancestors.", "cosmology": "Nature-based; world as sacred landscape.", "teleology": "Purpose is living in accord with nature and ancestors." }
-  },
-  {
-    "title": "Sikhism",
-    "category": "religious - Worldview",
-    "summary": "A monotheistic Indian religion founded by Guru Nanak, teaching devotion, equality, and service.",
-    "icon": "\u262C",
-    "scores": { "ontology": 0.65, "epistemology": 0.65, "praxeology": 0.75, "axiology": 0.85, "mythology": 0.70, "cosmology": 0.65, "teleology": 0.90 },
-    "facetDescriptions": { "ontology": "Unified; one transcendent reality, present in all.", "epistemology": "Revelatory and devotional; knowledge through scripture and experience.", "praxeology": "Service (seva), equality, honest living.", "axiology": "Values compassion, justice, humility.", "mythology": "Stories of gurus and martyrs, unity of faith.", "cosmology": "Creation as divine manifestation.", "teleology": "Purpose is union with the Divine through devotion and service." }
-  },
-  {
-    "title": "Stoicism",
-    "category": "philosophical - Worldview",
-    "summary": "A philosophy of rational resilience and self-mastery, emphasizing the cultivation of virtue and acceptance of nature.",
-    "icon": "\u221D",
-    "scores": { "ontology": 0.30, "epistemology": 0.20, "praxeology": 0.65, "axiology": 0.75, "mythology": 0.30, "cosmology": 0.40, "teleology": 0.30 },
-    "facetDescriptions": { "ontology": "Materialist or dualist; reason is part of nature.", "epistemology": "Reasoned reflection; self-examination.", "praxeology": "Virtuous action, self-control, resilience.", "axiology": "Values wisdom, virtue, equanimity.", "mythology": "Draws from Greco-Roman myths for exemplars.", "cosmology": "Universe as rational, ordered whole.", "teleology": "Purpose is to live in harmony with nature and reason." }
-  },
-  {
-    "title": "Sufism",
-    "category": "religious - Worldview",
-    "summary": "The mystical dimension of Islam, focusing on direct experience of God through love and devotion.",
-    "icon": "\u06E9",
-    "scores": { "ontology": 0.80, "epistemology": 0.90, "praxeology": 0.70, "axiology": 0.90, "mythology": 0.80, "cosmology": 0.80, "teleology": 0.95 },
-    "facetDescriptions": { "ontology": "Unity of all being; Divine presence in all.", "epistemology": "Revelatory; knowledge through love, poetry, and ecstatic practice.", "praxeology": "Devotional acts, dance, and ritual.", "axiology": "Values love, compassion, annihilation of ego.", "mythology": "Stories of saints, union with the Beloved.", "cosmology": "Cosmic love and unity.", "teleology": "Purpose is union with God, annihilation in Divine." }
-  },
-  {
-    "title": "Taoism",
-    "category": "religious - Worldview",
-    "summary": "A spiritual tradition rooted in the Tao, the ineffable source of all. Emphasizes harmony, non-action, and flowing with nature.",
-    "icon": "\u2635",
-    "scores": { "ontology": 0.70, "epistemology": 0.70, "praxeology": 0.60, "axiology": 0.65, "mythology": 0.70, "cosmology": 0.85, "teleology": 0.80 },
-    "facetDescriptions": { "ontology": "Relational; Tao as underlying reality.", "epistemology": "Intuitive, mystical, natural wisdom.", "praxeology": "Wu-wei (non-action), living in flow.", "axiology": "Values harmony, humility, spontaneity.", "mythology": "Taoist classics, mythic immortals, cosmic cycles.", "cosmology": "Natural cycles, yin-yang balance.", "teleology": "Purpose is attunement to Tao, spiritual immortality." }
-  },
-  {
-    "title": "Theosophy",
-    "category": "religious - Worldview",
-    "summary": "A mystical movement synthesizing Eastern and Western traditions, teaching spiritual evolution, karma, and hidden wisdom.",
-    "icon": "\u25EC",
-    "scores": { "ontology": 0.80, "epistemology": 0.80, "praxeology": 0.55, "axiology": 0.80, "mythology": 0.85, "cosmology": 0.80, "teleology": 0.90 },
-    "facetDescriptions": { "ontology": "Spiritualist; multi-layered worlds, hidden realities.", "epistemology": "Esoteric; knowledge through study and inner revelation.", "praxeology": "Initiatory, service, meditation.", "axiology": "Values evolution, spiritual growth, altruism.", "mythology": "Synthesis of East and West, cosmic myth.", "cosmology": "Emanations, cosmic cycles, hidden laws.", "teleology": "Purpose is spiritual evolution and unity." }
-  },
-  {
-    "title": "Theravada Buddhism",
-    "category": "religious - Worldview",
-    "summary": "The earliest form of Buddhism, emphasizing individual enlightenment through ethical conduct, meditation, and insight.",
-    "icon": "\u29BF",
-    "scores": { "ontology": 0.45, "epistemology": 0.55, "praxeology": 0.60, "axiology": 0.65, "mythology": 0.60, "cosmology": 0.50, "teleology": 0.65 },
-    "facetDescriptions": { "ontology": "Emptiness, impermanence, conditioned arising.", "epistemology": "Direct meditative insight (vipassana).", "praxeology": "Eightfold Path, monastic discipline.", "axiology": "Values non-harm, equanimity, clarity.", "mythology": "Stories of Buddha and arahants.", "cosmology": "Cycle of samsara, karma, and rebirth.", "teleology": "Purpose is liberation (nirvana)." }
-  },
-  {
-    "title": "Transcendentalism",
-    "category": "philosophical - Worldview",
-    "summary": "A 19th-century American movement emphasizing the inherent goodness of people and nature, and the primacy of intuition.",
-    "icon": "\u2732",
-    "scores": { "ontology": 0.65, "epistemology": 0.70, "praxeology": 0.60, "axiology": 0.75, "mythology": 0.65, "cosmology": 0.65, "teleology": 0.75 },
-    "facetDescriptions": { "ontology": "Nature is infused with spirit; all is interconnected.", "epistemology": "Intuitive, individual revelation.", "praxeology": "Self-reliance, living simply and authentically.", "axiology": "Values self-trust, harmony with nature, idealism.", "mythology": "Nature and individual as sacred symbols.", "cosmology": "Unity of all beings, nature as expression of spirit.", "teleology": "Purpose is self-realization and communion with nature." }
-  },
-  {
-    "title": "Transhumanism",
-    "category": "philosophical - Worldview",
-    "summary": "A movement advocating for transforming the human condition via advanced technology, reason, and science.",
-    "icon": "\u238B",
-    "scores": { "ontology": 0.15, "epistemology": 0.15, "praxeology": 0.80, "axiology": 0.70, "mythology": 0.30, "cosmology": 0.30, "teleology": 0.20 },
-    "facetDescriptions": { "ontology": "Materialist; reality as programmable, upgradable.", "epistemology": "Empirical, scientific, technophilic.", "praxeology": "Innovation, adaptation, enhancement.", "axiology": "Values progress, autonomy, mastery.", "mythology": "Futurist, technological utopias.", "cosmology": "Universe as modifiable, open-ended.", "teleology": "Purpose is transcendence of limitation, self-evolution." }
-  },
-  {
-    "title": "Unitarian Universalism",
-    "category": "religious - Worldview",
-    "summary": "A pluralistic faith embracing wisdom from all traditions and affirming freedom of belief and conscience.",
-    "icon": "\u222A",
-    "scores": { "ontology": 0.50, "epistemology": 0.65, "praxeology": 0.65, "axiology": 0.80, "mythology": 0.65, "cosmology": 0.60, "teleology": 0.65 },
-    "facetDescriptions": { "ontology": "Pluralist; embraces many metaphysical views.", "epistemology": "Open, dialogical, eclectic.", "praxeology": "Inclusive, community-oriented.", "axiology": "Values freedom, dignity, compassion.", "mythology": "Draws from many religious and philosophical stories.", "cosmology": "Cosmos as diverse and evolving.", "teleology": "Purpose is to seek truth and meaning freely." }
-  },
-  {
-    "title": "Vedanta",
-    "category": "religious - Worldview",
-    "summary": "A major school of Hindu philosophy teaching the unity of Atman (self) and Brahman (absolute reality).",
-    "icon": "\u0905",
-    "scores": { "ontology": 0.95, "epistemology": 0.85, "praxeology": 0.65, "axiology": 0.80, "mythology": 0.80, "cosmology": 0.90, "teleology": 0.95 },
-    "facetDescriptions": { "ontology": "Non-dual; self and ultimate reality are one.", "epistemology": "Direct realization, scriptural study, meditation.", "praxeology": "Discipline, devotion, renunciation.", "axiology": "Values liberation, knowledge, surrender.", "mythology": "Vedic stories, cosmic cycles.", "cosmology": "Universe as manifestation of Brahman.", "teleology": "Purpose is moksha—liberation from illusion." }
-  },
-  {
-    "title": "Wicca",
-    "category": "religious - Worldview",
-    "summary": "A modern pagan religion honoring nature, cycles, and the divine feminine and masculine.",
-    "icon": "\u263D",
-    "scores": { "ontology": 0.80, "epistemology": 0.80, "praxeology": 0.70, "axiology": 0.85, "mythology": 0.90, "cosmology": 0.90, "teleology": 0.80 },
-    "facetDescriptions": { "ontology": "Spirit and matter are interwoven, nature is alive.", "epistemology": "Intuitive, ritual, experiential.", "praxeology": "Ritual magic, cycles of the moon, seasonal rites.", "axiology": "Values harmony, balance, sacredness of nature.", "mythology": "Goddess and god, mythic cycles.", "cosmology": "World as enchanted and cyclical.", "teleology": "Purpose is attunement with cycles, self-actualization." }
-  },
-  {
-    "title": "Zen Buddhism",
-    "category": "religious - Worldview",
-    "summary": "A school of Mahayana Buddhism emphasizing direct, wordless experience and sudden enlightenment.",
-    "icon": "\u29BE",
-    "scores": { "ontology": 0.65, "epistemology": 0.80, "praxeology": 0.80, "axiology": 0.80, "mythology": 0.70, "cosmology": 0.60, "teleology": 0.75 },
-    "facetDescriptions": { "ontology": "Emptiness, non-duality, radical presence.", "epistemology": "Direct experience, beyond words or concepts.", "praxeology": "Meditation (zazen), spontaneous action.", "axiology": "Values mindfulness, simplicity, compassion.", "mythology": "Koans, teaching stories, paradox.", "cosmology": "All is Buddha-nature, reality is just as it is.", "teleology": "Purpose is awakening here and now." }
-  },
-  {
-    "title": "Zoroastrianism",
-    "category": "religious - Worldview",
-    "summary": "An ancient Persian religion centering on the cosmic struggle between truth and falsehood, light and darkness.",
-    "icon": "\u29CA",
-    "scores": { "ontology": 0.55, "epistemology": 0.65, "praxeology": 0.70, "axiology": 0.75, "mythology": 0.80, "cosmology": 0.60, "teleology": 0.80 },
-    "facetDescriptions": { "ontology": "Dualistic; world of good and evil, light and dark.", "epistemology": "Scriptural, ritual, moral discernment.", "praxeology": "Truth-telling, purity, fire ritual.", "axiology": "Values honesty, righteousness, order.", "mythology": "Myths of Ahura Mazda, Angra Mainyu, cosmic struggle.", "cosmology": "Order (asha) vs. chaos (druj), cosmic history.", "teleology": "Purpose is to aid truth and light, achieve renewal." }
-  }
-]
+    const title = item.title || item.name;
+    const id = title.toLowerCase().replace(/\s+/g, '_').replace(/[^\w-]+/g, '');
+
+    let domainScoresArray: DomainScore[] = [];
+    const scoresSource = item.scores || item.domainScores;
+    if (scoresSource && typeof scoresSource === 'object') {
+      domainScoresArray = FACET_NAMES.map(facetKey => {
+        const scoreKeyLower = facetKey.toLowerCase() as keyof typeof scoresSource;
+        const scoreKeyOriginal = facetKey as keyof typeof scoresSource;
+        let score = 0.5; // Default score
+        if (typeof scoresSource[scoreKeyLower] === 'number') {
+          score = scoresSource[scoreKeyLower];
+        } else if (typeof scoresSource[scoreKeyOriginal] === 'number') {
+          score = scoresSource[scoreKeyOriginal];
+        }
+        return { facetName: facetKey, score: Math.max(0, Math.min(1, Number(score))) };
+      });
+    } else {
+      // console.warn(`Missing or invalid scores for item: ${title}`);
+      domainScoresArray = FACET_NAMES.map(name => ({ facetName: name, score: 0.5 }));
+    }
+
+    const facetSummariesSource = item.facetDescriptions || item.facetSummaries || item.facetSummary;
+    const processedFacetSummaries: { [K_FacetName in FacetName]?: string } = {};
+    if (facetSummariesSource && typeof facetSummariesSource === 'object') {
+      for (const facetKey of FACET_NAMES) {
+        const summaryKeyLower = facetKey.toLowerCase() as keyof typeof facetSummariesSource;
+        const summaryKeyOriginal = facetKey as keyof typeof facetSummariesSource;
+        let summary = `Default summary for ${facetKey}...`; 
+        if (typeof facetSummariesSource[summaryKeyLower] === 'string') {
+          summary = facetSummariesSource[summaryKeyLower];
+        } else if (typeof facetSummariesSource[summaryKeyOriginal] === 'string') {
+          summary = facetSummariesSource[summaryKeyOriginal];
+        }
+        processedFacetSummaries[facetKey] = summary;
+      }
+    } else {
+      // console.warn(`Missing or invalid facet summaries for item: ${title}`);
+      FACET_NAMES.forEach(facetKey => {
+        processedFacetSummaries[facetKey] = `Information for ${facetKey} is not available.`;
+      });
+    }
+
+    let category: CodexEntry['category'] = 'custom';
+    const itemCategoryRaw = (item.category || '');
+    const itemCategory = itemCategoryRaw.toLowerCase().split(' ')[0]; // Take first word for category
+
+    if (['philosophical', 'religious', 'archetypal', 'spiritual', 'custom'].includes(itemCategory)) {
+      category = itemCategory as CodexEntry['category'];
+    } else if (item.tags && (item.tags as string[]).some(tag => ['philosophical', 'religious', 'archetypal', 'spiritual'].includes(tag))) {
+      category = (item.tags as string[]).find(tag => ['philosophical', 'religious', 'archetypal', 'spiritual'].includes(tag)) as CodexEntry['category'] || 'custom';
+    }
+
+
+    const tags = Array.isArray(item.tags) ? item.tags : (typeof item.tags === 'string' ? [item.tags] : []);
+    if (category !== 'custom' && !tags.includes(category)) {
+        tags.push(category);
+    }
+    const idTag = title.toLowerCase().replace(/\s+/g, '_').replace(/[^\w-]+/g, '');
+    if (!tags.includes(idTag)) {
+        tags.push(idTag);
+    }
+
+
+    return {
+      id,
+      title,
+      summary: item.summary || "No summary available.",
+      domainScores: domainScoresArray,
+      category,
+      isArchetype: category === 'archetypal' || (Array.isArray(item.tags) && (item.tags as string[]).includes('archetypal')),
+      createdAt: item.createdAt || new Date().toISOString(),
+      tags,
+      facetSummaries: processedFacetSummaries,
+      icon: item.icon || undefined, 
+    };
+  }).filter(item => item !== null) as CodexEntry[]; // Filter out nulls from skipped items
+};
+
+
+export default function CodexPage() {
+  const [searchTerm, setSearchTerm] = useState("");
+  const [sortBy, setSortBy] = useState("title"); // 'title', 'category', 'dominantFacet'
+  const [activeCategory, setActiveCategory] = useState<CodexEntry['category'] | "all">("all");
+  const [selectedEntry, setSelectedEntry] = useState<CodexEntry | null>(null);
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+  const { addSavedWorldview, savedWorldviews } = useWorldview();
+  const { toast } = useToast();
+
+  const initialMappedEntries = useMemo(() => {
+    try {
+      const combinedRawData = [
+        ...LATEST_CODEX_UPDATE_BATCH, 
+        ...ADDITIONAL_CODEX_DATA,
+        ...BASE_CODEX_DATA
+      ];
+      
+      const uniqueEntriesData: any[] = [];
+      const uniqueTitles = new Set<string>();
+
+      for (const item of combinedRawData) {
+        const title = (item.title || item.name || '').toLowerCase().trim();
+        if (title && !uniqueTitles.has(title)) {
+          // Standardize to use 'title' preferentially for mapping
+          const standardizedItem = { ...item, title: item.title || item.name };
+          delete standardizedItem.name; // remove 'name' if 'title' was used from it
+          uniqueEntriesData.push(standardizedItem);
+          uniqueTitles.add(title);
+        }
+      }
+      return mapRawDataToCodexEntries(uniqueEntriesData);
+    } catch (error) {
+      console.error("Error processing Codex data arrays in useMemo:", error);
+      return []; // Return empty array on error to prevent page crash
+    }
+  }, []);
+
+
+  const filteredAndSortedEntries = useMemo(() => {
+    let entries = [...initialMappedEntries];
+
+    // Filter by active category
+    if (activeCategory !== "all") {
+      entries = entries.filter(entry => entry.category === activeCategory);
+    }
+
+    // Filter by search term
+    if (searchTerm) {
+      entries = entries.filter(entry =>
+        entry.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        entry.summary.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (entry.tags && entry.tags.some(tag => tag.toLowerCase().includes(searchTerm.toLowerCase())))
+      );
+    }
+
+    // Sort entries
+    if (sortBy === "title") {
+      entries.sort((a, b) => a.title.localeCompare(b.title));
+    } else if (sortBy === "category") {
+      entries.sort((a, b) => a.category.localeCompare(b.category) || a.title.localeCompare(b.title));
+    } else if (sortBy === "dominantFacet") {
+      entries.sort((a, b) => {
+        const dominantA = getDominantFacet(a.domainScores);
+        const dominantB = getDominantFacet(b.domainScores);
+        return dominantA.localeCompare(dominantB) || a.title.localeCompare(b.title);
+      });
+    }
+    return entries;
+  }, [initialMappedEntries, activeCategory, searchTerm, sortBy]);
+
+  const allCategories = useMemo(() => {
+    const categories = new Set(initialMappedEntries.map(entry => entry.category));
+    return ["all", ...Array.from(categories).sort()] as (CodexEntry['category'] | "all")[];
+  }, [initialMappedEntries]);
+
+  const handleOpenDrawer = (entry: CodexEntry) => {
+    setSelectedEntry(entry);
+    setIsDrawerOpen(true);
+  };
+
+  const handleSaveCodexEntry = (entryToSave: CodexEntry) => {
+    if (!entryToSave) return;
+    const isAlreadySaved = savedWorldviews.some(p => p.id === entryToSave.id || p.title.toLowerCase() === entryToSave.title.toLowerCase());
+    if (isAlreadySaved) {
+      toast({ title: "Already Saved", description: `"${entryToSave.title}" is already in your library.` });
+      return;
+    }
+    addSavedWorldview({ ...entryToSave }); // Spread to ensure all props are passed
+  };
+  
+
+  const CodexCard = ({ entry }: { entry: CodexEntry }) => {
+    const dominantFacet = getDominantFacet(entry.domainScores);
+    const titleColor = getFacetColorHsl(dominantFacet);
+    const isSaved = savedWorldviews.some(p => p.id === entry.id || p.title.toLowerCase() === entry.title.toLowerCase());
+
+    return (
+      <Card className="flex flex-col overflow-hidden glassmorphic-card hover:shadow-primary/20 transition-shadow duration-300 h-full">
+        <CardHeader className="pb-3">
+          <div className="flex items-start justify-between">
+            <div className="flex items-center gap-2">
+              {entry.icon && <span className="text-2xl mr-1" style={{ color: titleColor, filter: 'saturate(1.5)' }}>{entry.icon}</span>}
+              <CardTitle className="text-xl line-clamp-1" style={{ color: titleColor }}>
+                {entry.title}
+              </CardTitle>
+            </div>
+            <Badge variant={entry.category === 'archetypal' ? 'default' : 'secondary'} className="text-xs capitalize shrink-0">
+              {entry.category}
+            </Badge>
+          </div>
+          <CardDescription className="h-12 line-clamp-2 text-xs pt-1">{entry.summary}</CardDescription>
+        </CardHeader>
+        <CardContent className="flex-grow flex flex-col justify-center items-center pt-0 pb-3">
+          <TriangleChart scores={entry.domainScores} width={180} height={156} className="!p-0 !bg-transparent !shadow-none !backdrop-blur-none mb-2" />
+        </CardContent>
+        <CardFooter className="p-3 border-t border-border/30 mt-auto grid grid-cols-2 gap-2">
+           <Button variant="outline" size="sm" className="w-full text-xs" onClick={() => handleOpenDrawer(entry)}>
+            View Details <Icons.chevronRight className="ml-1 h-3 w-3" />
+          </Button>
+          <Button
+            variant={isSaved ? "default" : "outline"}
+            size="sm"
+            className="w-full text-xs"
+            onClick={() => handleSaveCodexEntry(entry)}
+            disabled={isSaved}
+          >
+            {isSaved ? <Icons.check className="mr-1 h-3 w-3" /> : <Icons.saved className="mr-1 h-3 w-3" />}
+            {isSaved ? "Saved" : "Save"}
+          </Button>
+        </CardFooter>
+      </Card>
+    );
+  };
+
+
+  return (
+    <div className="container mx-auto py-8">
+      <header className="mb-10 text-center">
+        <h1 className="text-4xl font-bold mb-2">The Meta-Prism Codex</h1>
+        <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
+          An evolving library of worldviews, philosophical systems, and archetypal profiles. Explore diverse ways of constructing reality.
+        </p>
+      </header>
+
+      {/* Filters and Search */}
+      <Card className="mb-8 p-4 sm:p-6 glassmorphic-card">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
+          <div className="md:col-span-2">
+            <label htmlFor="search-codex" className="block text-sm font-medium text-muted-foreground mb-1">Search Codex</label>
+            <Input
+              id="search-codex"
+              type="text"
+              placeholder="Search by title, summary, or tag..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="bg-background/50"
+            />
+          </div>
+          <div>
+            <label htmlFor="sort-by" className="block text-sm font-medium text-muted-foreground mb-1">Sort By</label>
+            <Select value={sortBy} onValueChange={setSortBy}>
+              <SelectTrigger id="sort-by" className="bg-background/50">
+                <SelectValue placeholder="Sort by..." />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="title">Title</SelectItem>
+                <SelectItem value="category">Category</SelectItem>
+                <SelectItem value="dominantFacet">Dominant Facet</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
+        <div className="mt-4">
+          <p className="text-sm font-medium text-muted-foreground mb-2">Filter by Category:</p>
+          <div className="flex flex-wrap gap-2">
+            {allCategories.map(cat => (
+              <Button
+                key={cat}
+                variant={activeCategory === cat ? "default" : "outline"}
+                size="sm"
+                onClick={() => setActiveCategory(cat)}
+                className="capitalize text-xs"
+              >
+                {cat}
+              </Button>
+            ))}
+          </div>
+        </div>
+      </Card>
+      
+      {filteredAndSortedEntries.length > 0 ? (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          {filteredAndSortedEntries.map((entry) => {
+             // Defensive check
+            if (!entry || typeof entry.id === 'undefined' || typeof entry.title === 'undefined' || !Array.isArray(entry.domainScores)) {
+              // console.warn("Skipping rendering of incomplete/invalid entry:", entry);
+              return null;
+            }
+            return <CodexCard key={entry.id} entry={entry} />;
+          })}
+        </div>
+      ) : (
+        <div className="text-center py-12">
+          <Icons.search className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
+          <p className="text-xl text-muted-foreground">No entries match your filters.</p>
+          <p className="text-sm text-muted-foreground">Try adjusting your search or category selection.</p>
+        </div>
+      )}
+
+      {/* Details Drawer */}
+      {selectedEntry && (
+        <Sheet open={isDrawerOpen} onOpenChange={setIsDrawerOpen}>
+          <SheetContent className="w-full max-w-md sm:max-w-lg md:max-w-xl lg:max-w-2xl p-0 glassmorphic-card !bg-card/80 backdrop-blur-xl" side="right">
+            <ScrollArea className="h-full">
+              <div className="p-6">
+                <SheetHeader className="mb-6">
+                  <div className="flex justify-between items-start">
+                    <div className="flex items-center gap-3">
+                      {selectedEntry.icon && <span className="text-4xl" style={{color: getFacetColorHsl(getDominantFacet(selectedEntry.domainScores))}}>{selectedEntry.icon}</span>}
+                      <div>
+                        <SheetTitle className="text-3xl mb-1" style={{color: getFacetColorHsl(getDominantFacet(selectedEntry.domainScores))}}>
+                          {selectedEntry.title}
+                        </SheetTitle>
+                        <SheetDescription className="text-base capitalize">{selectedEntry.category} Profile</SheetDescription>
+                      </div>
+                    </div>
+                    <SheetClose asChild>
+                      <Button variant="ghost" size="icon" className="rounded-full">
+                        <Icons.close className="h-5 w-5" />
+                      </Button>
+                    </SheetClose>
+                  </div>
+                </SheetHeader>
+                
+                <p className="mb-6 text-muted-foreground leading-relaxed">{selectedEntry.summary}</p>
+
+                <div className="mb-6">
+                   <TriangleChart scores={selectedEntry.domainScores} width={250} height={217} className="mx-auto !p-0 !bg-transparent !shadow-none !backdrop-blur-none" />
+                </div>
+
+                <div className="space-y-4 mb-6">
+                  <h3 className="text-xl font-semibold text-foreground mb-3 border-b border-border/30 pb-2">Facet Breakdown</h3>
+                  {FACET_NAMES.map(facetName => {
+                    const scoreObj = selectedEntry.domainScores.find(ds => ds.facetName === facetName);
+                    const score = scoreObj ? scoreObj.score : 0.5; // Default to 0.5 if not found
+                    const facetConfig = FACETS[facetName];
+                    const facetSummary = selectedEntry.facetSummaries?.[facetName] || `Information for ${facetName} is not available for this worldview.`;
+                    
+                    return (
+                      <div key={facetName} className="p-4 rounded-md border border-border/30 bg-background/40">
+                        <div className="flex justify-between items-center mb-1">
+                          <h4 className="text-lg font-semibold" style={{color: getFacetColorHsl(facetName)}}>
+                            {facetName}
+                          </h4>
+                          <span className="text-sm font-bold" style={{color: getFacetColorHsl(facetName)}}>{Math.round(score * 100)}%</span>
+                        </div>
+                        <p className="text-xs text-muted-foreground italic mb-1">{facetConfig?.tagline || "..."}</p>
+                        <p className="text-sm text-muted-foreground">{facetSummary}</p>
+                      </div>
+                    );
+                  })}
+                </div>
+                <Button variant="outline" asChild className="w-full">
+                  <Link href={`/codex/${selectedEntry.id}`}>
+                    View Full Deep-Dive Page <Icons.chevronRight className="ml-1 h-4 w-4" />
+                  </Link>
+                </Button>
+              </div>
+            </ScrollArea>
+          </SheetContent>
+        </Sheet>
+      )}
+    </div>
+  );
+}
+
+    
