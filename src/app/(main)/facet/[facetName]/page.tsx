@@ -13,7 +13,7 @@ import { Slider } from "@/components/ui/slider";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import React, { useState, useMemo } from 'react';
-import { getFacetColorHsl, DOMAIN_COLORS } from '@/lib/colors'; // Import DOMAIN_COLORS
+import { getFacetColorHsl, DOMAIN_COLORS } from '@/lib/colors';
 import chroma from 'chroma-js';
 
 export default function FacetDeepDivePage() {
@@ -21,10 +21,10 @@ export default function FacetDeepDivePage() {
   const router = useRouter();
   const facetNameParam = params.facetName as string;
   
-  // Ensure facetNameParam is correctly capitalized to match FacetName type
   const capitalizedFacetName = useMemo(() => {
     if (!facetNameParam) return undefined;
-    return facetNameParam.charAt(0).toUpperCase() + facetNameParam.slice(1) as FacetName;
+    const name = facetNameParam.charAt(0).toUpperCase() + facetNameParam.slice(1);
+    return FACET_NAMES.includes(name as FacetName) ? name as FacetName : undefined;
   }, [facetNameParam]);
 
   const facet = capitalizedFacetName ? FACETS[capitalizedFacetName] : undefined;
@@ -53,8 +53,8 @@ export default function FacetDeepDivePage() {
     );
   }
 
-  const facetColorHslString = getFacetColorHsl(facet.name); // Used for direct CSS styling where HSL var is needed
-  const baseHexColorForChroma = DOMAIN_COLORS[facet.name as FacetName] || '#CCCCCC'; // Fallback hex for chroma
+  const facetColorHslString = getFacetColorHsl(facet.name);
+  const baseHexColorForChroma = DOMAIN_COLORS[facet.name as FacetName] || '#CCCCCC';
 
   return (
     <div className="container mx-auto py-8 space-y-10">
@@ -74,10 +74,10 @@ export default function FacetDeepDivePage() {
       {/* Introduction Block */}
       <Card className="glassmorphic-card">
         <CardHeader>
-          <CardTitle className="text-2xl" style={{ color: facetColorHslString }}>Introduction: {facet.deepDive.introduction.split(':')[0]}</CardTitle>
+          <CardTitle className="text-2xl" style={{ color: facetColorHslString }}>Introduction</CardTitle>
         </CardHeader>
         <CardContent>
-          <p className="text-muted-foreground leading-relaxed">{facet.deepDive.introduction.substring(facet.deepDive.introduction.indexOf(':') + 1).trim() || facet.description}</p>
+          <p className="text-muted-foreground leading-relaxed">{facet.deepDive.introduction}</p>
         </CardContent>
       </Card>
 
@@ -117,10 +117,10 @@ export default function FacetDeepDivePage() {
             <Card key={idx} className="bg-background/30 p-1 flex flex-col">
               <CardHeader className="pb-2">
                 <div className="flex items-center gap-2 mb-1">
-                  <Icons.sparkles className="h-5 w-5" style={{ color: facetColorHslString }} /> 
+                  {example.icon && <span className="text-xl" style={{color: facetColorHslString}}>{example.icon}</span>}
                   <CardTitle className="text-lg">{example.title}</CardTitle>
                 </div>
-                <CardDescription className="text-xs">{example.type === 'codex' ? "Codex Entry" : "Archetype"} - Score: {example.exampleScore}</CardDescription>
+                <CardDescription className="text-xs capitalize">{example.type} - Score: {example.exampleScore}</CardDescription>
               </CardHeader>
               <CardContent className="flex-grow">
                 <p className="text-sm text-muted-foreground line-clamp-3">{example.summary}</p>
@@ -152,7 +152,7 @@ export default function FacetDeepDivePage() {
                 <div className="flex items-center gap-2 mb-1">
                   {pattern.icon && Icons[pattern.icon] ? 
                     React.createElement(Icons[pattern.icon], { className: "h-5 w-5", style: { color: facetColorHslString } }) : 
-                    <Icons.users className="h-5 w-5" style={{ color: facetColorHslString }} />
+                    <Icons.archetypes className="h-5 w-5" style={{ color: facetColorHslString }} />
                   }
                   <h4 className="font-semibold text-foreground">{pattern.title} <span className="text-xs text-muted-foreground">({pattern.scoreRange})</span></h4>
                 </div>
@@ -215,7 +215,7 @@ export default function FacetDeepDivePage() {
               onValueChange={(value) => {
                 if (value) router.push(`/facet/${value.toLowerCase()}`);
               }}
-              defaultValue={facet.name.toLowerCase()}
+              value={facet.name.toLowerCase()} // Ensure the Select shows the current facet
             >
             <SelectTrigger className="w-[180px] bg-background/50">
               <SelectValue placeholder="Select Facet" />
