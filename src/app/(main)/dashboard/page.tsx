@@ -10,7 +10,7 @@ import Link from "next/link";
 import { FACETS, FACET_NAMES, FacetName, getFacetByName } from "@/config/facets"; 
 import type { DomainScore, CodexEntry, WorldviewProfile, LocalUser } from "@/types";
 import React, { useState, useMemo, useEffect } from 'react';
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription, SheetClose } from "@/components/ui/sheet";
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from "@/components/ui/sheet"; // Removed SheetClose import
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { getFacetColorHsl, getBandColor } from '@/lib/colors';
 import { Badge } from '@/components/ui/badge';
@@ -141,7 +141,7 @@ function DomainFeedbackBar({ facetName, score, anchorLeft, anchorRight }: { face
         <span className="text-xs font-semibold" style={{ color: colorHsl }}>{Math.round(score * 100)}%</span>
       </div>
       <Progress value={score * 100} className="h-3" indicatorStyle={{ backgroundColor: colorHsl }} />
-      <div className="flex justify-between text-xs text-muted-foreground mt-1">
+      <div className="flex justify-between text-xs text-muted-foreground font-semibold mt-1">
         <span>{anchorLeft}</span>
         <span>{anchorRight}</span>
       </div>
@@ -163,7 +163,6 @@ export default function DashboardPage() {
   const [selectedFacetForInsight, setSelectedFacetForInsight] = useState<FacetName | null>(null);
   const [isInsightPanelOpen, setIsInsightPanelOpen] = useState(false);
 
-  // Ensure userDomainScores has a default value if context returns undefined or empty initially
   const userDomainScores = useMemo(() => {
     return (userDomainScoresFromContext && userDomainScoresFromContext.length === FACET_NAMES.length)
       ? userDomainScoresFromContext
@@ -173,7 +172,6 @@ export default function DashboardPage() {
 
   const mappedArchetypes = useMemo(() => {
     try {
-      // Ensure all archetypes are copied into rawArchetypeData for full functionality
       return rawArchetypeData.filter(item => item && typeof item.name === 'string').map(mapRawArchetypeToCodexEntry);
     } catch (error) {
       console.error("Error mapping archetypes in Dashboard:", error);
@@ -269,27 +267,45 @@ export default function DashboardPage() {
             {(userDomainScores && userDomainScores.length === FACET_NAMES.length) ? (
                 userDomainScores.map(ds => {
                     const facetConfig = FACETS[ds.facetName];
-                    if (!facetConfig) return null; // Should not happen if FACET_NAMES is source of truth
+                    if (!facetConfig) return null; 
+                    
+                    let anchorLeftText = hasAssessmentBeenRun ? `${facetConfig.name} Low` : "Spectrum Low";
+                    let anchorRightText = hasAssessmentBeenRun ? `${facetConfig.name} High` : "Spectrum High";
+
+                    if (ds.facetName === "Ontology" && hasAssessmentBeenRun) {
+                      anchorLeftText = "Materialism";
+                      anchorRightText = "Idealism";
+                    }
+                    // Add similar conditions here for other facets if custom labels are needed
+
                     return (
                         <DomainFeedbackBar
                             key={ds.facetName}
                             facetName={ds.facetName}
                             score={ds.score}
-                            anchorLeft={hasAssessmentBeenRun ? `${facetConfig.tagline.split('?')[0]}` : "Spectrum Low"}
-                            anchorRight={hasAssessmentBeenRun ? `Focus: ${ds.score > 0.66 ? 'High' : ds.score > 0.33 ? 'Mid' : 'Low'}` : "Spectrum High"}
+                            anchorLeft={anchorLeftText}
+                            anchorRight={anchorRightText}
                         />
                     );
                 })
             ) : (
-                FACET_NAMES.map(name => (
-                     <DomainFeedbackBar
-                        key={name}
-                        facetName={name}
-                        score={0.5} 
-                        anchorLeft={"Spectrum Low"}
-                        anchorRight={"Spectrum High"}
-                    />
-                ))
+                FACET_NAMES.map(name => {
+                    let anchorLeftText = "Spectrum Low";
+                    let anchorRightText = "Spectrum High";
+                    if (name === "Ontology") {
+                        // Decide what to show for Ontology if no assessment is run - perhaps generic or specific placeholders
+                        // For now, keeping generic for the no-assessment case
+                    }
+                     return (
+                        <DomainFeedbackBar
+                            key={name}
+                            facetName={name}
+                            score={0.5} 
+                            anchorLeft={anchorLeftText}
+                            anchorRight={anchorRightText}
+                        />
+                    );
+                })
             )}
           </CardContent>
         </Card>
@@ -429,8 +445,8 @@ export default function DashboardPage() {
             <ScrollArea className="h-full">
               <div className="p-6">
                 <SheetHeader className="mb-6">
-                  <div className="flex justify-between items-start"> {/* Container for title block and potential close button */}
-                    <div className="flex items-center gap-3"> {/* Title block */}
+                  <div className="flex justify-between items-start"> 
+                    <div className="flex items-center gap-3"> 
                        <FacetIcon facetName={currentSelectedFacetData.name} className="h-10 w-10" />
                        <div>
                         <SheetTitle className="text-3xl mb-0" style={{color: getFacetColorHsl(currentSelectedFacetData.name)}}>
@@ -439,7 +455,6 @@ export default function DashboardPage() {
                         <SheetDescription className="text-sm -mt-1">{currentSelectedFacetData.tagline}</SheetDescription>
                        </div>
                     </div>
-                    {/* The default SheetContent close button is in the top-right. No need to add one here. */}
                   </div>
                 </SheetHeader>
 
@@ -509,3 +524,5 @@ export default function DashboardPage() {
     </div>
   );
 }
+
+    
