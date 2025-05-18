@@ -14,6 +14,7 @@ import { useWorldview } from '@/hooks/use-worldview';
 import { useRouter } from 'next/navigation';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from "@/lib/utils";
+import { OnboardingModal } from '@/components/onboarding/onboarding-modal'; // Import the modal
 
 const LIKERT_SCALE_OPTIONS = [
   { value: 1, label: "Strongly Disagree" },
@@ -23,12 +24,40 @@ const LIKERT_SCALE_OPTIONS = [
   { value: 5, label: "Strongly Agree" },
 ];
 
+const ONBOARDING_STORAGE_KEY = 'metaPrismOnboardingSeen_neutral_v1'; // Use a new key
+
 export default function AssessmentPage() {
   const [currentFacetIndex, setCurrentFacetIndex] = useState(0);
-  const { assessmentAnswers, updateAssessmentAnswer, calculateDomainScores } = useWorldview();
+  const { assessmentAnswers, updateAssessmentAnswer, calculateDomainScores, setAssessmentAnswers } = useWorldview();
   const router = useRouter();
   const { toast } = useToast();
   const [isProcessing, setIsProcessing] = useState(false);
+
+  const [showOnboardingModal, setShowOnboardingModal] = useState(false);
+  const [onboardingChecked, setOnboardingChecked] = useState(false);
+
+  useEffect(() => {
+    try {
+      const onboardingSeen = localStorage.getItem(ONBOARDING_STORAGE_KEY);
+      if (onboardingSeen !== "true") {
+        setShowOnboardingModal(true);
+      }
+    } catch (error) {
+      console.error("Error accessing localStorage for onboarding:", error);
+      // Decide if you want to show onboarding by default if localStorage fails
+      setShowOnboardingModal(true); 
+    }
+    setOnboardingChecked(true);
+  }, []);
+
+  const handleCloseOnboarding = () => {
+    try {
+      localStorage.setItem(ONBOARDING_STORAGE_KEY, "true");
+    } catch (error) {
+      console.error("Error saving onboarding status to localStorage:", error);
+    }
+    setShowOnboardingModal(false);
+  };
 
   const currentFacetName = FACET_NAMES[currentFacetIndex];
   const currentFacet = FACETS[currentFacetName];
@@ -61,32 +90,26 @@ export default function AssessmentPage() {
 
     if (currentFacetIndex < totalFacets - 1) {
       setCurrentFacetIndex(currentFacetIndex + 1);
-      // Scroll to top will be handled by useEffect listening to currentFacetName change
       setTimeout(() => setIsProcessing(false), 300); 
     } else {
-      // Navigate immediately
       router.push('/results'); 
-
-      // Perform scoring and final saving in the background
       setTimeout(() => {
         try {
-          // This function now updates context and context handles localStorage persistence of domainScores
           const calculatedScores = calculateDomainScores(); 
-          // localStorage.setItem("metaPrismAssessmentScores", JSON.stringify(calculatedScores)); // Removed as context handles main score persistence
-
+          // localStorage.setItem("metaPrismAssessmentScores", JSON.stringify(calculatedScores)); // Context handles main score persistence
           toast({
             title: "Assessment Complete!",
-            description: "Your scores have been calculated. You are being redirected to the results page.",
+            description: "Your worldview signature is being generated.",
           });
         } catch (error) {
           console.error("Error during background score calculation/saving:", error);
           toast({
             title: "Scoring Error",
-            description: "There was an issue calculating your scores. Your answers are saved, you can try viewing results later or retaking the assessment.",
+            description: "There was an issue calculating your scores. Your answers are saved; you can try viewing results later or retaking.",
             variant: "destructive",
           });
         }
-        // setIsProcessing(false); // Already navigated, processing state on this page isn't as critical
+        // setIsProcessing(false); // Not strictly needed as navigated away
       }, 0); 
     }
   };
@@ -95,7 +118,6 @@ export default function AssessmentPage() {
     if (currentFacetIndex > 0) {
       setIsProcessing(true);
       setCurrentFacetIndex(currentFacetIndex - 1);
-      // Scroll to top will be handled by useEffect listening to currentFacetName change
       setTimeout(() => setIsProcessing(false), 300);
     }
   };
@@ -104,6 +126,18 @@ export default function AssessmentPage() {
     const questionId = `${currentFacetName}_q${questionIndex}`;
     updateAssessmentAnswer(questionId, parseInt(value, 10));
   };
+
+  if (!onboardingChecked) {
+    return (
+      <div className="flex items-center justify-center min-h-[calc(100vh-10rem)]">
+        <Icons.loader className="h-10 w-10 animate-spin text-primary" />
+      </div>
+    );
+  }
+  
+  if (showOnboardingModal) {
+    return <OnboardingModal isOpen={showOnboardingModal} onClose={handleCloseOnboarding} />;
+  }
 
   if (!currentFacet) {
     return <div>Loading facet information...</div>;
@@ -122,14 +156,14 @@ export default function AssessmentPage() {
             </div>
             <span className="text-sm text-muted-foreground">Section {currentFacetIndex + 1} of {totalFacets}</span>
           </div>
-          <Progress value={progress} className="w-full mt-4 h-3" />
+          <Progress value={progress} className="w-full mt-4 h-3" indicatorStyle={{ backgroundColor: `hsl(var(${currentFacet.colorVariable.slice(2)}))`}}/>
         </CardHeader>
-        <CardContent className="space-y-8" key={currentFacetName}> {/* Key added here */}
+        <CardContent className="space-y-8" key={currentFacetName}>
           <form onSubmit={(e) => { e.preventDefault(); handleNext(); }}>
             {currentFacet.questions.map((question, index) => (
               <div 
                 key={index} 
-                className="bg-white/5 backdrop-blur-md rounded-xl shadow-lg p-6 mb-6"
+                className="bg-card/70 backdrop-blur-md rounded-xl shadow-lg p-6 mb-6"
               >
                 <Label htmlFor={`${currentFacetName}_q${index}`} className="text-xl font-semibold block mb-4 text-foreground">
                   {index + 1}. {question}
@@ -141,7 +175,7 @@ export default function AssessmentPage() {
                   className="flex flex-col space-y-3"
                 >
                   {LIKERT_SCALE_OPTIONS.map(option => (
-                    <div key={option.value} className="flex items-center space-x-3 p-3 rounded-md hover:bg-white/10 transition-colors cursor-pointer">
+                    <div key={option.value} className="flex items-center space-x-3 p-3 rounded-md hover:bg-muted/50 transition-colors cursor-pointer">
                       <RadioGroupItem value={option.value.toString()} id={`${currentFacetName}_q${index}_opt${option.value}`} />
                       <Label htmlFor={`${currentFacetName}_q${index}_opt${option.value}`} className="font-normal text-base text-muted-foreground cursor-pointer">
                         {option.label}
