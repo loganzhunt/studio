@@ -6,7 +6,7 @@ import { FACETS, FACET_NAMES } from '@/config/facets';
 import type { FacetName } from '@/types';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Icons } from '@/components/icons';
+import { Icons } from '@/components/icons'; // Added this import
 import { FacetIcon } from '@/components/facet-icon';
 import Link from 'next/link';
 import { Slider } from "@/components/ui/slider";
@@ -55,6 +55,7 @@ export default function FacetDeepDivePage() {
 
   const facetColorHslString = getFacetColorHsl(facet.name);
   const baseHexColorForChroma = DOMAIN_COLORS[facet.name as FacetName] || '#CCCCCC';
+
 
   return (
     <div className="container mx-auto py-8 space-y-10">
@@ -164,29 +165,31 @@ export default function FacetDeepDivePage() {
       )}
 
       {/* "What If?" Exploration Mode */}
-      <Card className="glassmorphic-card">
-        <CardHeader>
-          <CardTitle className="text-2xl" style={{ color: facetColorHslString }}>'What If?' Exploration</CardTitle>
-          <CardDescription>Adjust the slider to see how different scores in {facet.name} might be interpreted.</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="flex items-center space-x-4 mb-4">
-            <Slider
-              defaultValue={[whatIfScore]}
-              max={1}
-              step={0.01}
-              onValueChange={(value) => setWhatIfScore(value[0])}
-              className="w-full"
-            />
-            <span className="text-lg font-semibold tabular-nums" style={{ color: facetColorHslString, minWidth: '50px' }}>
-              {Math.round(whatIfScore * 100)}%
-            </span>
-          </div>
-          <div className="p-4 rounded-md bg-background/30 border border-border/50 min-h-[60px]">
-            <p className="text-sm text-muted-foreground italic">{whatIfInterpretation}</p>
-          </div>
-        </CardContent>
-      </Card>
+      {facet.deepDive.whatIfInterpretations && (
+        <Card className="glassmorphic-card">
+          <CardHeader>
+            <CardTitle className="text-2xl" style={{ color: facetColorHslString }}>'What If?' Exploration</CardTitle>
+            <CardDescription>Adjust the slider to see how different scores in {facet.name} might be interpreted.</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="flex items-center space-x-4 mb-4">
+              <Slider
+                defaultValue={[whatIfScore]}
+                max={1}
+                step={0.01}
+                onValueChange={(value) => setWhatIfScore(value[0])}
+                className="w-full"
+              />
+              <span className="text-lg font-semibold tabular-nums" style={{ color: facetColorHslString, minWidth: '50px' }}>
+                {Math.round(whatIfScore * 100)}%
+              </span>
+            </div>
+            <div className="p-4 rounded-md bg-background/30 border border-border/50 min-h-[60px]">
+              <p className="text-sm text-muted-foreground italic">{whatIfInterpretation}</p>
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Reflection/Journaling Prompt */}
       <Card className="glassmorphic-card">
@@ -204,6 +207,36 @@ export default function FacetDeepDivePage() {
         </CardContent>
       </Card>
 
+      {/* Strengths, Tensions, Blind Spots */}
+      {(facet.deepDive.strengthsPlaceholder || facet.deepDive.tensionsPlaceholder || facet.deepDive.blindSpotsPlaceholder) && (
+        <Card className="glassmorphic-card">
+          <CardHeader>
+            <CardTitle className="text-2xl" style={{ color: facetColorHslString }}>Further Insights</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            {facet.deepDive.strengthsPlaceholder && (
+              <div>
+                <h4 className="font-semibold text-lg text-foreground/90 mb-1">Potential Strengths</h4>
+                <p className="text-sm text-muted-foreground">{facet.deepDive.strengthsPlaceholder}</p>
+              </div>
+            )}
+            {facet.deepDive.tensionsPlaceholder && (
+               <div>
+                <h4 className="font-semibold text-lg text-foreground/90 mb-1">Possible Tensions</h4>
+                <p className="text-sm text-muted-foreground">{facet.deepDive.tensionsPlaceholder}</p>
+              </div>
+            )}
+            {facet.deepDive.blindSpotsPlaceholder && (
+              <div>
+                <h4 className="font-semibold text-lg text-foreground/90 mb-1">Potential Blind Spots</h4>
+                <p className="text-sm text-muted-foreground">{facet.deepDive.blindSpotsPlaceholder}</p>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      )}
+
+
       {/* Navigation */}
       <div className="flex flex-col sm:flex-row justify-center items-center gap-4 mt-10 pt-6 border-t border-border/30">
         <Button variant="outline" size="lg" asChild>
@@ -215,7 +248,7 @@ export default function FacetDeepDivePage() {
               onValueChange={(value) => {
                 if (value) router.push(`/facet/${value.toLowerCase()}`);
               }}
-              value={facet.name.toLowerCase()} // Ensure the Select shows the current facet
+              value={facet.name.toLowerCase()} 
             >
             <SelectTrigger className="w-[180px] bg-background/50">
               <SelectValue placeholder="Select Facet" />
@@ -233,3 +266,4 @@ export default function FacetDeepDivePage() {
     </div>
   );
 }
+
