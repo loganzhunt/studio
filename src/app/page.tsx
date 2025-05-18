@@ -2,13 +2,86 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Icons } from '@/components/icons';
 import { FACETS, FACET_NAMES } from '@/config/facets';
 import { FacetIcon } from '@/components/facet-icon';
 import { TriangleChart } from '@/components/visualization/TriangleChart';
 import { GlassCard } from '@/components/glass-card';
+import { Badge } from '@/components/ui/badge'; // Added Badge import
+import type { DomainScore } from '@/types'; // Added DomainScore type import
+
+// Data for Featured Worldviews
+const featuredWorldviewsData: Array<{
+  id: string;
+  title: string;
+  summary: string;
+  category: string;
+  domainScores: DomainScore[];
+}> = [
+  {
+    id: "stoicism",
+    title: "Stoicism",
+    summary: "A philosophy of rational resilience and self-mastery, emphasizing virtue and acceptance of nature.",
+    category: "Philosophical",
+    domainScores: [
+      { facetName: "Ontology", score: 0.65 },
+      { facetName: "Epistemology", score: 0.7 },
+      { facetName: "Praxeology", score: 0.9 },
+      { facetName: "Axiology", score: 0.85 },
+      { facetName: "Mythology", score: 0.4 },
+      { facetName: "Cosmology", score: 0.7 },
+      { facetName: "Teleology", score: 0.7 },
+    ],
+  },
+  {
+    id: "buddhism",
+    title: "Buddhism",
+    summary: "A spiritual philosophy emphasizing awakening, impermanence, and the end of suffering.",
+    category: "Spiritual",
+    domainScores: [
+      { facetName: "Ontology", score: 0.4 },
+      { facetName: "Epistemology", score: 0.8 },
+      { facetName: "Praxeology", score: 0.9 },
+      { facetName: "Axiology", score: 0.75 },
+      { facetName: "Mythology", score: 0.7 },
+      { facetName: "Cosmology", score: 0.7 },
+      { facetName: "Teleology", score: 0.85 },
+    ],
+  },
+  {
+    id: "existentialism",
+    title: "Existentialism",
+    summary: "Focuses on authentic existence, choice, and the creation of meaning in an indifferent universe.",
+    category: "Philosophical",
+    domainScores: [
+      { facetName: "Ontology", score: 0.5 },
+      { facetName: "Epistemology", score: 0.6 },
+      { facetName: "Praxeology", score: 0.8 },
+      { facetName: "Axiology", score: 0.65 },
+      { facetName: "Mythology", score: 0.25 },
+      { facetName: "Cosmology", score: 0.4 },
+      { facetName: "Teleology", score: 0.6 },
+    ],
+  },
+  {
+    id: "animism",
+    title: "Animism",
+    summary: "Sees spirit or consciousness present in all beings, places, and phenomena, emphasizing reciprocity.",
+    category: "Indigenous",
+    domainScores: [
+      { facetName: "Ontology", score: 0.8 },
+      { facetName: "Epistemology", score: 0.6 },
+      { facetName: "Praxeology", score: 0.7 },
+      { facetName: "Axiology", score: 0.7 },
+      { facetName: "Mythology", score: 0.9 },
+      { facetName: "Cosmology", score: 0.75 },
+      { facetName: "Teleology", score: 0.6 },
+    ],
+  }
+];
+
 
 export default function HomePage() {
   const howItWorksSteps = [
@@ -37,12 +110,11 @@ export default function HomePage() {
           <div
             className="absolute inset-0 opacity-10"
             style={{
-              backgroundImage: "url('https://via.placeholder.com/10x10.png/000000/FFFFFF?text=+')", // Using a very simple placeholder URL
+              backgroundImage: "url('https://via.placeholder.com/10x10.png/000000/FFFFFF?text=+')", 
               backgroundRepeat: 'repeat',
-              backgroundSize: '40px 40px', // Adjust size of pattern elements
+              backgroundSize: '40px 40px', 
               maskImage: 'radial-gradient(circle at center, white 20%, transparent 70%)'
             }}
-            // data-ai-hint="abstract geometric" // Temporarily removed for debugging
           />
           <div className="container mx-auto relative z-10">
             <div className="mx-auto mb-8 h-24 w-24">
@@ -57,7 +129,7 @@ export default function HomePage() {
             <Button
               size="lg"
               variant="outline"
-              className="border-primary/50 text-primary hover:bg-primary/10 hover:text-primary px-6 py-4 text-lg font-medium shadow-md hover:shadow-primary/30 transition-all duration-300 group"
+              className="border-primary/50 text-primary hover:bg-primary/10 hover:text-primary px-6 py-2.5 text-base font-medium shadow-md hover:shadow-primary/30 transition-all duration-300 group"
               asChild
             >
               <Link href="/assessment">
@@ -68,10 +140,10 @@ export default function HomePage() {
           </div>
         </section>
 
-        {/* Animated Section Divider (Placeholder) */}
+        {/* Animated Section Divider */}
         <div className="h-1 w-full bg-gradient-to-r from-transparent via-primary/30 to-transparent my-12 md:my-16"></div>
 
-        {/* How the Assessment Works Section */}
+        {/* How Meta-Prism Works Section */}
         <section className="py-16 md:py-24">
           <div className="container mx-auto">
             <h2 className="text-3xl md:text-4xl font-bold text-center mb-16">
@@ -92,29 +164,32 @@ export default function HomePage() {
           </div>
         </section>
 
-        {/* Animated Section Divider (Placeholder) */}
+        {/* Animated Section Divider */}
         <div className="h-px w-full bg-gradient-to-r from-transparent via-border to-transparent my-12 md:my-16"></div>
 
-        {/* Featured Worldviews Placeholder Section */}
+        {/* Featured Worldviews Section */}
         <section className="py-16 md:py-24 bg-card/30">
           <div className="container mx-auto">
             <h2 className="text-3xl md:text-4xl font-bold text-center mb-4">Featured Worldviews</h2>
             <p className="text-center text-muted-foreground mb-12 max-w-2xl mx-auto">
-              Explore a diverse collection of philosophical, religious, and archetypal systems.
+              Browse some of the diverse philosophical and spiritual perspectives mapped in our Codex.
             </p>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {[1, 2, 3].map(i => (
-                <Card key={i} className="overflow-hidden hover:shadow-lg transition-shadow duration-300 glassmorphic-card">
-                  <CardHeader>
-                    <CardTitle className="text-xl">Example Worldview {i}</CardTitle>
-                    <CardDescription>A brief summary of this worldview...</CardDescription>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+              {featuredWorldviewsData.map(entry => (
+                <Card key={entry.id} className="flex flex-col overflow-hidden hover:shadow-lg transition-shadow duration-300 glassmorphic-card">
+                  <CardHeader className="pb-2">
+                    <CardTitle className="text-xl line-clamp-1">{entry.title}</CardTitle>
+                    <CardDescription className="text-xs h-10 line-clamp-2">{entry.summary}</CardDescription>
                   </CardHeader>
-                  <CardContent>
-                    <TriangleChart scores={FACET_NAMES.map(name => ({ facetName: name, score: Math.random()}))} width={200} height={173} className="mx-auto !p-0 !bg-transparent !shadow-none !backdrop-blur-none" />
-                    <Button variant="link" className="mt-4 p-0 text-primary" asChild>
-                      <Link href="/codex/example-worldview">Explore Details <Icons.chevronRight className="ml-1 h-4 w-4" /></Link>
-                    </Button>
+                  <CardContent className="flex-grow flex flex-col justify-center items-center pt-2 pb-4">
+                    <TriangleChart scores={entry.domainScores} width={180} height={156} className="!p-0 !bg-transparent !shadow-none !backdrop-blur-none mb-3" />
+                    <Badge variant="secondary" className="text-xs">{entry.category}</Badge>
                   </CardContent>
+                  <CardFooter className="p-4 border-t border-border/30 mt-auto">
+                    <Button variant="outline" size="sm" className="w-full" asChild>
+                      <Link href={`/codex/${entry.id}`}>Explore <Icons.chevronRight className="ml-1 h-4 w-4" /></Link>
+                    </Button>
+                  </CardFooter>
                 </Card>
               ))}
             </div>
@@ -126,7 +201,7 @@ export default function HomePage() {
           </div>
         </section>
 
-        {/* Animated Section Divider (Placeholder) */}
+        {/* Animated Section Divider */}
         <div className="h-px w-full bg-gradient-to-r from-transparent via-border to-transparent my-12 md:my-16"></div>
 
         {/* Facet Accordions Section */}
