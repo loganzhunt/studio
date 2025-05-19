@@ -26,7 +26,6 @@ import { BASE_CODEX_DATA } from "@/data/codex/base-codex-data";
 import { LATEST_CODEX_UPDATE_BATCH } from "@/data/codex/latest-codex-update-batch";
 import { ADDITIONAL_CODEX_DATA } from "@/data/codex/additional-codex-data";
 
-
 // --- Helper Functions ---
 const getDominantFacet = (scores: DomainScore[]): FacetName => {
   if (!scores || scores.length === 0) return FACET_NAMES[0]; // Default
@@ -44,7 +43,7 @@ export function mapRawDataToCodexEntries(rawItems: any[]): CodexEntry[] {
     const title = item.title || item.name;
     if (!item || (typeof title !== 'string' )) {
       // console.warn(`Skipping invalid item at index ${index} in rawCodexData (missing title/name):`, item);
-      return null;
+      return null; // Filter this out later
     }
 
     const id = title.toLowerCase().replace(/\s+/g, '_').replace(/[^\w-]+/g, '');
@@ -56,16 +55,17 @@ export function mapRawDataToCodexEntries(rawItems: any[]): CodexEntry[] {
       domainScoresArray = FACET_NAMES.map(facetKey => {
         const scoreKeyLower = facetKey.toLowerCase() as keyof typeof scoresSource;
         const scoreKeyOriginal = facetKey as keyof typeof scoresSource;
-        let scoreValue = 0.5;
+        let scoreValue = 0.5; // Default if no score found
 
-        if (typeof scoresSource[scoreKeyLower] === 'number') {
+        if (scoresSource.hasOwnProperty(scoreKeyLower) && typeof scoresSource[scoreKeyLower] === 'number') {
           scoreValue = scoresSource[scoreKeyLower];
-        } else if (typeof scoresSource[scoreKeyOriginal] === 'number') {
+        } else if (scoresSource.hasOwnProperty(scoreKeyOriginal) && typeof scoresSource[scoreKeyOriginal] === 'number') {
           scoreValue = scoresSource[scoreKeyOriginal];
         }
         return { facetName: facetKey, score: Math.max(0, Math.min(1, Number(scoreValue))) };
       });
     } else {
+      // If no scores are provided at all, default all to 0.5
       domainScoresArray = FACET_NAMES.map(name => ({ facetName: name, score: 0.5 }));
     }
 
@@ -75,11 +75,11 @@ export function mapRawDataToCodexEntries(rawItems: any[]): CodexEntry[] {
       for (const facetKey of FACET_NAMES) {
         const summaryKeyLower = facetKey.toLowerCase() as keyof typeof facetSummariesSource;
         const summaryKeyOriginal = facetKey as keyof typeof facetSummariesSource;
-        let summary = `Information for ${facetKey} is not available for this worldview.`;
+        let summary = `Information for ${facetKey} is not available for this worldview.`; // Default summary
 
-        if (typeof facetSummariesSource[summaryKeyLower] === 'string') {
+        if (facetSummariesSource.hasOwnProperty(summaryKeyLower) && typeof facetSummariesSource[summaryKeyLower] === 'string') {
           summary = facetSummariesSource[summaryKeyLower];
-        } else if (typeof facetSummariesSource[summaryKeyOriginal] === 'string') {
+        } else if (facetSummariesSource.hasOwnProperty(summaryKeyOriginal) && typeof facetSummariesSource[summaryKeyOriginal] === 'string') {
           summary = facetSummariesSource[summaryKeyOriginal];
         }
         processedFacetSummaries[facetKey] = summary;
@@ -89,26 +89,30 @@ export function mapRawDataToCodexEntries(rawItems: any[]): CodexEntry[] {
         processedFacetSummaries[facetKey] = `Information for ${facetKey} is not available for ${title}.`;
       });
     }
-
+    
     let category: CodexEntry['category'] = 'custom';
     const itemCategoryRaw = (item.category || '').toString();
+    // Extract first word for main category type (e.g., "philosophical - Worldview" -> "philosophical")
     const itemCategoryMain = itemCategoryRaw.toLowerCase().split(' ')[0];
 
     const validCategories: CodexEntry['category'][] = ['philosophical', 'religious', 'archetypal', 'spiritual', 'custom', 'indigenous', 'mystical', 'scientific', 'cultural'];
     if (validCategories.includes(itemCategoryMain as CodexEntry['category'])) {
       category = itemCategoryMain as CodexEntry['category'];
     } else if (item.tags && Array.isArray(item.tags) && (item.tags as string[]).some(tag => validCategories.includes(tag.toLowerCase() as CodexEntry['category']))) {
+      // Fallback to checking tags if category field is not directly one of the valid ones
       category = (item.tags as string[]).find(tag => validCategories.includes(tag.toLowerCase() as CodexEntry['category']))?.toLowerCase() as CodexEntry['category'] || 'custom';
     }
 
+
     const tags = Array.isArray(item.tags) ? item.tags.map(String) : (typeof item.tags === 'string' ? [item.tags] : (item.tags === undefined ? [] : []));
     if (category !== 'custom' && !tags.includes(category)) {
-      tags.push(category);
+      tags.push(category); // Ensure the determined category is also a tag
     }
     const idTag = title.toLowerCase().replace(/\s+/g, '_').replace(/[^\w-]+/g, '');
     if (!tags.includes(idTag)) {
-      tags.push(idTag);
+        tags.push(idTag);
     }
+
 
     return {
       id,
@@ -119,8 +123,8 @@ export function mapRawDataToCodexEntries(rawItems: any[]): CodexEntry[] {
       isArchetype: category === 'archetypal' || (Array.isArray(item.tags) && (item.tags as string[]).map(t => t.toLowerCase()).includes('archetypal')),
       createdAt: item.createdAt || new Date().toISOString(),
       tags,
-      facetSummaries: processedFacetSummaries,
-      icon: item.icon || undefined,
+      icon: item.icon || undefined, // Add icon
+      facetSummaries: processedFacetSummaries, // Use processed summaries
     };
   }).filter(item => item !== null) as CodexEntry[];
 };
@@ -139,13 +143,12 @@ export default function CodexPage() {
 
   const initialMappedEntries = useMemo(() => {
     try {
-      // Combine data sources, LATEST_CODEX_UPDATE_BATCH taking highest precedence
       const combinedRawData = [
         ...(Array.isArray(LATEST_CODEX_UPDATE_BATCH) ? LATEST_CODEX_UPDATE_BATCH : []),
         ...(Array.isArray(ADDITIONAL_CODEX_DATA) ? ADDITIONAL_CODEX_DATA : []),
         ...(Array.isArray(BASE_CODEX_DATA) ? BASE_CODEX_DATA : [])
       ];
-
+      
       const uniqueEntriesData: any[] = [];
       const uniqueTitles = new Set<string>();
 
@@ -153,15 +156,16 @@ export default function CodexPage() {
         if (typeof item !== 'object' || item === null) continue;
         const title = (item.title || item.name || '').toString().toLowerCase().trim();
         if (title && !uniqueTitles.has(title)) {
+          // Standardize to 'title' property before mapping
           const standardizedItem = { ...item, title: item.title || item.name };
-          if (item.name && typeof item.name === 'string' && standardizedItem.title !== item.name) delete standardizedItem.name;
+          if (item.name && typeof item.name === 'string' && standardizedItem.title !== item.name) delete standardizedItem.name; 
           uniqueEntriesData.push(standardizedItem);
           uniqueTitles.add(title);
         }
       }
-      return mapRawDataToCodexEntries(uniqueEntriesData);
+      return mapRawDataToCodexEntries(uniqueEntriesData); 
     } catch (error) {
-      console.error("Error processing Codex data arrays in useMemo for initialMappedEntries:", error);
+      console.error("Error processing Codex data arrays in useMemo:", error);
       return []; // Return empty array on error
     }
   }, []);
@@ -200,7 +204,8 @@ export default function CodexPage() {
         return dominantA.localeCompare(dominantB) || (a.title || "").localeCompare(b.title || "");
       });
     }
-    return entries.filter(entry => entry); // Ensure no null/undefined entries
+    // Ensure no null/undefined entries after filtering/sorting
+    return entries.filter(entry => entry); 
   }, [initialMappedEntries, activeCategory, searchTerm, sortBy]);
 
   const allCategories = useMemo(() => {
@@ -221,7 +226,7 @@ export default function CodexPage() {
       toast({ title: "Already Saved", description: `"${entryToSave.title}" is already in your library.` });
       return;
     }
-    addSavedWorldview({ ...entryToSave });
+    addSavedWorldview({ ...entryToSave }); // Spread to ensure a new object if needed
     toast({ title: "Saved to Library", description: `"${entryToSave.title}" has been added to your saved worldviews.` });
   };
 
@@ -233,13 +238,13 @@ export default function CodexPage() {
     return (
       <Card className="flex flex-col overflow-hidden glassmorphic-card hover:shadow-primary/20 transition-shadow duration-300 h-full">
         <CardHeader className="pb-3 text-center">
-          <div className="flex items-center justify-center gap-2">
+          <div className="flex items-center justify-center gap-2 mb-1">
             {entry.icon && <span className="text-3xl" style={{ color: titleColor }}>{entry.icon}</span>}
             <CardTitle className="text-xl line-clamp-1" style={{ color: titleColor }}>
               {entry.title}
             </CardTitle>
           </div>
-          <CardDescription className="h-12 line-clamp-2 text-xs pt-1 text-left">
+          <CardDescription className="line-clamp-2 text-xs pt-1 text-left">
             {entry.summary}
           </CardDescription>
         </CardHeader>
@@ -313,9 +318,10 @@ export default function CodexPage() {
       {filteredAndSortedEntries.length > 0 ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
           {filteredAndSortedEntries.map((entry) => {
+            // Defensive check: ensure entry and its essential properties are defined
             if (!entry || typeof entry.id === 'undefined' || typeof entry.title === 'undefined' || !Array.isArray(entry.domainScores)) {
-              // console.warn("Skipping rendering of incomplete/invalid entry:", entry);
-              return null;
+              console.warn("Skipping rendering of incomplete/invalid entry:", entry);
+              return null; 
             }
             return <CodexCard key={entry.id} entry={entry} />;
           })}
@@ -375,8 +381,9 @@ export default function CodexPage() {
                   <h3 className="text-xl font-semibold text-foreground mb-3 border-b border-border/30 pb-2">Facet Breakdown</h3>
                   {FACET_NAMES.map(facetName => {
                     const scoreObj = selectedEntry.domainScores.find(ds => ds.facetName === facetName);
-                    const score = scoreObj ? scoreObj.score : 0.5;
+                    const score = scoreObj ? scoreObj.score : 0.5; // Default to 0.5 if score not found
                     const facetConfig = FACETS[facetName];
+                    // Use facetSummaries for drawer, ensure fallback if specific summary is missing
                     const facetSummary = selectedEntry.facetSummaries?.[facetName] || `Information for ${facetName} is not available for this worldview.`;
 
                     return (
@@ -405,11 +412,6 @@ export default function CodexPage() {
                     {savedWorldviews.some(p => p.id === selectedEntry.id) ? <Icons.check className="mr-1 h-3 w-3" /> : <Icons.saved className="mr-1 h-3 w-3" />}
                     {savedWorldviews.some(p => p.id === selectedEntry.id) ? "Saved to Library" : "Save to Library"}
                   </Button>
-                  <Button variant="outline" asChild className="w-full">
-                    <Link href={`/codex/${selectedEntry.id}`}>
-                      View Full Deep-Dive Page <Icons.chevronRight className="ml-1 h-4 w-4" />
-                    </Link>
-                  </Button>
                 </div>
 
               </div>
@@ -420,4 +422,3 @@ export default function CodexPage() {
     </div>
   );
 }
-
