@@ -1,8 +1,7 @@
-
 "use client";
 
 import { useParams, useRouter } from 'next/navigation';
-import { TriangleChart } from '@/components/visualization/TriangleChart'; // Corrected path
+import { TriangleChart } from '@/components/visualization/TriangleChart'; 
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -16,7 +15,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Textarea } from '@/components/ui/textarea';
 import { Separator } from '@/components/ui/separator';
-import { getFacetColorHsl, SPECTRUM_LABELS } from '@/lib/colors'; // Assuming SPECTRUM_LABELS is in colors
+import { getFacetColorHsl, SPECTRUM_LABELS } from '@/lib/colors'; 
 
 // Import all codex data - needed to find the specific entry
 import { BASE_CODEX_DATA } from "@/data/codex/base-codex-data";
@@ -36,7 +35,7 @@ const SECTION_IDS = {
 export default function CodexDeepDivePage() {
   const params = useParams();
   const router = useRouter();
-  const worldviewNameFromParam = params.worldviewName as string; // e.g., "platonism"
+  const worldviewNameFromParam = params.worldviewName as string; 
   
   const { savedWorldviews, addSavedWorldview } = useWorldview();
   const { toast } = useToast();
@@ -62,9 +61,6 @@ export default function CodexDeepDivePage() {
           uniqueTitles.add(title);
         }
       }
-      // Ensure mapRawDataToCodexEntries is defined or imported correctly
-      // For now, assuming it's imported from the codex page, or defined locally if needed.
-      // This function might need to be adjusted if its dependencies are not available here.
       return mapRawDataToCodexEntries(uniqueEntriesData); 
     } catch (error) {
       console.error("Error processing Codex data arrays for deep dive:", error);
@@ -88,11 +84,12 @@ export default function CodexDeepDivePage() {
       toast({ title: "Already Saved", description: `"${worldview.title}" is already in your library.` });
       return;
     }
-    addSavedWorldview({ ...worldview }); // Add the whole entry
-    setIsSaved(true); //  No need for toast here, context addSavedWorldview shows it
+    addSavedWorldview({ ...worldview }); 
+    setIsSaved(true); 
   };
 
   // Placeholder content specific to Platonism for new sections
+  // This will be overridden if worldview.originAndContext etc. exist
   const platonismExtraContent = {
     originAndContext: "Platonism originated in ancient Greece with the philosopher Plato (c. 428/427 – 348/347 BC), a student of Socrates and teacher of Aristotle. His Academy in Athens was one of the first institutions of higher learning in the Western world. Platonism profoundly influenced Western thought, particularly through Neoplatonism and its impact on Christian theology (e.g., Augustine) and Islamic philosophy. Key figures include Plato himself, Plotinus, Porphyry, and Proclus.",
     coreBeliefs: "Central to Platonism is the Theory of Forms (or Ideas), which posits that the physical world we perceive is not the real world but only a shadow or imitation of the true, eternal, and perfect Forms. These Forms (e.g., Beauty, Justice, Goodness) are abstract universals. Knowledge is achieved through reason and contemplation of these Forms, not just sensory experience. The soul is seen as immortal and pre-existing, with a destiny to return to the realm of Forms. The highest Form is the Form of the Good, which illuminates all other Forms and is the ultimate source of reality and knowledge.",
@@ -123,10 +120,15 @@ export default function CodexDeepDivePage() {
     { id: SECTION_IDS.FACETS, label: "Facet Profile" },
     { id: SECTION_IDS.ORIGINS, label: "Origin & Context" },
     { id: SECTION_IDS.BELIEFS, label: "Core Beliefs" },
-    // { id: "compare", label: "Compare" }, // Placeholder for compare section
     { id: SECTION_IDS.REFLECTION, label: "Reflection" },
     { id: SECTION_IDS.RESOURCES, label: "Resources" },
   ];
+
+  // Use worldview's own data if available, otherwise fallback to Platonism example
+  const originAndContext = (worldview as any).originAndContext || (worldviewNameFromParam === 'platonism' ? platonismExtraContent.originAndContext : `Detailed historical and cultural context for ${worldview.title} will be displayed here.`);
+  const coreBeliefs = (worldview as any).coreBeliefs || (worldviewNameFromParam === 'platonism' ? platonismExtraContent.coreBeliefs : `Key tenets and foundational beliefs of ${worldview.title} will be detailed here.`);
+  const furtherResources = (worldview as any).furtherResources || (worldviewNameFromParam === 'platonism' ? platonismExtraContent.furtherResources : []);
+
 
   return (
     <div className="container mx-auto py-8 space-y-10">
@@ -146,7 +148,6 @@ export default function CodexDeepDivePage() {
         <p className="text-lg text-muted-foreground mt-1 capitalize">{worldview.category} Worldview</p>
       </header>
 
-      {/* Simplified Jump Links Navigation */}
       <nav className="mb-10 p-3 bg-card/30 rounded-lg shadow-sm">
         <ul className="flex flex-wrap gap-x-4 gap-y-2 justify-center">
           {sectionLinks.map(link => (
@@ -159,7 +160,6 @@ export default function CodexDeepDivePage() {
         </ul>
       </nav>
 
-      {/* Section: Title & Summary */}
       <Card id={SECTION_IDS.SUMMARY} className="glassmorphic-card scroll-mt-20">
         <CardHeader>
           <CardTitle className="text-2xl">Overview</CardTitle>
@@ -179,14 +179,13 @@ export default function CodexDeepDivePage() {
 
       <Separator />
 
-      {/* Section: Facet Spectrum & Scores */}
       <Card id={SECTION_IDS.FACETS} className="glassmorphic-card scroll-mt-20">
         <CardHeader>
           <CardTitle className="text-2xl">Facet Profile & Scores</CardTitle>
           <CardDescription>How {worldview.title} aligns with each of the 7 Meta-Prism facets.</CardDescription>
         </CardHeader>
         <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-8 items-start">
-          <div className="md:sticky md:top-24"> {/* Make triangle sticky on larger screens */}
+          <div className="md:sticky md:top-24"> 
             <TriangleChart scores={worldview.domainScores} className="mx-auto max-w-sm" />
           </div>
           <Accordion type="single" collapsible className="w-full" defaultValue={FACET_NAMES[0]}>
@@ -227,35 +226,32 @@ export default function CodexDeepDivePage() {
 
       <Separator />
 
-      {/* Section: Origin & Context */}
       <Card id={SECTION_IDS.ORIGINS} className="glassmorphic-card scroll-mt-20">
         <CardHeader>
           <CardTitle className="text-2xl">Origin & Context</CardTitle>
         </CardHeader>
         <CardContent>
           <p className="text-muted-foreground leading-relaxed whitespace-pre-line">
-            {worldviewNameFromParam === 'platonism' ? platonismExtraContent.originAndContext : `Detailed historical and cultural context for ${worldview.title} will be displayed here.`}
+            {originAndContext}
           </p>
         </CardContent>
       </Card>
 
       <Separator />
 
-      {/* Section: Core Beliefs & Assumptions */}
       <Card id={SECTION_IDS.BELIEFS} className="glassmorphic-card scroll-mt-20">
         <CardHeader>
           <CardTitle className="text-2xl">Core Beliefs & Assumptions</CardTitle>
         </CardHeader>
         <CardContent>
           <p className="text-muted-foreground leading-relaxed whitespace-pre-line">
-            {worldviewNameFromParam === 'platonism' ? platonismExtraContent.coreBeliefs : `Key tenets and foundational beliefs of ${worldview.title} will be detailed here.`}
+            {coreBeliefs}
           </p>
         </CardContent>
       </Card>
       
       <Separator />
 
-      {/* Section: Comparative Insights (Placeholder) */}
       <Card className="glassmorphic-card scroll-mt-20">
         <CardHeader>
           <CardTitle className="text-2xl">Comparative Insights</CardTitle>
@@ -268,7 +264,6 @@ export default function CodexDeepDivePage() {
 
       <Separator />
 
-      {/* Section: Reflection/Journal */}
       <Card id={SECTION_IDS.REFLECTION} className="glassmorphic-card scroll-mt-20">
         <CardHeader>
           <CardTitle className="text-2xl">Reflection & Journal</CardTitle>
@@ -286,15 +281,14 @@ export default function CodexDeepDivePage() {
 
       <Separator />
 
-      {/* Section: Further Resources */}
       <Card id={SECTION_IDS.RESOURCES} className="glassmorphic-card scroll-mt-20">
         <CardHeader>
           <CardTitle className="text-2xl">Further Resources</CardTitle>
         </CardHeader>
         <CardContent>
-          {worldviewNameFromParam === 'platonism' && platonismExtraContent.furtherResources.length > 0 ? (
+          {(Array.isArray(furtherResources) && furtherResources.length > 0) ? (
             <ul className="list-disc list-inside space-y-2">
-              {platonismExtraContent.furtherResources.map(resource => (
+              {furtherResources.map((resource: any) => (
                 <li key={resource.url}>
                   <a href={resource.url} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">
                     {resource.title} <Icons.share className="inline h-3 w-3 ml-1" />
@@ -310,5 +304,3 @@ export default function CodexDeepDivePage() {
     </div>
   );
 }
-
-    

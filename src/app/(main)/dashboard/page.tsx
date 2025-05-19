@@ -12,7 +12,7 @@ import type { DomainScore, CodexEntry, LocalUser, WorldviewProfile } from "@/typ
 import React, { useState, useMemo, useEffect } from 'react';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from "@/components/ui/sheet";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { getFacetColorHsl, DOMAIN_COLORS } from '@/lib/colors';
+import { getFacetColorHsl, DOMAIN_COLORS, SPECTRUM_LABELS } from '@/lib/colors';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from "@/components/ui/progress";
 import { cn } from "@/lib/utils";
@@ -220,22 +220,17 @@ const calculateSimilarity = (userScores: DomainScore[], archetypeScores: DomainS
   return Math.max(0, Math.min(100, similarity));
 };
 
-const SPECTRUM_LABELS: Record<FacetName, { left: string; right: string }> = {
-  Ontology: { left: "Materialism", right: "Idealism" },
-  Epistemology: { left: "Empirical", right: "Revelatory" },
-  Praxeology: { left: "Hierarchical", right: "Egalitarian" },
-  Axiology: { left: "Individualism", right: "Collectivism" },
-  Mythology: { left: "Linear", right: "Cyclical" },
-  Cosmology: { left: "Mechanistic", right: "Holistic" },
-  Teleology: { left: "Existential", right: "Divine" },
-};
 
 const defaultNeutralScores: DomainScore[] = FACET_NAMES.map(name => ({ facetName: name, score: 0.5 }));
 
 function DomainFeedbackBar({ facetName, score, anchorLeft, anchorRight }: { facetName: FacetName, score: number, anchorLeft: string, anchorRight: string }) {
   const facetConfig = FACETS[facetName];
   if (!facetConfig) {
-    return null;
+    return (
+      <div className="mb-4 p-3 rounded-md border border-destructive/50 bg-destructive/10">
+        <p className="text-destructive text-sm">Configuration error for facet: {facetName}</p>
+      </div>
+    );
   }
 
   return (
@@ -269,13 +264,14 @@ export default function DashboardPage() {
   const mappedArchetypes = useMemo(() => {
     try {
       return rawArchetypeData
-        .filter(item => item && typeof item.name === 'string')
+        .filter(item => item && typeof item.name === 'string') // Ensure item and name exist
         .map(mapRawArchetypeToCodexEntry);
     } catch (error) {
       console.error("Error mapping archetypes in Dashboard:", error);
-      return [];
+      return []; // Return empty array on error
     }
   }, []);
+
 
   const scoresForMainTriangle = useMemo(() => {
     return hasAssessmentBeenRun ? userDomainScores : defaultNeutralScores;
@@ -305,7 +301,7 @@ export default function DashboardPage() {
   };
 
   const handleTriangleLayerClick = (facetName: FacetName) => {
-    if (!hasAssessmentBeenRun) return; // Only allow click if assessment is run
+    if (!hasAssessmentBeenRun) return; 
     setSelectedFacetForInsight(facetName);
     setIsInsightPanelOpen(true);
   };
@@ -402,7 +398,7 @@ export default function DashboardPage() {
               const facetConfig = FACETS[ds.facetName];
               if (!facetConfig) {
                 console.warn(`Facet configuration not found for: ${ds.facetName} in Facet Breakdown`);
-                return ( // Render a fallback bar if config is missing
+                return ( 
                   <DomainFeedbackBar
                     key={ds.facetName}
                     facetName={ds.facetName}
@@ -438,13 +434,19 @@ export default function DashboardPage() {
             {hasAssessmentBeenRun && userDomainScores && userDomainScores.length > 0 ? (
               (() => {
                 const dominantFacetName = getDominantFacet(userDomainScores);
-                const dominantScore = userDomainScores.find(s => s.facetName === dominantFacetName)?.score;
+                const dominantScoreObj = userDomainScores.find(s => s.facetName === dominantFacetName);
+                const dominantScore = dominantScoreObj ? dominantScoreObj.score : undefined;
+
+                if (dominantScore === undefined) {
+                   return <p className="text-muted-foreground text-sm">Could not determine dominant facet score.</p>;
+                }
+                
                 const qualitativeDesc = getQualitativeScoreDescription(dominantScore, dominantFacetName);
                 
                 return (
                   <p className="text-muted-foreground text-sm">
                     Your dominant facet appears to be <span className="font-semibold" style={{color: getFacetColorHsl(dominantFacetName)}}>{dominantFacetName}</span>.
-                    {dominantScore !== undefined && ` Your alignment (${Math.round(dominantScore*100)}%) ${qualitativeDesc.toLowerCase()}.`}
+                    {` Your alignment (${Math.round(dominantScore*100)}%) ${qualitativeDesc.toLowerCase()}.`}
                     Consider exploring the implications of this emphasis.
                   </p>
                 );
@@ -537,6 +539,9 @@ export default function DashboardPage() {
                       </SheetTitle>
                       <SheetDescription className="text-base capitalize">{selectedArchetypeForDrawer.category} Profile</SheetDescription>
                     </div>
+                     <Button variant="ghost" size="icon" className="rounded-full" onClick={() => setIsArchetypeDrawerOpen(false)}>
+                        <Icons.close className="h-5 w-5" />
+                      </Button>
                   </div>
                 </SheetHeader>
                 <p className="mb-6 text-muted-foreground leading-relaxed">{selectedArchetypeForDrawer.summary}</p>
@@ -584,6 +589,9 @@ export default function DashboardPage() {
                         <SheetDescription className="text-sm -mt-1">{currentSelectedFacetData.tagline}</SheetDescription>
                       </div>
                     </div>
+                     <Button variant="ghost" size="icon" className="rounded-full" onClick={() => setIsInsightPanelOpen(false)}>
+                        <Icons.close className="h-5 w-5" />
+                      </Button>
                   </div>
                 </SheetHeader>
 
@@ -649,3 +657,5 @@ export default function DashboardPage() {
     </div>
   );
 }
+
+```

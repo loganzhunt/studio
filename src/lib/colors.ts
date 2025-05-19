@@ -10,7 +10,7 @@ export const DOMAIN_COLORS: Record<FacetName | string, string> = {
   Axiology:     "#43A047", // Green
   Mythology:    "#1E88E5", // Blue
   Cosmology:    "#5E35B1", // Indigo
-  Teleology:    "#8E24AA", // Violet
+  Teleology:    "#B455B6", // Violet
 };
 
 // Fallback color for unknown domains
@@ -24,20 +24,21 @@ const FALLBACK_COLOR = "#BDBDBD"; // Medium Gray
  * @returns A hex color string.
  */
 export function getBandColor(domainName: FacetName, score: number): string {
-  const baseColor = DOMAIN_COLORS[domainName] || FALLBACK_COLOR;
+  const baseColorKey = domainName;
+  const baseColor = DOMAIN_COLORS[baseColorKey] || FALLBACK_COLOR;
 
   // Score thresholds: 0-0.33 (dark), 0.34-0.66 (base), 0.67-1.0 (light)
   if (score <= 0.33) {
-    return chroma(baseColor).darken(1.5).hex();
+    return chroma(baseColor).darken(1.2).desaturate(0.2).hex();
   } else if (score <= 0.66) {
     return baseColor; 
   } else {
-    return chroma(baseColor).brighten(1).hex();
+    return chroma(baseColor).brighten(0.8).saturate(0.2).hex();
   }
 }
 
 /**
- * Returns the HSL string for a facet's base color.
+ * Returns the HSL string for a facet's base color from CSS variables.
  * @param facetName The name of the facet.
  * @returns HSL string (e.g., "hsl(var(--domain-ontology))") or a fallback.
  */
@@ -48,3 +49,16 @@ export function getFacetColorHsl(facetName: FacetName | string | undefined): str
   const facetConfig = FACETS[facetName as FacetName];
   return `hsl(var(${facetConfig.colorVariable.slice(2)}))`;
 }
+
+/**
+ * Defines the bipolar spectrum labels for each facet.
+ */
+export const SPECTRUM_LABELS: Record<FacetName, { left: string; right: string }> = {
+  Ontology: { left: "Materialism", right: "Idealism" },
+  Epistemology: { left: "Empirical", right: "Revelatory" },
+  Praxeology: { left: "Hierarchical", right: "Egalitarian" },
+  Axiology: { left: "Individualism", right: "Collectivism" },
+  Mythology: { left: "Linear", right: "Cyclical" },
+  Cosmology: { left: "Mechanistic", right: "Holistic" },
+  Teleology: { left: "Existential", right: "Divine" }, // Note: Reversed from an earlier state
+};
