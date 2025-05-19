@@ -297,11 +297,7 @@ export default function ArchetypesPage() {
                       </SheetTitle>
                       <SheetDescription className="text-base capitalize">{selectedArchetype.category} Profile</SheetDescription>
                     </div>
-                    <SheetClose asChild>
-                      <Button variant="ghost" size="icon" className="rounded-full">
-                        <Icons.close className="h-5 w-5" />
-                      </Button>
-                    </SheetClose>
+                    {/* Removed explicit SheetClose here, relying on default SheetContent close button */}
                   </div>
                 </SheetHeader>
 
