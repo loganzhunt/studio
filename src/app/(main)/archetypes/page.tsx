@@ -15,10 +15,12 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { getFacetColorHsl } from '@/lib/colors';
 import { Badge } from '@/components/ui/badge';
 
-// --- Helper Functions (can be moved to a lib if used elsewhere) ---
+// Helper Functions (can be moved to a lib if used elsewhere)
 const getDominantFacet = (scores: DomainScore[]): FacetName => {
   if (!scores || scores.length === 0) return FACET_NAMES[0]; // Default
-  return scores.reduce((prev, current) => (prev.score > current.score) ? prev : current).facetName || FACET_NAMES[0];
+  const validScores = scores.filter(s => s && typeof s.score === 'number');
+  if (validScores.length === 0) return FACET_NAMES[0];
+  return validScores.reduce((prev, current) => (current.score > prev.score) ? current : prev).facetName || FACET_NAMES[0];
 };
 
 // New batch of 10 archetypes provided by the user
@@ -87,7 +89,7 @@ const newArchetypeBatch = [
 
 // This is the existing rawArchetypeData from the file.
 // It will be merged with newArchetypeBatch.
-const existingRawArchetypeData = [
+let existingRawArchetypeData: any[] = [
   {
     "name": "The Philosopher",
     "summary": "Seeker of wisdom, driven to question, analyze, and understand the world in depth.",
@@ -286,7 +288,7 @@ const existingRawArchetypeData = [
     "facetScores": { "ontology": 0.3, "epistemology": 0.4, "praxeology": 0.6, "axiology": 0.5, "mythology": 0.4, "cosmology": 0.3, "teleology": 0.2 }
   },
   {
-    "name": "The Integral Synthesizer",
+    "name": "The Integral Synthesizer", // Updated version of this one exists in newArchetypeBatch
     "summary": "Integrates science and spirituality, development and depth, autonomy and wholeness.",
     "facetScores": { "ontology": 0.7, "epistemology": 0.7, "praxeology": 0.6, "axiology": 0.9, "mythology": 0.8, "cosmology": 0.85, "teleology": 0.9 }
   },
@@ -359,6 +361,7 @@ const existingRawArchetypeData = [
 // Helper function to merge and update archetype data
 // Prioritizes entries from the new batch.
 const mergeAndUpdateArchetypes = (existingArchetypes: any[], newBatch: any[]) => {
+  console.log("Starting merge. Existing:", existingArchetypes.length, "New:", newBatch.length);
   const newBatchMap = new Map(newBatch.map(item => [item.title.toLowerCase(), item]));
   const updatedArchetypes: any[] = [];
   const processedTitles = new Set<string>();
@@ -368,12 +371,16 @@ const mergeAndUpdateArchetypes = (existingArchetypes: any[], newBatch: any[]) =>
     const titleLower = (existingItem.name || existingItem.title || '').toLowerCase();
     if (newBatchMap.has(titleLower)) {
       const newItem = newBatchMap.get(titleLower)!;
+      // console.log(`Updating existing: ${existingItem.name || existingItem.title} with new data for ${newItem.title}`);
       updatedArchetypes.push({
-        name: newItem.title, // Use title from new batch as name
+        // Always use 'title' from new batch for consistency, map it to 'name' for the existing structure
+        name: newItem.title, 
         summary: newItem.summary,
         facetScores: newItem.scores, // Use new scores
         facetSummaries: newItem.facetDescriptions, // Use new descriptions
         // Retain other properties from existing if needed, or define them here
+        // e.g., tags, icon, etc., if they are not part of the new batch structure
+        // For this update, we assume the new batch defines the complete desired state for matching entries
       });
       processedTitles.add(titleLower);
     } else {
@@ -385,51 +392,87 @@ const mergeAndUpdateArchetypes = (existingArchetypes: any[], newBatch: any[]) =>
   newBatch.forEach(newItem => {
     const titleLower = newItem.title.toLowerCase();
     if (!processedTitles.has(titleLower)) {
+      // console.log(`Adding new archetype: ${newItem.title}`);
       updatedArchetypes.push({
-        name: newItem.title,
+        name: newItem.title, // Map new batch 'title' to 'name'
         summary: newItem.summary,
-        facetScores: newItem.scores,
-        facetSummaries: newItem.facetDescriptions,
+        facetScores: newItem.scores, // Map 'scores' to 'facetScores'
+        facetSummaries: newItem.facetDescriptions, // Map 'facetDescriptions' to 'facetSummaries'
       });
     }
   });
+  console.log("Merge complete. Total updated archetypes:", updatedArchetypes.length);
   return updatedArchetypes;
 };
 
+// `rawArchetypeData` is now the result of merging the existing data with the new batch
 const rawArchetypeData = mergeAndUpdateArchetypes(existingRawArchetypeData, newArchetypeBatch);
 
 
 // Helper function to ensure consistent `CodexEntry` structure
 // (Already defined in the file, assuming it's similar to this)
 const mapRawArchetypeToCodexEntry = (raw: any): CodexEntry => {
+  // console.log("Mapping raw item:", raw); // Log the raw item being mapped
   const domainScoresArray: DomainScore[] = FACET_NAMES.map(facetKey => {
-    const scoreSource = raw.facetScores || raw.scores; // Check both legacy and new score key
+    // Check both legacy score key 'facetScores' and new score key 'scores'
+    const scoreSource = raw.facetScores || raw.scores; 
     let score = 0.5; // Default score if missing or invalid
     if (scoreSource && typeof scoreSource === 'object') {
-        const rawScore = scoreSource[facetKey.toLowerCase() as keyof typeof scoreSource];
+        // Try lowercase key first (from new batch), then original case (from existing data)
+        const rawScore = scoreSource[facetKey.toLowerCase() as keyof typeof scoreSource] ?? scoreSource[facetKey as keyof typeof scoreSource];
         if (typeof rawScore === 'number') {
             score = Math.max(0, Math.min(1, Number(rawScore)));
+        } else {
+            // console.warn(`Invalid or missing score for facet ${facetKey} in item: ${raw.name || raw.title}, defaulting to 0.5`);
         }
+    } else {
+        // console.warn(`Missing scoreSource for item: ${raw.name || raw.title}, defaulting scores.`);
     }
     return { facetName: facetKey, score };
   });
 
-  const facetSummariesSource = raw.facetSummaries || raw.facetDescriptions; // Check both legacy and new summary key
+  // Check both legacy summary key 'facetSummaries' and new summary key 'facetDescriptions'
+  const facetSummariesSource = raw.facetSummaries || raw.facetDescriptions; 
   const processedFacetSummaries: { [K_FacetName in FacetName]?: string } = {};
   if (facetSummariesSource && typeof facetSummariesSource === 'object') {
     for (const facetKey of FACET_NAMES) {
-      const summaryKeyLower = facetKey.toLowerCase() as keyof typeof facetSummariesSource;
-      const summary = facetSummariesSource[summaryKeyLower];
+      // Try lowercase key first, then original case
+      const summary = facetSummariesSource[facetKey.toLowerCase() as keyof typeof facetSummariesSource] ?? facetSummariesSource[facetKey as keyof typeof facetSummariesSource];
       if (typeof summary === 'string') {
         processedFacetSummaries[facetKey] = summary;
+      } else {
+        // console.warn(`Missing or invalid summary for facet ${facetKey} in item: ${raw.name || raw.title}`);
+        processedFacetSummaries[facetKey] = `Details for ${facetKey} not available.`; // Default summary
       }
     }
+  } else {
+    // console.warn(`Missing facetSummariesSource for item: ${raw.name || raw.title}, using default summaries.`);
+    FACET_NAMES.forEach(name => {
+        processedFacetSummaries[name] = `Details for ${name} not available.`;
+    });
   }
-
+  
   const nameToUse = raw.name || raw.title; // Use name or title
 
+  if (!nameToUse || typeof nameToUse !== 'string') {
+    // console.error("mapRawArchetypeToCodexEntry: Item has no valid name or title", raw);
+    // This case should ideally be filtered out before mapping, or return a specific error object
+    return { 
+        id: `invalid-archetype-${Date.now()}`, 
+        title: "Invalid Archetype Data", 
+        summary: "This archetype data could not be processed.",
+        domainScores: FACET_NAMES.map(name => ({ facetName: name, score: 0.5 })),
+        facetSummaries: {},
+        category: "custom",
+        isArchetype: true,
+        createdAt: new Date().toISOString(),
+        tags: ["error"],
+    };
+  }
+
+
   return {
-    id: nameToUse.toLowerCase().replace(/\s+/g, '_'),
+    id: nameToUse.toLowerCase().replace(/\s+/g, '_').replace(/[^\w-]+/g, ''),
     title: nameToUse,
     summary: raw.summary || "No summary available.",
     domainScores: domainScoresArray,
@@ -437,11 +480,18 @@ const mapRawArchetypeToCodexEntry = (raw: any): CodexEntry => {
     category: "archetypal", // All these are archetypal
     isArchetype: true,
     createdAt: raw.createdAt || new Date().toISOString(),
-    tags: raw.tags || [nameToUse.toLowerCase().replace(/\s+/g, '_'), "archetype"],
+    tags: raw.tags || [nameToUse.toLowerCase().replace(/\s+/g, '_').replace(/[^\w-]+/g, '')],
   };
 };
 
-const dummyArchetypes: CodexEntry[] = rawArchetypeData.map(mapRawArchetypeToCodexEntry);
+// console.log("Raw Archetype Data after merge:", rawArchetypeData.map(item => item.name || item.title));
+
+const dummyArchetypes: CodexEntry[] = rawArchetypeData
+  .filter(item => item && (item.name || item.title)) // Ensure item and its name/title exist before mapping
+  .map(mapRawArchetypeToCodexEntry);
+
+// console.log("Final Mapped Archetypes (dummyArchetypes):", dummyArchetypes.map(a => a.title));
+// console.log("Number of mapped archetypes:", dummyArchetypes.length);
 
 
 // Placeholder for similarity calculation
@@ -471,12 +521,13 @@ const calculateSimilarity = (userScores: DomainScore[], archetypeScores: DomainS
   if (userMagnitude === 0 || archetypeMagnitude === 0) {
     return 0;
   }
-
-  return (dotProduct / (userMagnitude * archetypeMagnitude)) * 100;
+  const similarity = (dotProduct / (userMagnitude * archetypeMagnitude)) * 100;
+  return Math.max(0, Math.min(100, similarity)); // Clamp between 0 and 100
 };
 
 
 export default function ArchetypesPage() {
+  // console.log("ArchetypesPage rendered. Number of archetypes to display:", dummyArchetypes.length);
   const { domainScores: userDomainScores } = useWorldview();
   const [selectedArchetype, setSelectedArchetype] = useState<CodexEntry | null>(null);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
@@ -485,8 +536,9 @@ export default function ArchetypesPage() {
     let closest: CodexEntry | null = null;
     let highestSim = 0;
 
-    if (userDomainScores && userDomainScores.length > 0) {
+    if (userDomainScores && userDomainScores.length > 0 && Array.isArray(dummyArchetypes)) {
       for (const archetype of dummyArchetypes) {
+        if (!archetype || !archetype.domainScores) continue; // Defensive check
         const similarity = calculateSimilarity(userDomainScores, archetype.domainScores);
         if (similarity > highestSim) {
           highestSim = similarity;
@@ -504,6 +556,10 @@ export default function ArchetypesPage() {
 
   // ArchetypeCard component defined inside ArchetypesPage
   const ArchetypeCard = ({ archetype }: { archetype: CodexEntry }) => {
+    if (!archetype || !archetype.title || !archetype.domainScores) {
+      // console.warn("Rendering ArchetypeCard: Invalid archetype data", archetype);
+      return null; // Don't render card if essential data is missing
+    }
     const dominantFacet = getDominantFacet(archetype.domainScores);
     const titleColor = getFacetColorHsl(dominantFacet);
     
@@ -515,13 +571,7 @@ export default function ArchetypesPage() {
         </CardHeader>
         <CardContent className="flex-grow flex flex-col justify-center items-center">
           <TriangleChart scores={archetype.domainScores} width={180} height={156} className="!p-0 !bg-transparent !shadow-none !backdrop-blur-none mb-3" />
-           {archetype.tags && archetype.tags.length > 0 && (
-            <div className="flex flex-wrap gap-1 justify-center mt-2">
-              {archetype.tags.slice(0, 2).map(tag => ( // Show max 2 tags
-                <Badge key={tag} variant="secondary" className="text-xs">{tag}</Badge>
-              ))}
-            </div>
-          )}
+           {/* Tags are intentionally removed as per user request */}
         </CardContent>
         <CardFooter className="p-4 border-t border-border/30 mt-auto">
           <Button variant="outline" size="sm" className="w-full" onClick={() => handleOpenDrawer(archetype)}>
@@ -576,9 +626,10 @@ export default function ArchetypesPage() {
       <h2 className="text-3xl font-semibold mb-6 text-center">Browse Archetypal Profiles</h2>
       {dummyArchetypes.length > 0 ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-          {dummyArchetypes.map((archetype) => (
-            <ArchetypeCard key={archetype.id} archetype={archetype} />
-          ))}
+          {dummyArchetypes.map((archetype) => {
+            if (!archetype || !archetype.id) return null; // Add a key check
+            return <ArchetypeCard key={archetype.id} archetype={archetype} />;
+          })}
         </div>
       ) : (
         <div className="text-center py-12">
@@ -628,7 +679,7 @@ export default function ArchetypesPage() {
                           </h4>
                           <span className="text-sm font-bold" style={{color: getFacetColorHsl(facetName)}}>{Math.round(score * 100)}%</span>
                         </div>
-                        <p className="text-xs text-muted-foreground italic mb-1">{facetConfig.tagline}</p>
+                        <p className="text-xs text-muted-foreground italic mb-1">{facetConfig?.tagline || "..."}</p>
                         <p className="text-sm text-muted-foreground">{facetSummary}</p>
                       </div>
                     );
@@ -642,13 +693,3 @@ export default function ArchetypesPage() {
     </div>
   );
 }
-
-    
-
-    
-
-    
-
-    
-
-    
