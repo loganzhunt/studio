@@ -14,7 +14,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { TriangleChart } from "@/components/visualization/TriangleChart";
 import type { CodexEntry, FacetName, DomainScore } from "@/types";
 import { FACETS, FACET_NAMES } from "@/config/facets";
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription, SheetClose } from "@/components/ui/sheet";
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from "@/components/ui/sheet";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Badge } from '@/components/ui/badge';
 import { getFacetColorHsl } from '@/lib/colors';
@@ -28,14 +28,14 @@ import { ADDITIONAL_CODEX_DATA } from "@/data/codex/additional-codex-data";
 
 // --- Helper Functions ---
 const getDominantFacet = (scores: DomainScore[]): FacetName => {
-  if (!scores || scores.length === 0) return FACET_NAMES[0];
+  if (!scores || scores.length === 0) return FACET_NAMES[0]; // Default
   const validScores = scores.filter(s => s && typeof s.score === 'number');
   if (validScores.length === 0) return FACET_NAMES[0];
   return validScores.reduce((prev, current) => (current.score > prev.score) ? current : prev).facetName || FACET_NAMES[0];
 };
 
 // Ensure this function is exported
-export const mapRawDataToCodexEntries = (rawItems: any[]): CodexEntry[] => {
+export function mapRawDataToCodexEntries(rawItems: any[]): CodexEntry[] {
   if (!Array.isArray(rawItems)) {
     console.error("mapRawDataToCodexEntries received non-array input:", rawItems);
     return [];
@@ -50,23 +50,23 @@ export const mapRawDataToCodexEntries = (rawItems: any[]): CodexEntry[] => {
     const id = title.toLowerCase().replace(/\s+/g, '_').replace(/[^\w-]+/g, '');
 
     let domainScoresArray: DomainScore[] = [];
-    const scoresSource = item.scores || item.domainScores;
+    const scoresSource = item.scores || item.domainScores; // Use 'scores' from new data, fallback to 'domainScores'
 
     if (scoresSource && typeof scoresSource === 'object') {
       domainScoresArray = FACET_NAMES.map(facetKey => {
         const scoreKeyLower = facetKey.toLowerCase() as keyof typeof scoresSource;
         const scoreKeyOriginal = facetKey as keyof typeof scoresSource;
-        let scoreValue = 0.5;
+        let scoreValue = 0.5; // Default score if not found for a facet
 
         if (typeof scoresSource[scoreKeyLower] === 'number') {
           scoreValue = scoresSource[scoreKeyLower];
-        } else if (typeof scoresSource[scoreKeyOriginal] === 'number') {
+        } else if (typeof scoresSource[scoreKeyOriginal] === 'number') { // Fallback for capitalized keys
           scoreValue = scoresSource[scoreKeyOriginal];
         }
         return { facetName: facetKey, score: Math.max(0, Math.min(1, Number(scoreValue))) };
       });
     } else {
-      // console.warn(`Missing or invalid scores for item: ${title}, defaulting to 0.5`);
+      // console.warn(`Missing or invalid scores for item: ${title}, defaulting all to 0.5`);
       domainScoresArray = FACET_NAMES.map(name => ({ facetName: name, score: 0.5 }));
     }
 
@@ -93,23 +93,23 @@ export const mapRawDataToCodexEntries = (rawItems: any[]): CodexEntry[] => {
     }
 
     let category: CodexEntry['category'] = 'custom';
-    const itemCategoryRaw = (item.category || '').toString(); // Ensure it's a string
-    const itemCategory = itemCategoryRaw.toLowerCase().split(' ')[0];
+    const itemCategoryRaw = (item.category || '').toString();
+    const itemCategoryMain = itemCategoryRaw.toLowerCase().split(' ')[0]; // Take first word for category
 
     const validCategories: CodexEntry['category'][] = ['philosophical', 'religious', 'archetypal', 'spiritual', 'custom', 'indigenous', 'mystical', 'scientific', 'cultural'];
-    if (validCategories.includes(itemCategory as CodexEntry['category'])) {
-      category = itemCategory as CodexEntry['category'];
+    if (validCategories.includes(itemCategoryMain as CodexEntry['category'])) {
+      category = itemCategoryMain as CodexEntry['category'];
     } else if (item.tags && Array.isArray(item.tags) && (item.tags as string[]).some(tag => validCategories.includes(tag.toLowerCase() as CodexEntry['category']))) {
       category = (item.tags as string[]).find(tag => validCategories.includes(tag.toLowerCase() as CodexEntry['category']))?.toLowerCase() as CodexEntry['category'] || 'custom';
     }
 
     const tags = Array.isArray(item.tags) ? item.tags.map(String) : (typeof item.tags === 'string' ? [item.tags] : []);
     if (category !== 'custom' && !tags.includes(category)) {
-        tags.push(category);
+      tags.push(category);
     }
     const idTag = title.toLowerCase().replace(/\s+/g, '_').replace(/[^\w-]+/g, '');
     if (!tags.includes(idTag)) {
-        tags.push(idTag);
+      tags.push(idTag);
     }
 
     return {
@@ -118,21 +118,17 @@ export const mapRawDataToCodexEntries = (rawItems: any[]): CodexEntry[] => {
       summary: item.summary || "No summary available.",
       domainScores: domainScoresArray,
       category,
-      isArchetype: category === 'archetypal' || (Array.isArray(item.tags) && (item.tags as string[]).map(t=>t.toLowerCase()).includes('archetypal')),
+      isArchetype: category === 'archetypal' || (Array.isArray(item.tags) && (item.tags as string[]).map(t => t.toLowerCase()).includes('archetypal')),
       createdAt: item.createdAt || new Date().toISOString(),
       tags,
       facetSummaries: processedFacetSummaries,
-      icon: item.icon || undefined,
+      icon: item.icon || undefined, // Add icon from raw data
     };
   }).filter(item => item !== null) as CodexEntry[];
 };
 
 
 export default function CodexPage() {
-  // console.log("BASE_CODEX_DATA length:", BASE_CODEX_DATA?.length);
-  // console.log("LATEST_CODEX_UPDATE_BATCH length:", LATEST_CODEX_UPDATE_BATCH?.length);
-  // console.log("ADDITIONAL_CODEX_DATA length:", ADDITIONAL_CODEX_DATA?.length);
-
   const [searchTerm, setSearchTerm] = useState("");
   const [sortBy, setSortBy] = useState("title");
   const [activeCategory, setActiveCategory] = useState<CodexEntry['category'] | "all">("all");
@@ -140,6 +136,7 @@ export default function CodexPage() {
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const { addSavedWorldview, savedWorldviews } = useWorldview();
   const { toast } = useToast();
+  // console.log("CodexPage function definition reached");
 
   const initialMappedEntries = useMemo(() => {
     let combinedRawData: any[] = [];
@@ -154,12 +151,11 @@ export default function CodexPage() {
       const uniqueTitles = new Set<string>();
 
       for (const item of combinedRawData) {
-        // Ensure item is an object and has a title or name
         if (typeof item !== 'object' || item === null) continue;
         const title = (item.title || item.name || '').toString().toLowerCase().trim();
         if (title && !uniqueTitles.has(title)) {
           const standardizedItem = { ...item, title: item.title || item.name };
-          if (item.name && typeof item.name === 'string' && item.title !== item.name) delete standardizedItem.name;
+          if (item.name && typeof item.name === 'string' && standardizedItem.title !== item.name) delete standardizedItem.name;
           uniqueEntriesData.push(standardizedItem);
           uniqueTitles.add(title);
         }
@@ -175,12 +171,10 @@ export default function CodexPage() {
   const filteredAndSortedEntries = useMemo(() => {
     let entries = [...initialMappedEntries];
 
-    // Filter by active category
     if (activeCategory !== "all") {
       entries = entries.filter(entry => entry.category === activeCategory);
     }
 
-    // Filter by search term
     if (searchTerm) {
       const lowerSearchTerm = searchTerm.toLowerCase();
       entries = entries.filter(entry =>
@@ -190,7 +184,6 @@ export default function CodexPage() {
       );
     }
 
-    // Sort entries
     if (sortBy === "title") {
       entries.sort((a, b) => a.title.localeCompare(b.title));
     } else if (sortBy === "category") {
@@ -222,7 +215,7 @@ export default function CodexPage() {
       toast({ title: "Already Saved", description: `"${entryToSave.title}" is already in your library.` });
       return;
     }
-    addSavedWorldview({ ...entryToSave });
+    addSavedWorldview({ ...entryToSave }); // Spread to ensure a new object is saved if types differ slightly
     toast({ title: "Saved to Library", description: `"${entryToSave.title}" has been added to your saved worldviews.` });
   };
 
@@ -251,7 +244,7 @@ export default function CodexPage() {
           <TriangleChart scores={entry.domainScores} width={180} height={156} className="!p-0 !bg-transparent !shadow-none !backdrop-blur-none mb-2" />
         </CardContent>
         <CardFooter className="p-3 border-t border-border/30 mt-auto">
-           <Button variant="outline" size="sm" className="w-full text-xs" onClick={() => handleOpenDrawer(entry)}>
+          <Button variant="outline" size="sm" className="w-full text-xs" onClick={() => handleOpenDrawer(entry)}>
             View Details <Icons.chevronRight className="ml-1 h-3 w-3" />
           </Button>
         </CardFooter>
@@ -348,35 +341,15 @@ export default function CodexPage() {
                         <SheetDescription className="text-base capitalize">{selectedEntry.category} Profile</SheetDescription>
                       </div>
                     </div>
-                    {/* Removed explicit SheetClose here, relying on default SheetContent close button */}
                   </div>
                 </SheetHeader>
 
                 <p className="mb-6 text-muted-foreground leading-relaxed">{selectedEntry.summary}</p>
 
-                <div className="mb-6">
+                <div className="mb-6 flex justify-center">
                    <TriangleChart scores={selectedEntry.domainScores} width={250} height={217} className="mx-auto !p-0 !bg-transparent !shadow-none !backdrop-blur-none" />
                 </div>
                 
-                <div className="mb-4 space-y-2">
-                  <Button 
-                    variant={savedWorldviews.some(p => p.id === selectedEntry.id) ? "default" : "outline"}
-                    size="sm"
-                    className="w-full text-xs"
-                    onClick={() => handleSaveCodexEntry(selectedEntry)}
-                    disabled={savedWorldviews.some(p => p.id === selectedEntry.id)}
-                  >
-                    {savedWorldviews.some(p => p.id === selectedEntry.id) ? <Icons.check className="mr-1 h-3 w-3" /> : <Icons.saved className="mr-1 h-3 w-3" />}
-                    {savedWorldviews.some(p => p.id === selectedEntry.id) ? "Saved to Library" : "Save to Library"}
-                  </Button>
-                  <Button variant="outline" asChild className="w-full">
-                    <Link href={`/codex/${selectedEntry.id}`}>
-                      View Full Deep-Dive Page <Icons.chevronRight className="ml-1 h-4 w-4" />
-                    </Link>
-                  </Button>
-                </div>
-
-
                 <div className="space-y-4 mb-6">
                   <h3 className="text-xl font-semibold text-foreground mb-3 border-b border-border/30 pb-2">Facet Breakdown</h3>
                   {FACET_NAMES.map(facetName => {
@@ -398,6 +371,23 @@ export default function CodexPage() {
                       </div>
                     );
                   })}
+                </div>
+                <div className="mb-4 space-y-2 border-t border-border/30 pt-4">
+                  <Button
+                    variant={savedWorldviews.some(p => p.id === selectedEntry.id) ? "default" : "outline"}
+                    size="sm"
+                    className="w-full text-xs"
+                    onClick={() => handleSaveCodexEntry(selectedEntry)}
+                    disabled={savedWorldviews.some(p => p.id === selectedEntry.id)}
+                  >
+                    {savedWorldviews.some(p => p.id === selectedEntry.id) ? <Icons.check className="mr-1 h-3 w-3" /> : <Icons.saved className="mr-1 h-3 w-3" />}
+                    {savedWorldviews.some(p => p.id === selectedEntry.id) ? "Saved to Library" : "Save to Library"}
+                  </Button>
+                  <Button variant="outline" asChild className="w-full">
+                    <Link href={`/codex/${selectedEntry.id}`}>
+                      View Full Deep-Dive Page <Icons.chevronRight className="ml-1 h-4 w-4" />
+                    </Link>
+                  </Button>
                 </div>
               </div>
             </ScrollArea>
