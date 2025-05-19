@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useParams, useRouter } from 'next/navigation';
@@ -15,7 +16,10 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Textarea } from '@/components/ui/textarea';
 import { Separator } from '@/components/ui/separator';
-import { getFacetColorHsl, SPECTRUM_LABELS } from '@/lib/colors'; 
+import { getFacetColorHsl, SPECTRUM_LABELS, DOMAIN_COLORS } from '@/lib/colors'; 
+import chroma from 'chroma-js';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+
 
 // Import all codex data - needed to find the specific entry
 import { BASE_CODEX_DATA } from "@/data/codex/base-codex-data";
@@ -86,6 +90,7 @@ export default function CodexDeepDivePage() {
     }
     addSavedWorldview({ ...worldview }); 
     setIsSaved(true); 
+    toast({ title: "Saved to Library", description: `"${worldview.title}" has been added to your saved worldviews.` });
   };
 
   // Placeholder content specific to Platonism for new sections
@@ -185,42 +190,71 @@ export default function CodexDeepDivePage() {
           <CardDescription>How {worldview.title} aligns with each of the 7 Meta-Prism facets.</CardDescription>
         </CardHeader>
         <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-8 items-start">
-          <div className="md:sticky md:top-24"> 
-            <TriangleChart scores={worldview.domainScores} className="mx-auto max-w-sm" />
+          <div className="md:sticky md:top-24 flex justify-center"> 
+            <TriangleChart scores={worldview.domainScores} width={300} height={260} className="max-w-sm !p-0 !bg-transparent !shadow-none !backdrop-blur-none" />
           </div>
-          <Accordion type="single" collapsible className="w-full" defaultValue={FACET_NAMES[0]}>
-            {worldview.domainScores.map(ds => {
-              const facetConfig = FACETS[ds.facetName];
-              const spectrumPoleLabels = SPECTRUM_LABELS[ds.facetName];
-              const facetColor = getFacetColorHsl(ds.facetName);
+          <div className="space-y-4">
+            {FACET_NAMES.map(facetName => {
+              const scoreObj = worldview.domainScores.find(ds => ds.facetName === facetName);
+              const score = scoreObj ? scoreObj.score : 0.5; // Default to 0.5 if score not found
+              const facetConfig = FACETS[facetName];
+              const facetSummary = worldview.facetSummaries?.[facetName] || `Information for ${facetName} not available.`;
+              const spectrumPoleLabels = SPECTRUM_LABELS[facetName] || { left: 'Low', right: 'High' };
+              
+              const barColorDark = chroma(DOMAIN_COLORS[facetName]).darken(1.5).hex();
+              const barColorLight = chroma(DOMAIN_COLORS[facetName]).brighten(1.5).hex();
 
               return (
-                <AccordionItem value={ds.facetName} key={ds.facetName} className="border-border/50 mb-2 last:mb-0 rounded-lg overflow-hidden bg-background/30 hover:bg-background/50 transition-colors">
-                  <AccordionTrigger className="p-4 text-md hover:no-underline">
-                    <div className="flex flex-col items-start text-left w-full">
-                      <div className="flex items-center gap-2 w-full justify-between">
-                        <div className="flex items-center gap-2">
-                           {facetConfig?.icon && React.createElement(facetConfig.icon, { className: "h-5 w-5", style: { color: facetColor } })}
-                          <span className="font-semibold" style={{ color: facetColor }}>{ds.facetName}</span>
+                <div key={facetName} className="p-4 rounded-md border border-border/30 bg-background/40 space-y-2">
+                  <div className="flex justify-between items-center">
+                    <h4 className="text-lg font-semibold" style={{color: getFacetColorHsl(facetName)}}>
+                      {facetName}
+                    </h4>
+                    <span className="text-sm font-bold" style={{color: getFacetColorHsl(facetName)}}>{Math.round(score * 100)}%</span>
+                  </div>
+                  <p className="text-xs text-muted-foreground italic mb-1">{facetConfig?.tagline || "..."}</p>
+                  <p className="text-sm text-muted-foreground">{facetSummary}</p>
+                  
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <div className="w-full h-6 rounded bg-muted/30 relative mt-2" aria-label={`${facetName} spectrum: ${spectrumPoleLabels.left} to ${spectrumPoleLabels.right}. Score: ${Math.round(score * 100)}%`}>
+                          <div 
+                            className="h-full rounded"
+                            style={{ background: `linear-gradient(to right, ${barColorDark}, ${barColorLight})` }}
+                          />
+                          {/* Marker group: text bubble + triangle pointing to the score */}
+                          <div
+                            className="absolute top-0 transform -translate-x-1/2 -translate-y-full -mt-0.5" 
+                            style={{ left: `${score * 100}%` }}
+                            aria-hidden="true"
+                          >
+                            <div 
+                              className="px-2 py-0.5 text-xs bg-foreground text-background rounded-md shadow-lg whitespace-nowrap"
+                            >
+                              {Math.round(score * 100)}%
+                            </div>
+                            <svg
+                              width="10"
+                              height="6"
+                              viewBox="0 0 10 6"
+                              className="fill-foreground mx-auto mt-0.5"
+                              style={{ filter: 'drop-shadow(0px 1px 1px rgba(0,0,0,0.2))' }}
+                            >
+                              <path d="M5 6L0 0H10L5 6Z" /> {/* Downward pointing triangle */}
+                            </svg>
+                          </div>
                         </div>
-                        <span className="text-sm font-bold" style={{ color: facetColor }}>{Math.round(ds.score * 100)}%</span>
-                      </div>
-                      {spectrumPoleLabels && (
-                        <p className="text-xs text-muted-foreground mt-1">
-                          {spectrumPoleLabels.left} <span className="text-foreground/50 mx-1">←────→</span> {spectrumPoleLabels.right}
-                        </p>
-                      )}
-                    </div>
-                  </AccordionTrigger>
-                  <AccordionContent className="p-4 pt-0">
-                    <p className="text-sm text-muted-foreground leading-relaxed">
-                      {worldview.facetSummaries?.[ds.facetName] || `Detailed insights into ${worldview.title}'s approach to ${ds.facetName.toLowerCase()}...`}
-                    </p>
-                  </AccordionContent>
-                </AccordionItem>
+                      </TooltipTrigger>
+                      <TooltipContent side="bottom" className="bg-popover text-popover-foreground p-2 rounded-md shadow-lg text-xs">
+                        <p>{spectrumPoleLabels.left} <span className="text-muted-foreground mx-1">←</span> Score: {Math.round(score * 100)}% <span className="text-muted-foreground mx-1">→</span> {spectrumPoleLabels.right}</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                </div>
               );
             })}
-          </Accordion>
+          </div>
         </CardContent>
       </Card>
 

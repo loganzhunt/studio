@@ -14,19 +14,18 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { TriangleChart } from "@/components/visualization/TriangleChart";
 import type { CodexEntry, FacetName, DomainScore } from "@/types";
 import { FACETS, FACET_NAMES } from "@/config/facets";
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription, SheetClose } from "@/components/ui/sheet";
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from "@/components/ui/sheet";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { getFacetColorHsl, DOMAIN_COLORS, SPECTRUM_LABELS } from '@/lib/colors'; // Import SPECTRUM_LABELS
+import { getFacetColorHsl, DOMAIN_COLORS, SPECTRUM_LABELS } from '@/lib/colors';
 import { useWorldview } from '@/hooks/use-worldview';
 import { useToast } from '@/hooks/use-toast';
-import chroma from 'chroma-js'; // Import chroma
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"; // Import Tooltip
+import chroma from 'chroma-js';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 // Import data from separate files
 import { BASE_CODEX_DATA } from "@/data/codex/base-codex-data";
 import { LATEST_CODEX_UPDATE_BATCH } from "@/data/codex/latest-codex-update-batch";
 import { ADDITIONAL_CODEX_DATA } from "@/data/codex/additional-codex-data";
-
 
 // --- Helper Functions ---
 const getDominantFacet = (scores: DomainScore[]): FacetName => {
@@ -38,17 +37,17 @@ const getDominantFacet = (scores: DomainScore[]): FacetName => {
 
 export function mapRawDataToCodexEntries(rawItems: any[]): CodexEntry[] {
   if (!Array.isArray(rawItems)) {
-    // console.error("mapRawDataToCodexEntries received non-array input:", rawItems);
+    console.error("mapRawDataToCodexEntries received non-array input:", rawItems);
     return [];
   }
   return rawItems.map((item: any, index: number) => {
-    const title = item.title || item.name;
-    if (!item || (typeof title !== 'string' )) {
-      // console.warn(`Skipping invalid item at index ${index} in rawCodexData (missing title/name):`, item);
+    const titleToUse = item.title || item.name;
+    if (!item || (typeof titleToUse !== 'string' )) {
+      console.warn(`Skipping invalid item at index ${index} in rawCodexData (missing title/name):`, item);
       return null; // Filter this out later
     }
 
-    const id = title.toLowerCase().replace(/\s+/g, '_').replace(/[^\w-]+/g, '');
+    const id = titleToUse.toLowerCase().replace(/\s+/g, '_').replace(/[^\w-]+/g, '');
 
     let domainScoresArray: DomainScore[] = [];
     const scoresSource = item.scores || item.domainScores || item.facetScores;
@@ -88,7 +87,7 @@ export function mapRawDataToCodexEntries(rawItems: any[]): CodexEntry[] {
       }
     } else {
       FACET_NAMES.forEach(facetKey => {
-        processedFacetSummaries[facetKey] = `Information for ${facetKey} is not available for ${title}.`;
+        processedFacetSummaries[facetKey] = `Information for ${facetKey} is not available for ${titleToUse}.`;
       });
     }
     
@@ -108,15 +107,14 @@ export function mapRawDataToCodexEntries(rawItems: any[]): CodexEntry[] {
     if (category !== 'custom' && !tags.includes(category)) {
       tags.push(category); 
     }
-    const idTag = title.toLowerCase().replace(/\s+/g, '_').replace(/[^\w-]+/g, '');
+    const idTag = titleToUse.toLowerCase().replace(/\s+/g, '_').replace(/[^\w-]+/g, '');
     if (!tags.includes(idTag)) {
         tags.push(idTag);
     }
 
-
     return {
       id,
-      title,
+      title: titleToUse,
       summary: item.summary || "No summary available.",
       icon: item.icon || undefined,
       domainScores: domainScoresArray,
@@ -131,9 +129,10 @@ export function mapRawDataToCodexEntries(rawItems: any[]): CodexEntry[] {
 
 
 export default function CodexPage() {
-  // console.log("BASE_CODEX_DATA length:", BASE_CODEX_DATA?.length);
-  // console.log("LATEST_CODEX_UPDATE_BATCH length:", LATEST_CODEX_UPDATE_BATCH?.length);
-  // console.log("ADDITIONAL_CODEX_DATA length:", ADDITIONAL_CODEX_DATA?.length);
+  // console.log('BASE_CODEX_DATA length:', BASE_CODEX_DATA?.length);
+  // console.log('LATEST_CODEX_UPDATE_BATCH length:', LATEST_CODEX_UPDATE_BATCH?.length);
+  // console.log('ADDITIONAL_CODEX_DATA length:', ADDITIONAL_CODEX_DATA?.length);
+  // console.log("CodexPage function definition reached");
 
 
   const [searchTerm, setSearchTerm] = useState("");
@@ -147,6 +146,7 @@ export default function CodexPage() {
   const initialMappedEntries = useMemo(() => {
     try {
       let combinedRawData: any[] = [];
+      // Ensure arrays are valid before concatenating
       if (Array.isArray(LATEST_CODEX_UPDATE_BATCH)) combinedRawData = combinedRawData.concat(LATEST_CODEX_UPDATE_BATCH);
       if (Array.isArray(ADDITIONAL_CODEX_DATA)) combinedRawData = combinedRawData.concat(ADDITIONAL_CODEX_DATA);
       if (Array.isArray(BASE_CODEX_DATA)) combinedRawData = combinedRawData.concat(BASE_CODEX_DATA);
@@ -155,11 +155,16 @@ export default function CodexPage() {
       const uniqueTitles = new Set<string>();
 
       for (const item of combinedRawData) {
-        if (typeof item !== 'object' || item === null) continue;
+        if (typeof item !== 'object' || item === null) {
+          // console.warn("Skipping invalid item in combinedRawData:", item);
+          continue;
+        }
         const title = (item.title || item.name || '').toString().toLowerCase().trim();
         if (title && !uniqueTitles.has(title)) {
-          const standardizedItem = { ...item, title: item.title || item.name };
-          if (item.name && typeof item.name === 'string' && standardizedItem.title !== item.name) delete standardizedItem.name; 
+          const standardizedItem = { ...item, title: item.title || item.name }; // Ensure title property exists
+          if (item.name && typeof item.name === 'string' && standardizedItem.title !== item.name) { // Remove name if different from title
+             delete standardizedItem.name; 
+          }
           uniqueEntriesData.push(standardizedItem);
           uniqueTitles.add(title);
         }
@@ -248,8 +253,8 @@ export default function CodexPage() {
             {entry.summary}
           </CardDescription>
         </CardHeader>
-        <CardContent className="flex-grow flex flex-col justify-center items-center pt-2 pb-3">
-          <TriangleChart scores={entry.domainScores} width={180} height={156} className="!p-0 !bg-transparent !shadow-none !backdrop-blur-none mb-2" />
+        <CardContent className="flex-grow flex flex-col justify-center items-center pt-2 pb-4">
+          <TriangleChart scores={entry.domainScores} width={180} height={156} className="!p-0 !bg-transparent !shadow-none !backdrop-blur-none mb-3" />
         </CardContent>
         <CardFooter className="p-3 border-t border-border/30 mt-auto">
           <Button variant="outline" size="sm" className="w-full text-xs" onClick={() => handleOpenDrawer(entry)}>
@@ -406,14 +411,26 @@ export default function CodexPage() {
                                 className="h-full rounded"
                                 style={{ background: `linear-gradient(to right, ${barColorDark}, ${barColorLight})` }}
                               />
-                              <div 
-                                className="absolute top-0 h-full w-1.5 bg-white rounded-full shadow-md transform -translate-x-1/2 border-2 border-background"
+                              {/* Marker group: text bubble + triangle pointing to the score */}
+                              <div
+                                className="absolute top-0 transform -translate-x-1/2 -translate-y-full -mt-0.5" 
                                 style={{ left: `${score * 100}%` }}
                                 aria-hidden="true"
                               >
-                                <div className="absolute -top-5 left-1/2 transform -translate-x-1/2 px-1.5 py-0.5 text-xs bg-foreground text-background rounded-sm shadow whitespace-nowrap">
+                                <div 
+                                  className="px-2 py-0.5 text-xs bg-foreground text-background rounded-md shadow-lg whitespace-nowrap"
+                                >
                                   {Math.round(score * 100)}%
                                 </div>
+                                <svg
+                                  width="10"
+                                  height="6"
+                                  viewBox="0 0 10 6"
+                                  className="fill-foreground mx-auto mt-0.5"
+                                  style={{ filter: 'drop-shadow(0px 1px 1px rgba(0,0,0,0.2))' }}
+                                >
+                                  <path d="M5 6L0 0H10L5 6Z" /> {/* Downward pointing triangle */}
+                                </svg>
                               </div>
                             </div>
                           </TooltipTrigger>
@@ -448,4 +465,3 @@ export default function CodexPage() {
     </div>
   );
 }
-

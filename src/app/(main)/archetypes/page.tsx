@@ -35,9 +35,9 @@ const rawArchetypeData: any[] = [
     "facetDescriptions": { "ontology": "Sees reality as fundamentally material; trusts in what can be measured.", "epistemology": "Strongly favors empirical observation and skepticism over revelation.", "praxeology": "Prefers structured, hierarchical systems and established authority.", "axiology": "Values personal autonomy and achievement over collective or spiritual ideals.", "mythology": "Views history and experience as linear progress.", "cosmology": "Explains the universe in mechanistic, scientific terms.", "teleology": "Sees purpose as self-determined, existential, and grounded in this life." }
   },
   {
-    "title": "The Transcendent Mystic", // Renamed from "The Mystic Pilgrim" to match common name
+    "title": "The Transcendent Mystic", 
     "summary": "Sees all of existence as sacred and interconnected, guided by direct spiritual insight. Values self-transcendence, unity, and surrender to higher meaning.",
-    "scores": { "ontology": 0.95, "epistemology": 0.9, "praxeology": 0.8, "axiology": 0.95, "mythology": 0.95, "cosmology": 0.95, "teleology": 1.0 },
+    "scores": { "ontology": 0.95, "epistemology": 0.9, "praxeology": 0.30, "axiology": 0.95, "mythology": 0.95, "cosmology": 0.95, "teleology": 1.0 }, // Updated Praxeology for Mystic Pilgrim to 0.30 (original 0.8)
     "facetDescriptions": { "ontology": "Sees reality as fundamentally ideal or spiritual, rooted in unity or consciousness.", "epistemology": "Gains knowledge through revelation, intuition, or mystical insight.", "praxeology": "Prefers non-hierarchical, contemplative, or surrender-based action.", "axiology": "Values selfless love, devotion, and sacred ideals over individual gain.", "mythology": "Finds resonance in cyclical, mythic, and transpersonal stories.", "cosmology": "Views the universe as holistic and interconnected.", "teleology": "Sees life’s highest purpose in the Divine, transcendence, or unity." }
   },
   {
@@ -47,9 +47,9 @@ const rawArchetypeData: any[] = [
     "facetDescriptions": { "ontology": "Balances between material and ideal, questioning fixed reality. Reality is constructed, not fixed.", "epistemology": "Explores both empirical and revelatory ways of knowing. Knowledge is contextual.", "praxeology": "Resists rigid hierarchy; favors flexible, individual action. Critical, open-ended.", "axiology": "Values personal meaning and creative expression. Values diversity, pluralism.", "mythology": "Draws from diverse stories, often in cyclical or disrupted form. Deconstructs grand narratives.", "cosmology": "Views cosmos as open, uncertain, and in flux. Rejects fixed cosmic order.", "teleology": "Sees purpose as existential, chosen, and ambiguous. Purpose is provisional or ironic." }
   },
   {
-    "title": "The Scientific Humanist", // Renamed from "The Humanist"
+    "title": "The Scientific Humanist", 
     "summary": "Grounded in rational ethics, scientific method, and belief in human progress.",
-    "scores": { "ontology": 0.1, "epistemology": 0.2, "praxeology": 0.4, "axiology": 0.6, "mythology": 0.4, "cosmology": 0.5, "teleology": 0.6 },
+    "scores": { "ontology": 0.1, "epistemology": 0.25, "praxeology": 0.40, "axiology": 0.55, "mythology": 0.25, "cosmology": 0.25, "teleology": 0.15 }, // Updated scores to match 'The Humanist'
     "facetDescriptions": { "ontology": "Leans materialist, seeing people and relationships as the core of reality.", "epistemology": "Values evidence, critical thinking, and reasoned dialogue.", "praxeology": "Prefers systems that are merit-based but support collective good.", "axiology": "Blends individual dignity with social compassion and justice.", "mythology": "Draws meaning from human stories and cultural narratives.", "cosmology": "Views the universe as understandable and shaped by human inquiry.", "teleology": "Sees meaning as constructed, existential, and rooted in this world." }
   },
   {
@@ -59,16 +59,16 @@ const rawArchetypeData: any[] = [
     "facetDescriptions": { "ontology": "Reality is ordered by tradition and divine principles.", "epistemology": "Knowledge comes from sacred texts and lineage.", "praxeology": "Action is guided by established duties and rituals.", "axiology": "Values heritage, obedience, and communal harmony.", "mythology": "Upholds foundational myths and religious narratives.", "cosmology": "Universe is seen as divinely structured and meaningful.", "teleology": "Purpose is to live according to divine law and tradition." }
   },
   {
-    "title": "The Earth-Centered Animist", // Renamed from "The Cosmic Animist"
+    "title": "The Earth-Centered Animist", 
     "summary": "Views the world as alive, reciprocal, and sacred; values ecological harmony and ancestral continuity.",
-    "scores": { "ontology": 0.9, "epistemology": 0.8, "praxeology": 0.7, "axiology": 0.85, "mythology": 0.85, "cosmology": 0.9, "teleology": 0.85 },
+    "scores": { "ontology": 0.85, "epistemology": 0.60, "praxeology": 0.40, "axiology": 0.65, "mythology": 0.70, "cosmology": 0.90, "teleology": 0.80 }, // Updated scores to match 'The Cosmic Animist'
     "facetDescriptions": { "ontology": "Sees reality as inherently alive, relational, and animated by spirit.", "epistemology": "Balances observation with revelatory ways of knowing (dream, vision).", "praxeology": "Values egalitarian, reciprocal, and collective practices.", "axiology": "Prioritizes interdependence, respect, and stewardship.", "mythology": "Meaning is found in cyclical, living, and place-based stories.", "cosmology": "Views cosmos as holistic and animate.", "teleology": "Purpose is to participate in the living web of existence." }
   },
   {
-    "title": "The Existential Individualist", // Renamed from "The Existential Explorer"
+    "title": "The Existential Individualist", 
     "summary": "Asserts self-determined meaning, embraces uncertainty, and rejects cosmic absolutes.",
-    "scores": { "ontology": 0.3, "epistemology": 0.4, "praxeology": 0.6, "axiology": 0.5, "mythology": 0.4, "cosmology": 0.3, "teleology": 0.2 },
-    "facetDescriptions": { "ontology": "Materialist and existential; reality is brute fact, not essence.", "epistemology": "Leans empirical; values personal experience over dogma.", "praxeology": "Emphasizes individual freedom, authenticity, and responsibility.", "axiology": "Values subjective meaning, authenticity, and self-definition.", "mythology": "Skeptical of traditional myths; embraces existential narrative.", "cosmology": "Mechanistic and indifferent; cosmos lacks intrinsic order.", "teleology": "Existential; meaning and purpose are self-created." }
+    "scores": { "ontology": 0.40, "epistemology": 0.40, "praxeology": 0.45, "axiology": 0.35, "mythology": 0.40, "cosmology": 0.35, "teleology": 0.05 }, // Updated scores to match 'The Existential Explorer'
+    "facetDescriptions": { "ontology": "Balances between material and ideal, questioning fixed reality.", "epistemology": "Explores both empirical and revelatory ways of knowing.", "praxeology": "Resists rigid hierarchy; favors flexible, individual action.", "axiology": "Values personal meaning and creative expression.", "mythology": "Draws from diverse stories, often in cyclical or disrupted form.", "cosmology": "Views cosmos as open, uncertain, and in flux.", "teleology": "Sees purpose as existential, chosen, and ambiguous." }
   },
   {
     "title": "The Integral Synthesizer",
@@ -88,7 +88,6 @@ const rawArchetypeData: any[] = [
     "scores": { "ontology": 0.5, "epistemology": 0.6, "praxeology": 0.5, "axiology": 0.7, "mythology": 0.5, "cosmology": 0.5, "teleology": 0.6 },
     "facetDescriptions": { "ontology": "Reality is what is, but also includes subjective depth.", "epistemology": "Balances empirical observation with introspective awareness.", "praxeology": "Acts mindfully and with consideration for nuance.", "axiology": "Values clarity, peace, and authentic understanding.", "mythology": "Interprets myths for psychological or spiritual insight.", "cosmology": "Universe is real, and our perception of it matters.", "teleology": "Purpose is found in awareness and living authentically." }
   }
-  // Other original archetypes were removed as per request to keep only these 10.
 ];
 
 
@@ -379,14 +378,26 @@ export default function ArchetypesPage() {
                                 className="h-full rounded"
                                 style={{ background: `linear-gradient(to right, ${barColorDark}, ${barColorLight})` }}
                               />
-                              <div 
-                                className="absolute top-0 h-full w-1.5 bg-white rounded-full shadow-md transform -translate-x-1/2 border-2 border-background"
+                              {/* Marker group: text bubble + triangle pointing to the score */}
+                              <div
+                                className="absolute top-0 transform -translate-x-1/2 -translate-y-full -mt-0.5" 
                                 style={{ left: `${score * 100}%` }}
                                 aria-hidden="true"
                               >
-                                <div className="absolute -top-5 left-1/2 transform -translate-x-1/2 px-1.5 py-0.5 text-xs bg-foreground text-background rounded-sm shadow whitespace-nowrap">
+                                <div 
+                                  className="px-2 py-0.5 text-xs bg-foreground text-background rounded-md shadow-lg whitespace-nowrap"
+                                >
                                   {Math.round(score * 100)}%
                                 </div>
+                                <svg
+                                  width="10"
+                                  height="6"
+                                  viewBox="0 0 10 6"
+                                  className="fill-foreground mx-auto mt-0.5"
+                                  style={{ filter: 'drop-shadow(0px 1px 1px rgba(0,0,0,0.2))' }}
+                                >
+                                  <path d="M5 6L0 0H10L5 6Z" /> {/* Downward pointing triangle */}
+                                </svg>
                               </div>
                             </div>
                           </TooltipTrigger>
@@ -421,4 +432,3 @@ export default function ArchetypesPage() {
     </div>
   );
 }
-
