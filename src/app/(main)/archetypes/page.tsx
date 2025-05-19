@@ -232,7 +232,7 @@ export default function ArchetypesPage() {
       <Card className="flex flex-col overflow-hidden glassmorphic-card hover:shadow-primary/20 transition-shadow duration-300 h-full">
         <CardHeader>
           <CardTitle className="text-xl" style={{ color: titleColor }}>{archetype.title}</CardTitle>
-          <CardDescription className="h-16 line-clamp-3 text-xs">{archetype.summary}</CardDescription>
+          <CardDescription className="line-clamp-2 text-xs">{archetype.summary}</CardDescription>
         </CardHeader>
         <CardContent className="flex-grow flex flex-col justify-center items-center">
           <TriangleChart scores={archetype.domainScores} width={180} height={156} className="!p-0 !bg-transparent !shadow-none !backdrop-blur-none mb-3" />
@@ -318,9 +318,7 @@ export default function ArchetypesPage() {
                     </div>
                   </div>
                 </SheetHeader>
-
-                <p className="mb-6 text-muted-foreground leading-relaxed">{selectedArchetype.summary}</p>
-
+                
                 <div className="mb-6 flex justify-center">
                  <TriangleChart scores={selectedArchetype.domainScores} width={250} height={217} className="mx-auto !p-0 !bg-transparent !shadow-none !backdrop-blur-none" />
                 </div>
@@ -337,6 +335,9 @@ export default function ArchetypesPage() {
                     {savedWorldviews.some(p => p.id === selectedArchetype.id) ? "Saved to Library" : "Save to Library"}
                   </Button>
                 </div>
+
+                <p className="mb-6 text-muted-foreground leading-relaxed">{selectedArchetype.summary}</p>
+
 
                 <div className="space-y-4 mb-6">
                   <h3 className="text-xl font-semibold text-foreground mb-3 border-b border-border/30 pb-2">Facet Breakdown</h3>
