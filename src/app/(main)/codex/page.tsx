@@ -141,6 +141,11 @@ export default function CodexPage() {
   const { addSavedWorldview, savedWorldviews } = useWorldview();
   const { toast } = useToast();
 
+  // Diagnostic logs for imported data - REMOVE AFTER DEBUGGING
+  // console.log("Imported BASE_CODEX_DATA length:", BASE_CODEX_DATA?.length);
+  // console.log("Imported LATEST_CODEX_UPDATE_BATCH length:", LATEST_CODEX_UPDATE_BATCH?.length);
+  // console.log("Imported ADDITIONAL_CODEX_DATA length:", ADDITIONAL_CODEX_DATA?.length);
+
   const initialMappedEntries = useMemo(() => {
     try {
       const combinedRawData = [
@@ -244,6 +249,7 @@ export default function CodexPage() {
               {entry.title}
             </CardTitle>
           </div>
+          {/* Category label removed from here */}
           <CardDescription className="line-clamp-2 text-xs pt-1 text-left">
             {entry.summary}
           </CardDescription>
@@ -350,11 +356,10 @@ export default function CodexPage() {
                         <SheetDescription className="text-base capitalize">{selectedEntry.category} Profile</SheetDescription>
                       </div>
                     </div>
+                     {/* Explicit SheetClose removed, default one from SheetContent will be used */}
                   </div>
                 </SheetHeader>
-
-                <p className="mb-6 text-muted-foreground leading-relaxed">{selectedEntry.summary}</p>
-
+                
                 <div className="mb-6 flex justify-center">
                    <TriangleChart scores={selectedEntry.domainScores} width={250} height={217} className="mx-auto !p-0 !bg-transparent !shadow-none !backdrop-blur-none" />
                 </div>
@@ -376,6 +381,9 @@ export default function CodexPage() {
                     </Link>
                   </Button>
                 </div>
+
+                <p className="mb-6 text-muted-foreground leading-relaxed">{selectedEntry.summary}</p>
+
 
                 <div className="space-y-4 mb-6">
                   <h3 className="text-xl font-semibold text-foreground mb-3 border-b border-border/30 pb-2">Facet Breakdown</h3>
@@ -422,3 +430,6 @@ export default function CodexPage() {
     </div>
   );
 }
+
+
+    
