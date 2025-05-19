@@ -27,6 +27,7 @@ import { BASE_CODEX_DATA } from "@/data/codex/base-codex-data";
 import { LATEST_CODEX_UPDATE_BATCH } from "@/data/codex/latest-codex-update-batch";
 import { ADDITIONAL_CODEX_DATA } from "@/data/codex/additional-codex-data";
 
+
 // --- Helper Functions ---
 const getDominantFacet = (scores: DomainScore[]): FacetName => {
   if (!scores || scores.length === 0) return FACET_NAMES[0]; // Default
@@ -43,7 +44,7 @@ export function mapRawDataToCodexEntries(rawItems: any[]): CodexEntry[] {
   return rawItems.map((item: any, index: number) => {
     const titleToUse = item.title || item.name;
     if (!item || (typeof titleToUse !== 'string' )) {
-      console.warn(`Skipping invalid item at index ${index} in rawCodexData (missing title/name):`, item);
+      // console.warn(`Skipping invalid item at index ${index} in rawCodexData (missing title/name):`, item);
       return null; // Filter this out later
     }
 
@@ -129,11 +130,10 @@ export function mapRawDataToCodexEntries(rawItems: any[]): CodexEntry[] {
 
 
 export default function CodexPage() {
+  // console.log("CodexPage function definition reached");
   // console.log('BASE_CODEX_DATA length:', BASE_CODEX_DATA?.length);
   // console.log('LATEST_CODEX_UPDATE_BATCH length:', LATEST_CODEX_UPDATE_BATCH?.length);
   // console.log('ADDITIONAL_CODEX_DATA length:', ADDITIONAL_CODEX_DATA?.length);
-  // console.log("CodexPage function definition reached");
-
 
   const [searchTerm, setSearchTerm] = useState("");
   const [sortBy, setSortBy] = useState("title");
@@ -411,25 +411,30 @@ export default function CodexPage() {
                                 className="h-full rounded"
                                 style={{ background: `linear-gradient(to right, ${barColorDark}, ${barColorLight})` }}
                               />
-                              {/* Marker group: text bubble + triangle pointing to the score */}
+                              {/* Marker Group: Positioned at the score percentage, vertically centered in the bar */}
                               <div
-                                className="absolute top-0 transform -translate-x-1/2 -translate-y-full -mt-0.5" 
-                                style={{ left: `${score * 100}%` }}
+                                className="absolute top-1/2 transform -translate-y-1/2 -translate-x-1/2 flex flex-col items-center"
+                                style={{
+                                  left: `${score * 100}%`,
+                                  pointerEvents: 'none', 
+                                  zIndex: 10 
+                                }}
                                 aria-hidden="true"
                               >
+                                {/* Text Bubble */}
                                 <div 
-                                  className="px-2 py-0.5 text-xs bg-foreground text-background rounded-md shadow-lg whitespace-nowrap"
+                                  className="px-1.5 py-0 text-[10px] bg-black/70 text-white rounded shadow-md whitespace-nowrap"
                                 >
                                   {Math.round(score * 100)}%
                                 </div>
+                                {/* Triangle pointing downwards, centered under the text bubble */}
                                 <svg
-                                  width="10"
-                                  height="6"
-                                  viewBox="0 0 10 6"
-                                  className="fill-foreground mx-auto mt-0.5"
-                                  style={{ filter: 'drop-shadow(0px 1px 1px rgba(0,0,0,0.2))' }}
+                                  width="8"
+                                  height="5"
+                                  viewBox="0 0 8 5"
+                                  className="fill-black/70 mx-auto" 
                                 >
-                                  <path d="M5 6L0 0H10L5 6Z" /> {/* Downward pointing triangle */}
+                                  <path d="M4 5L0 0H8L4 5Z" />
                                 </svg>
                               </div>
                             </div>
@@ -465,3 +470,4 @@ export default function CodexPage() {
     </div>
   );
 }
+

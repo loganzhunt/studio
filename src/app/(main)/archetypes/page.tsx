@@ -37,7 +37,7 @@ const rawArchetypeData: any[] = [
   {
     "title": "The Transcendent Mystic", 
     "summary": "Sees all of existence as sacred and interconnected, guided by direct spiritual insight. Values self-transcendence, unity, and surrender to higher meaning.",
-    "scores": { "ontology": 0.95, "epistemology": 0.9, "praxeology": 0.30, "axiology": 0.95, "mythology": 0.95, "cosmology": 0.95, "teleology": 1.0 }, // Updated Praxeology for Mystic Pilgrim to 0.30 (original 0.8)
+    "scores": { "ontology": 0.90, "epistemology": 0.85, "praxeology": 0.30, "axiology": 0.90, "mythology": 0.90, "cosmology": 0.85, "teleology": 1.0 }, 
     "facetDescriptions": { "ontology": "Sees reality as fundamentally ideal or spiritual, rooted in unity or consciousness.", "epistemology": "Gains knowledge through revelation, intuition, or mystical insight.", "praxeology": "Prefers non-hierarchical, contemplative, or surrender-based action.", "axiology": "Values selfless love, devotion, and sacred ideals over individual gain.", "mythology": "Finds resonance in cyclical, mythic, and transpersonal stories.", "cosmology": "Views the universe as holistic and interconnected.", "teleology": "Sees life’s highest purpose in the Divine, transcendence, or unity." }
   },
   {
@@ -49,7 +49,7 @@ const rawArchetypeData: any[] = [
   {
     "title": "The Scientific Humanist", 
     "summary": "Grounded in rational ethics, scientific method, and belief in human progress.",
-    "scores": { "ontology": 0.1, "epistemology": 0.25, "praxeology": 0.40, "axiology": 0.55, "mythology": 0.25, "cosmology": 0.25, "teleology": 0.15 }, // Updated scores to match 'The Humanist'
+    "scores": { "ontology": 0.20, "epistemology": 0.25, "praxeology": 0.40, "axiology": 0.55, "mythology": 0.25, "cosmology": 0.25, "teleology": 0.15 },
     "facetDescriptions": { "ontology": "Leans materialist, seeing people and relationships as the core of reality.", "epistemology": "Values evidence, critical thinking, and reasoned dialogue.", "praxeology": "Prefers systems that are merit-based but support collective good.", "axiology": "Blends individual dignity with social compassion and justice.", "mythology": "Draws meaning from human stories and cultural narratives.", "cosmology": "Views the universe as understandable and shaped by human inquiry.", "teleology": "Sees meaning as constructed, existential, and rooted in this world." }
   },
   {
@@ -61,13 +61,13 @@ const rawArchetypeData: any[] = [
   {
     "title": "The Earth-Centered Animist", 
     "summary": "Views the world as alive, reciprocal, and sacred; values ecological harmony and ancestral continuity.",
-    "scores": { "ontology": 0.85, "epistemology": 0.60, "praxeology": 0.40, "axiology": 0.65, "mythology": 0.70, "cosmology": 0.90, "teleology": 0.80 }, // Updated scores to match 'The Cosmic Animist'
+    "scores": { "ontology": 0.85, "epistemology": 0.60, "praxeology": 0.40, "axiology": 0.65, "mythology": 0.70, "cosmology": 0.90, "teleology": 0.80 },
     "facetDescriptions": { "ontology": "Sees reality as inherently alive, relational, and animated by spirit.", "epistemology": "Balances observation with revelatory ways of knowing (dream, vision).", "praxeology": "Values egalitarian, reciprocal, and collective practices.", "axiology": "Prioritizes interdependence, respect, and stewardship.", "mythology": "Meaning is found in cyclical, living, and place-based stories.", "cosmology": "Views cosmos as holistic and animate.", "teleology": "Purpose is to participate in the living web of existence." }
   },
   {
     "title": "The Existential Individualist", 
     "summary": "Asserts self-determined meaning, embraces uncertainty, and rejects cosmic absolutes.",
-    "scores": { "ontology": 0.40, "epistemology": 0.40, "praxeology": 0.45, "axiology": 0.35, "mythology": 0.40, "cosmology": 0.35, "teleology": 0.05 }, // Updated scores to match 'The Existential Explorer'
+    "scores": { "ontology": 0.40, "epistemology": 0.40, "praxeology": 0.45, "axiology": 0.35, "mythology": 0.40, "cosmology": 0.35, "teleology": 0.05 }, 
     "facetDescriptions": { "ontology": "Balances between material and ideal, questioning fixed reality.", "epistemology": "Explores both empirical and revelatory ways of knowing.", "praxeology": "Resists rigid hierarchy; favors flexible, individual action.", "axiology": "Values personal meaning and creative expression.", "mythology": "Draws from diverse stories, often in cyclical or disrupted form.", "cosmology": "Views cosmos as open, uncertain, and in flux.", "teleology": "Sees purpose as existential, chosen, and ambiguous." }
   },
   {
@@ -378,25 +378,30 @@ export default function ArchetypesPage() {
                                 className="h-full rounded"
                                 style={{ background: `linear-gradient(to right, ${barColorDark}, ${barColorLight})` }}
                               />
-                              {/* Marker group: text bubble + triangle pointing to the score */}
+                              {/* Marker Group: Positioned at the score percentage, vertically centered in the bar */}
                               <div
-                                className="absolute top-0 transform -translate-x-1/2 -translate-y-full -mt-0.5" 
-                                style={{ left: `${score * 100}%` }}
+                                className="absolute top-1/2 transform -translate-y-1/2 -translate-x-1/2 flex flex-col items-center"
+                                style={{
+                                  left: `${score * 100}%`,
+                                  pointerEvents: 'none', 
+                                  zIndex: 10 
+                                }}
                                 aria-hidden="true"
                               >
+                                {/* Text Bubble */}
                                 <div 
-                                  className="px-2 py-0.5 text-xs bg-foreground text-background rounded-md shadow-lg whitespace-nowrap"
+                                  className="px-1.5 py-0 text-[10px] bg-black/70 text-white rounded shadow-md whitespace-nowrap"
                                 >
                                   {Math.round(score * 100)}%
                                 </div>
+                                {/* Triangle pointing downwards, centered under the text bubble */}
                                 <svg
-                                  width="10"
-                                  height="6"
-                                  viewBox="0 0 10 6"
-                                  className="fill-foreground mx-auto mt-0.5"
-                                  style={{ filter: 'drop-shadow(0px 1px 1px rgba(0,0,0,0.2))' }}
+                                  width="8"
+                                  height="5"
+                                  viewBox="0 0 8 5"
+                                  className="fill-black/70 mx-auto" 
                                 >
-                                  <path d="M5 6L0 0H10L5 6Z" /> {/* Downward pointing triangle */}
+                                  <path d="M4 5L0 0H8L4 5Z" />
                                 </svg>
                               </div>
                             </div>
@@ -432,3 +437,4 @@ export default function ArchetypesPage() {
     </div>
   );
 }
+
