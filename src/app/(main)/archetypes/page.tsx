@@ -325,6 +325,19 @@ export default function ArchetypesPage() {
                  <TriangleChart scores={selectedArchetype.domainScores} width={250} height={217} className="mx-auto !p-0 !bg-transparent !shadow-none !backdrop-blur-none" />
                 </div>
 
+                <div className="mb-4 space-y-2 border-t border-border/30 pt-4">
+                  <Button
+                    variant={savedWorldviews.some(p => p.id === selectedArchetype.id) ? "default" : "outline"}
+                    size="sm"
+                    className="w-full text-xs"
+                    onClick={() => handleSaveArchetype(selectedArchetype)}
+                    disabled={savedWorldviews.some(p => p.id === selectedArchetype.id)}
+                  >
+                    {savedWorldviews.some(p => p.id === selectedArchetype.id) ? <Icons.check className="mr-1 h-3 w-3" /> : <Icons.saved className="mr-1 h-3 w-3" />}
+                    {savedWorldviews.some(p => p.id === selectedArchetype.id) ? "Saved to Library" : "Save to Library"}
+                  </Button>
+                </div>
+
                 <div className="space-y-4 mb-6">
                   <h3 className="text-xl font-semibold text-foreground mb-3 border-b border-border/30 pb-2">Facet Breakdown</h3>
                   {FACET_NAMES.map(facetName => {
@@ -347,6 +360,7 @@ export default function ArchetypesPage() {
                     );
                   })}
                 </div>
+                
                 <div className="mb-4 space-y-2 border-t border-border/30 pt-4">
                   <Button
                     variant={savedWorldviews.some(p => p.id === selectedArchetype.id) ? "default" : "outline"}
@@ -367,3 +381,4 @@ export default function ArchetypesPage() {
     </div>
   );
 }
+
