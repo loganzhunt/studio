@@ -14,7 +14,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { TriangleChart } from "@/components/visualization/TriangleChart";
 import type { CodexEntry, FacetName, DomainScore } from "@/types";
 import { FACETS, FACET_NAMES } from "@/config/facets";
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from "@/components/ui/sheet";
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription, SheetClose } from "@/components/ui/sheet";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Badge } from '@/components/ui/badge';
 import { getFacetColorHsl } from '@/lib/colors';
@@ -41,32 +41,31 @@ export function mapRawDataToCodexEntries(rawItems: any[]): CodexEntry[] {
     return [];
   }
   return rawItems.map((item: any, index: number) => {
-    if (!item || (typeof item.title !== 'string' && typeof item.name !== 'string')) {
-      // console.warn(`Skipping invalid item at index ${index} in rawCodexData (missing name/title):`, item);
+    const title = item.title || item.name; 
+    if (!item || (typeof title !== 'string' )) {
+      console.warn(`Skipping invalid item at index ${index} in rawCodexData (missing title/name):`, item);
       return null;
     }
 
-    const title = item.title || item.name; // Prefer title if available
     const id = title.toLowerCase().replace(/\s+/g, '_').replace(/[^\w-]+/g, '');
 
     let domainScoresArray: DomainScore[] = [];
-    const scoresSource = item.scores || item.domainScores; // Use 'scores' from new data, fallback to 'domainScores'
+    const scoresSource = item.scores || item.domainScores || item.facetScores; 
 
     if (scoresSource && typeof scoresSource === 'object') {
       domainScoresArray = FACET_NAMES.map(facetKey => {
         const scoreKeyLower = facetKey.toLowerCase() as keyof typeof scoresSource;
         const scoreKeyOriginal = facetKey as keyof typeof scoresSource;
-        let scoreValue = 0.5; // Default score if not found for a facet
+        let scoreValue = 0.5; 
 
         if (typeof scoresSource[scoreKeyLower] === 'number') {
           scoreValue = scoresSource[scoreKeyLower];
-        } else if (typeof scoresSource[scoreKeyOriginal] === 'number') { // Fallback for capitalized keys
+        } else if (typeof scoresSource[scoreKeyOriginal] === 'number') { 
           scoreValue = scoresSource[scoreKeyOriginal];
         }
         return { facetName: facetKey, score: Math.max(0, Math.min(1, Number(scoreValue))) };
       });
     } else {
-      // console.warn(`Missing or invalid scores for item: ${title}, defaulting all to 0.5`);
       domainScoresArray = FACET_NAMES.map(name => ({ facetName: name, score: 0.5 }));
     }
 
@@ -76,7 +75,7 @@ export function mapRawDataToCodexEntries(rawItems: any[]): CodexEntry[] {
       for (const facetKey of FACET_NAMES) {
         const summaryKeyLower = facetKey.toLowerCase() as keyof typeof facetSummariesSource;
         const summaryKeyOriginal = facetKey as keyof typeof facetSummariesSource;
-        let summary = `Information for ${facetKey} is not available.`;
+        let summary = `Information for ${facetKey} is not available for this worldview.`;
 
         if (typeof facetSummariesSource[summaryKeyLower] === 'string') {
           summary = facetSummariesSource[summaryKeyLower];
@@ -86,15 +85,14 @@ export function mapRawDataToCodexEntries(rawItems: any[]): CodexEntry[] {
         processedFacetSummaries[facetKey] = summary;
       }
     } else {
-      // console.warn(`Missing or invalid facet summaries for item: ${title}, using defaults.`);
       FACET_NAMES.forEach(facetKey => {
-        processedFacetSummaries[facetKey] = `Information for ${facetKey} is not available for this worldview.`;
+        processedFacetSummaries[facetKey] = `Information for ${facetKey} is not available for ${title}.`;
       });
     }
 
     let category: CodexEntry['category'] = 'custom';
     const itemCategoryRaw = (item.category || '').toString();
-    const itemCategoryMain = itemCategoryRaw.toLowerCase().split(' ')[0]; // Take first word for category
+    const itemCategoryMain = itemCategoryRaw.toLowerCase().split(' ')[0]; 
 
     const validCategories: CodexEntry['category'][] = ['philosophical', 'religious', 'archetypal', 'spiritual', 'custom', 'indigenous', 'mystical', 'scientific', 'cultural'];
     if (validCategories.includes(itemCategoryMain as CodexEntry['category'])) {
@@ -122,13 +120,14 @@ export function mapRawDataToCodexEntries(rawItems: any[]): CodexEntry[] {
       createdAt: item.createdAt || new Date().toISOString(),
       tags,
       facetSummaries: processedFacetSummaries,
-      icon: item.icon || undefined, // Add icon from raw data
+      icon: item.icon || undefined, 
     };
   }).filter(item => item !== null) as CodexEntry[];
 };
 
 
 export default function CodexPage() {
+  // console.log("CodexPage function definition reached");
   const [searchTerm, setSearchTerm] = useState("");
   const [sortBy, setSortBy] = useState("title");
   const [activeCategory, setActiveCategory] = useState<CodexEntry['category'] | "all">("all");
@@ -136,7 +135,6 @@ export default function CodexPage() {
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const { addSavedWorldview, savedWorldviews } = useWorldview();
   const { toast } = useToast();
-  // console.log("CodexPage function definition reached");
 
   const initialMappedEntries = useMemo(() => {
     let combinedRawData: any[] = [];
@@ -162,44 +160,51 @@ export default function CodexPage() {
       }
       return mapRawDataToCodexEntries(uniqueEntriesData);
     } catch (error) {
-      console.error("Error processing Codex data arrays in useMemo:", error);
-      return [];
+      console.error("Error processing Codex data arrays in useMemo for initialMappedEntries:", error);
+      return []; // Return empty array on error
     }
   }, []);
 
 
   const filteredAndSortedEntries = useMemo(() => {
+    if (!Array.isArray(initialMappedEntries)) {
+        console.error("initialMappedEntries is not an array:", initialMappedEntries);
+        return [];
+    }
     let entries = [...initialMappedEntries];
 
     if (activeCategory !== "all") {
-      entries = entries.filter(entry => entry.category === activeCategory);
+      entries = entries.filter(entry => entry && entry.category === activeCategory);
     }
 
     if (searchTerm) {
       const lowerSearchTerm = searchTerm.toLowerCase();
       entries = entries.filter(entry =>
-        entry.title.toLowerCase().includes(lowerSearchTerm) ||
-        entry.summary.toLowerCase().includes(lowerSearchTerm) ||
-        (entry.tags && entry.tags.some(tag => tag.toLowerCase().includes(lowerSearchTerm)))
+        entry && (
+          (entry.title && entry.title.toLowerCase().includes(lowerSearchTerm)) ||
+          (entry.summary && entry.summary.toLowerCase().includes(lowerSearchTerm)) ||
+          (entry.tags && entry.tags.some(tag => tag.toLowerCase().includes(lowerSearchTerm)))
+        )
       );
     }
 
     if (sortBy === "title") {
-      entries.sort((a, b) => a.title.localeCompare(b.title));
+      entries.sort((a, b) => (a.title || "").localeCompare(b.title || ""));
     } else if (sortBy === "category") {
-      entries.sort((a, b) => a.category.localeCompare(b.category) || a.title.localeCompare(b.title));
+      entries.sort((a, b) => (a.category || "").localeCompare(b.category || "") || (a.title || "").localeCompare(b.title || ""));
     } else if (sortBy === "dominantFacet") {
       entries.sort((a, b) => {
-        const dominantA = getDominantFacet(a.domainScores);
-        const dominantB = getDominantFacet(b.domainScores);
-        return dominantA.localeCompare(dominantB) || a.title.localeCompare(b.title);
+        const dominantA = getDominantFacet(a.domainScores || []);
+        const dominantB = getDominantFacet(b.domainScores || []);
+        return dominantA.localeCompare(dominantB) || (a.title || "").localeCompare(b.title || "");
       });
     }
-    return entries;
+    return entries.filter(entry => entry); // Ensure no null/undefined entries
   }, [initialMappedEntries, activeCategory, searchTerm, sortBy]);
 
   const allCategories = useMemo(() => {
-    const categories = new Set(initialMappedEntries.map(entry => entry.category));
+    if (!Array.isArray(initialMappedEntries)) return ["all"];
+    const categories = new Set(initialMappedEntries.map(entry => entry?.category).filter(Boolean));
     return ["all", ...Array.from(categories).sort()] as (CodexEntry['category'] | "all")[];
   }, [initialMappedEntries]);
 
@@ -215,7 +220,7 @@ export default function CodexPage() {
       toast({ title: "Already Saved", description: `"${entryToSave.title}" is already in your library.` });
       return;
     }
-    addSavedWorldview({ ...entryToSave }); // Spread to ensure a new object is saved if types differ slightly
+    addSavedWorldview({ ...entryToSave }); 
     toast({ title: "Saved to Library", description: `"${entryToSave.title}" has been added to your saved worldviews.` });
   };
 
@@ -234,9 +239,7 @@ export default function CodexPage() {
                 {entry.title}
               </CardTitle>
             </div>
-            <Badge variant={entry.category === 'archetypal' ? 'default' : 'secondary'} className="text-xs capitalize shrink-0">
-              {entry.category}
-            </Badge>
+            {/* Category Badge removed as per request */}
           </div>
           <CardDescription className="h-12 line-clamp-2 text-xs pt-1">{entry.summary}</CardDescription>
         </CardHeader>
@@ -311,7 +314,6 @@ export default function CodexPage() {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
           {filteredAndSortedEntries.map((entry) => {
             if (!entry || typeof entry.id === 'undefined' || typeof entry.title === 'undefined' || !Array.isArray(entry.domainScores)) {
-              // console.warn("Skipping rendering of incomplete/invalid entry:", entry);
               return null;
             }
             return <CodexCard key={entry.id} entry={entry} />;
@@ -341,6 +343,7 @@ export default function CodexPage() {
                         <SheetDescription className="text-base capitalize">{selectedEntry.category} Profile</SheetDescription>
                       </div>
                     </div>
+                    {/* SheetClose button is provided by SheetContent by default */}
                   </div>
                 </SheetHeader>
 
@@ -372,7 +375,7 @@ export default function CodexPage() {
                     );
                   })}
                 </div>
-                <div className="mb-4 space-y-2 border-t border-border/30 pt-4">
+                 <div className="mb-4 space-y-2 border-t border-border/30 pt-4">
                   <Button
                     variant={savedWorldviews.some(p => p.id === selectedEntry.id) ? "default" : "outline"}
                     size="sm"
