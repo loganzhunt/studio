@@ -16,10 +16,11 @@ import type { CodexEntry, FacetName, DomainScore } from "@/types";
 import { FACETS, FACET_NAMES } from "@/config/facets";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription, SheetClose } from "@/components/ui/sheet";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Badge } from '@/components/ui/badge';
-import { getFacetColorHsl } from '@/lib/colors';
+import { getFacetColorHsl, DOMAIN_COLORS, SPECTRUM_LABELS } from '@/lib/colors'; // Import SPECTRUM_LABELS
 import { useWorldview } from '@/hooks/use-worldview';
 import { useToast } from '@/hooks/use-toast';
+import chroma from 'chroma-js'; // Import chroma
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"; // Import Tooltip
 
 // Import data from separate files
 import { BASE_CODEX_DATA } from "@/data/codex/base-codex-data";
@@ -37,7 +38,7 @@ const getDominantFacet = (scores: DomainScore[]): FacetName => {
 
 export function mapRawDataToCodexEntries(rawItems: any[]): CodexEntry[] {
   if (!Array.isArray(rawItems)) {
-    console.error("mapRawDataToCodexEntries received non-array input:", rawItems);
+    // console.error("mapRawDataToCodexEntries received non-array input:", rawItems);
     return [];
   }
   return rawItems.map((item: any, index: number) => {
@@ -130,10 +131,9 @@ export function mapRawDataToCodexEntries(rawItems: any[]): CodexEntry[] {
 
 
 export default function CodexPage() {
-  // console.log("CodexPage function definition reached");
-  // console.log("Imported BASE_CODEX_DATA length:", BASE_CODEX_DATA?.length);
-  // console.log("Imported LATEST_CODEX_UPDATE_BATCH length:", LATEST_CODEX_UPDATE_BATCH?.length);
-  // console.log("Imported ADDITIONAL_CODEX_DATA length:", ADDITIONAL_CODEX_DATA?.length);
+  // console.log("BASE_CODEX_DATA length:", BASE_CODEX_DATA?.length);
+  // console.log("LATEST_CODEX_UPDATE_BATCH length:", LATEST_CODEX_UPDATE_BATCH?.length);
+  // console.log("ADDITIONAL_CODEX_DATA length:", ADDITIONAL_CODEX_DATA?.length);
 
 
   const [searchTerm, setSearchTerm] = useState("");
@@ -145,8 +145,8 @@ export default function CodexPage() {
   const { toast } = useToast();
 
   const initialMappedEntries = useMemo(() => {
-    let combinedRawData: any[] = [];
     try {
+      let combinedRawData: any[] = [];
       if (Array.isArray(LATEST_CODEX_UPDATE_BATCH)) combinedRawData = combinedRawData.concat(LATEST_CODEX_UPDATE_BATCH);
       if (Array.isArray(ADDITIONAL_CODEX_DATA)) combinedRawData = combinedRawData.concat(ADDITIONAL_CODEX_DATA);
       if (Array.isArray(BASE_CODEX_DATA)) combinedRawData = combinedRawData.concat(BASE_CODEX_DATA);
@@ -174,7 +174,7 @@ export default function CodexPage() {
 
   const filteredAndSortedEntries = useMemo(() => {
     if (!Array.isArray(initialMappedEntries)) {
-        console.error("initialMappedEntries is not an array:", initialMappedEntries);
+        // console.error("initialMappedEntries is not an array:", initialMappedEntries);
         return [];
     }
     let entries = [...initialMappedEntries];
@@ -319,7 +319,7 @@ export default function CodexPage() {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
           {filteredAndSortedEntries.map((entry) => {
             if (!entry || typeof entry.id === 'undefined' || typeof entry.title === 'undefined' || !Array.isArray(entry.domainScores)) {
-              console.warn("Skipping rendering of incomplete/invalid entry:", entry);
+              // console.warn("Skipping rendering of incomplete/invalid entry:", entry);
               return null; 
             }
             return <CodexCard key={entry.id} entry={entry} />;
@@ -337,6 +337,7 @@ export default function CodexPage() {
         <Sheet open={isDrawerOpen} onOpenChange={setIsDrawerOpen}>
           <SheetContent className="w-full max-w-md sm:max-w-lg md:max-w-xl lg:max-w-2xl p-0 glassmorphic-card !bg-card/80 backdrop-blur-xl" side="right">
             <ScrollArea className="h-full">
+            <TooltipProvider>
               <div className="p-6">
                 <SheetHeader className="mb-6">
                   <div className="flex justify-between items-start">
@@ -352,11 +353,11 @@ export default function CodexPage() {
                   </div>
                 </SheetHeader>
                 
-                <div className="mb-6 flex justify-center">
+                <div className="flex justify-center mb-6">
                    <TriangleChart scores={selectedEntry.domainScores} width={250} height={217} className="mx-auto !p-0 !bg-transparent !shadow-none !backdrop-blur-none" />
                 </div>
                 
-                <div className="mb-4 space-y-2 border-t border-border/30 pt-4">
+                <div className="mb-4 space-y-2">
                   <Button
                     variant={savedWorldviews.some(p => p.id === selectedEntry.id) ? "default" : "outline"}
                     size="sm"
@@ -374,8 +375,6 @@ export default function CodexPage() {
                   </Button>
                 </div>
 
-                <p className="mb-6 text-muted-foreground leading-relaxed">{selectedEntry.summary}</p>
-
 
                 <div className="space-y-4 mb-6">
                   <h3 className="text-xl font-semibold text-foreground mb-3 border-b border-border/30 pb-2">Facet Breakdown</h3>
@@ -384,17 +383,44 @@ export default function CodexPage() {
                     const score = scoreObj ? scoreObj.score : 0.5; 
                     const facetConfig = FACETS[facetName];
                     const facetSummary = selectedEntry.facetSummaries?.[facetName] || `Information for ${facetName} is not available for this worldview.`;
+                    const spectrumPoleLabels = SPECTRUM_LABELS[facetName] || { left: 'Low', right: 'High' };
+                    
+                    const barColorDark = chroma(DOMAIN_COLORS[facetName]).darken(1.5).hex();
+                    const barColorLight = chroma(DOMAIN_COLORS[facetName]).brighten(1.5).hex();
 
                     return (
-                      <div key={facetName} className="p-4 rounded-md border border-border/30 bg-background/40">
-                        <div className="flex justify-between items-center mb-1">
+                      <div key={facetName} className="p-4 rounded-md border border-border/30 bg-background/40 space-y-1">
+                        <div className="flex justify-between items-center">
                           <h4 className="text-lg font-semibold" style={{color: getFacetColorHsl(facetName)}}>
                             {facetName}
                           </h4>
                           <span className="text-sm font-bold" style={{color: getFacetColorHsl(facetName)}}>{Math.round(score * 100)}%</span>
                         </div>
                         <p className="text-xs text-muted-foreground italic mb-1">{facetConfig?.tagline || "..."}</p>
-                        <p className="text-sm text-muted-foreground">{facetSummary}</p>
+                        <p className="text-sm text-muted-foreground mb-2">{facetSummary}</p>
+                        
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <div className="w-full h-6 rounded bg-muted/30 relative mt-1" aria-label={`${facetName} spectrum: ${spectrumPoleLabels.left} to ${spectrumPoleLabels.right}. Score: ${Math.round(score * 100)}%`}>
+                              <div 
+                                className="h-full rounded"
+                                style={{ background: `linear-gradient(to right, ${barColorDark}, ${barColorLight})` }}
+                              />
+                              <div 
+                                className="absolute top-0 h-full w-1.5 bg-white rounded-full shadow-md transform -translate-x-1/2 border-2 border-background"
+                                style={{ left: `${score * 100}%` }}
+                                aria-hidden="true"
+                              >
+                                <div className="absolute -top-5 left-1/2 transform -translate-x-1/2 px-1.5 py-0.5 text-xs bg-foreground text-background rounded-sm shadow whitespace-nowrap">
+                                  {Math.round(score * 100)}%
+                                </div>
+                              </div>
+                            </div>
+                          </TooltipTrigger>
+                          <TooltipContent side="bottom" className="bg-popover text-popover-foreground p-2 rounded-md shadow-lg text-xs">
+                            <p>{spectrumPoleLabels.left} <span className="text-muted-foreground mx-1">←</span> Score: {Math.round(score * 100)}% <span className="text-muted-foreground mx-1">→</span> {spectrumPoleLabels.right}</p>
+                          </TooltipContent>
+                        </Tooltip>
                       </div>
                     );
                   })}
@@ -414,6 +440,7 @@ export default function CodexPage() {
                 </div>
 
               </div>
+            </TooltipProvider>
             </ScrollArea>
           </SheetContent>
         </Sheet>
