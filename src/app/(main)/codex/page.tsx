@@ -14,7 +14,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { TriangleChart } from "@/components/visualization/TriangleChart";
 import type { CodexEntry, FacetName, DomainScore } from "@/types";
 import { FACETS, FACET_NAMES } from "@/config/facets";
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from "@/components/ui/sheet";
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription, SheetClose } from "@/components/ui/sheet";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Badge } from '@/components/ui/badge';
 import { getFacetColorHsl } from '@/lib/colors';
@@ -25,6 +25,7 @@ import { useToast } from '@/hooks/use-toast';
 import { BASE_CODEX_DATA } from "@/data/codex/base-codex-data";
 import { LATEST_CODEX_UPDATE_BATCH } from "@/data/codex/latest-codex-update-batch";
 import { ADDITIONAL_CODEX_DATA } from "@/data/codex/additional-codex-data";
+
 
 // --- Helper Functions ---
 const getDominantFacet = (scores: DomainScore[]): FacetName => {
@@ -129,9 +130,11 @@ export function mapRawDataToCodexEntries(rawItems: any[]): CodexEntry[] {
 
 
 export default function CodexPage() {
-  console.log("BASE_CODEX_DATA length:", BASE_CODEX_DATA?.length);
-  console.log("LATEST_CODEX_UPDATE_BATCH length:", LATEST_CODEX_UPDATE_BATCH?.length);
-  console.log("ADDITIONAL_CODEX_DATA length:", ADDITIONAL_CODEX_DATA?.length);
+  // console.log("CodexPage function definition reached");
+  // console.log("Imported BASE_CODEX_DATA length:", BASE_CODEX_DATA?.length);
+  // console.log("Imported LATEST_CODEX_UPDATE_BATCH length:", LATEST_CODEX_UPDATE_BATCH?.length);
+  // console.log("Imported ADDITIONAL_CODEX_DATA length:", ADDITIONAL_CODEX_DATA?.length);
+
 
   const [searchTerm, setSearchTerm] = useState("");
   const [sortBy, setSortBy] = useState("title");
@@ -245,7 +248,7 @@ export default function CodexPage() {
             {entry.summary}
           </CardDescription>
         </CardHeader>
-        <CardContent className="flex-grow flex flex-col justify-center items-center pt-0 pb-3">
+        <CardContent className="flex-grow flex flex-col justify-center items-center pt-2 pb-3">
           <TriangleChart scores={entry.domainScores} width={180} height={156} className="!p-0 !bg-transparent !shadow-none !backdrop-blur-none mb-2" />
         </CardContent>
         <CardFooter className="p-3 border-t border-border/30 mt-auto">
@@ -418,3 +421,4 @@ export default function CodexPage() {
     </div>
   );
 }
+
