@@ -14,7 +14,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { TriangleChart } from "@/components/visualization/TriangleChart";
 import type { CodexEntry, FacetName, DomainScore } from "@/types";
 import { FACETS, FACET_NAMES } from "@/config/facets";
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription, SheetClose } from "@/components/ui/sheet";
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from "@/components/ui/sheet";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Badge } from '@/components/ui/badge';
 import { getFacetColorHsl } from '@/lib/colors';
@@ -92,21 +92,19 @@ export function mapRawDataToCodexEntries(rawItems: any[]): CodexEntry[] {
     
     let category: CodexEntry['category'] = 'custom';
     const itemCategoryRaw = (item.category || '').toString();
-    // Extract first word for main category type (e.g., "philosophical - Worldview" -> "philosophical")
     const itemCategoryMain = itemCategoryRaw.toLowerCase().split(' ')[0];
 
     const validCategories: CodexEntry['category'][] = ['philosophical', 'religious', 'archetypal', 'spiritual', 'custom', 'indigenous', 'mystical', 'scientific', 'cultural'];
     if (validCategories.includes(itemCategoryMain as CodexEntry['category'])) {
       category = itemCategoryMain as CodexEntry['category'];
     } else if (item.tags && Array.isArray(item.tags) && (item.tags as string[]).some(tag => validCategories.includes(tag.toLowerCase() as CodexEntry['category']))) {
-      // Fallback to checking tags if category field is not directly one of the valid ones
       category = (item.tags as string[]).find(tag => validCategories.includes(tag.toLowerCase() as CodexEntry['category']))?.toLowerCase() as CodexEntry['category'] || 'custom';
     }
 
 
     const tags = Array.isArray(item.tags) ? item.tags.map(String) : (typeof item.tags === 'string' ? [item.tags] : (item.tags === undefined ? [] : []));
     if (category !== 'custom' && !tags.includes(category)) {
-      tags.push(category); // Ensure the determined category is also a tag
+      tags.push(category); 
     }
     const idTag = title.toLowerCase().replace(/\s+/g, '_').replace(/[^\w-]+/g, '');
     if (!tags.includes(idTag)) {
@@ -118,20 +116,22 @@ export function mapRawDataToCodexEntries(rawItems: any[]): CodexEntry[] {
       id,
       title,
       summary: item.summary || "No summary available.",
+      icon: item.icon || undefined,
       domainScores: domainScoresArray,
       category,
       isArchetype: category === 'archetypal' || (Array.isArray(item.tags) && (item.tags as string[]).map(t => t.toLowerCase()).includes('archetypal')),
       createdAt: item.createdAt || new Date().toISOString(),
       tags,
-      icon: item.icon || undefined, // Add icon
-      facetSummaries: processedFacetSummaries, // Use processed summaries
+      facetSummaries: processedFacetSummaries, 
     };
   }).filter(item => item !== null) as CodexEntry[];
 };
 
 
 export default function CodexPage() {
-  // console.log("CodexPage function definition reached");
+  console.log("BASE_CODEX_DATA length:", BASE_CODEX_DATA?.length);
+  console.log("LATEST_CODEX_UPDATE_BATCH length:", LATEST_CODEX_UPDATE_BATCH?.length);
+  console.log("ADDITIONAL_CODEX_DATA length:", ADDITIONAL_CODEX_DATA?.length);
 
   const [searchTerm, setSearchTerm] = useState("");
   const [sortBy, setSortBy] = useState("title");
@@ -141,18 +141,12 @@ export default function CodexPage() {
   const { addSavedWorldview, savedWorldviews } = useWorldview();
   const { toast } = useToast();
 
-  // Diagnostic logs for imported data - REMOVE AFTER DEBUGGING
-  // console.log("Imported BASE_CODEX_DATA length:", BASE_CODEX_DATA?.length);
-  // console.log("Imported LATEST_CODEX_UPDATE_BATCH length:", LATEST_CODEX_UPDATE_BATCH?.length);
-  // console.log("Imported ADDITIONAL_CODEX_DATA length:", ADDITIONAL_CODEX_DATA?.length);
-
   const initialMappedEntries = useMemo(() => {
+    let combinedRawData: any[] = [];
     try {
-      const combinedRawData = [
-        ...(Array.isArray(LATEST_CODEX_UPDATE_BATCH) ? LATEST_CODEX_UPDATE_BATCH : []),
-        ...(Array.isArray(ADDITIONAL_CODEX_DATA) ? ADDITIONAL_CODEX_DATA : []),
-        ...(Array.isArray(BASE_CODEX_DATA) ? BASE_CODEX_DATA : [])
-      ];
+      if (Array.isArray(LATEST_CODEX_UPDATE_BATCH)) combinedRawData = combinedRawData.concat(LATEST_CODEX_UPDATE_BATCH);
+      if (Array.isArray(ADDITIONAL_CODEX_DATA)) combinedRawData = combinedRawData.concat(ADDITIONAL_CODEX_DATA);
+      if (Array.isArray(BASE_CODEX_DATA)) combinedRawData = combinedRawData.concat(BASE_CODEX_DATA);
       
       const uniqueEntriesData: any[] = [];
       const uniqueTitles = new Set<string>();
@@ -161,7 +155,6 @@ export default function CodexPage() {
         if (typeof item !== 'object' || item === null) continue;
         const title = (item.title || item.name || '').toString().toLowerCase().trim();
         if (title && !uniqueTitles.has(title)) {
-          // Standardize to 'title' property before mapping
           const standardizedItem = { ...item, title: item.title || item.name };
           if (item.name && typeof item.name === 'string' && standardizedItem.title !== item.name) delete standardizedItem.name; 
           uniqueEntriesData.push(standardizedItem);
@@ -171,7 +164,7 @@ export default function CodexPage() {
       return mapRawDataToCodexEntries(uniqueEntriesData); 
     } catch (error) {
       console.error("Error processing Codex data arrays in useMemo:", error);
-      return []; // Return empty array on error
+      return []; 
     }
   }, []);
 
@@ -209,7 +202,6 @@ export default function CodexPage() {
         return dominantA.localeCompare(dominantB) || (a.title || "").localeCompare(b.title || "");
       });
     }
-    // Ensure no null/undefined entries after filtering/sorting
     return entries.filter(entry => entry); 
   }, [initialMappedEntries, activeCategory, searchTerm, sortBy]);
 
@@ -231,7 +223,7 @@ export default function CodexPage() {
       toast({ title: "Already Saved", description: `"${entryToSave.title}" is already in your library.` });
       return;
     }
-    addSavedWorldview({ ...entryToSave }); // Spread to ensure a new object if needed
+    addSavedWorldview({ ...entryToSave }); 
     toast({ title: "Saved to Library", description: `"${entryToSave.title}" has been added to your saved worldviews.` });
   };
 
@@ -242,14 +234,13 @@ export default function CodexPage() {
 
     return (
       <Card className="flex flex-col overflow-hidden glassmorphic-card hover:shadow-primary/20 transition-shadow duration-300 h-full">
-        <CardHeader className="pb-3 text-center">
+        <CardHeader className="p-6 text-center">
           <div className="flex items-center justify-center gap-2 mb-1">
             {entry.icon && <span className="text-3xl" style={{ color: titleColor }}>{entry.icon}</span>}
             <CardTitle className="text-xl line-clamp-1" style={{ color: titleColor }}>
               {entry.title}
             </CardTitle>
           </div>
-          {/* Category label removed from here */}
           <CardDescription className="line-clamp-2 text-xs pt-1 text-left">
             {entry.summary}
           </CardDescription>
@@ -324,7 +315,6 @@ export default function CodexPage() {
       {filteredAndSortedEntries.length > 0 ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
           {filteredAndSortedEntries.map((entry) => {
-            // Defensive check: ensure entry and its essential properties are defined
             if (!entry || typeof entry.id === 'undefined' || typeof entry.title === 'undefined' || !Array.isArray(entry.domainScores)) {
               console.warn("Skipping rendering of incomplete/invalid entry:", entry);
               return null; 
@@ -356,7 +346,6 @@ export default function CodexPage() {
                         <SheetDescription className="text-base capitalize">{selectedEntry.category} Profile</SheetDescription>
                       </div>
                     </div>
-                     {/* Explicit SheetClose removed, default one from SheetContent will be used */}
                   </div>
                 </SheetHeader>
                 
@@ -375,7 +364,7 @@ export default function CodexPage() {
                     {savedWorldviews.some(p => p.id === selectedEntry.id) ? <Icons.check className="mr-1 h-3 w-3" /> : <Icons.saved className="mr-1 h-3 w-3" />}
                     {savedWorldviews.some(p => p.id === selectedEntry.id) ? "Saved to Library" : "Save to Library"}
                   </Button>
-                  <Button variant="outline" asChild className="w-full">
+                  <Button variant="outline" asChild className="w-full text-xs">
                     <Link href={`/codex/${selectedEntry.id}`}>
                       View Full Deep-Dive Page <Icons.chevronRight className="ml-1 h-4 w-4" />
                     </Link>
@@ -389,9 +378,8 @@ export default function CodexPage() {
                   <h3 className="text-xl font-semibold text-foreground mb-3 border-b border-border/30 pb-2">Facet Breakdown</h3>
                   {FACET_NAMES.map(facetName => {
                     const scoreObj = selectedEntry.domainScores.find(ds => ds.facetName === facetName);
-                    const score = scoreObj ? scoreObj.score : 0.5; // Default to 0.5 if score not found
+                    const score = scoreObj ? scoreObj.score : 0.5; 
                     const facetConfig = FACETS[facetName];
-                    // Use facetSummaries for drawer, ensure fallback if specific summary is missing
                     const facetSummary = selectedEntry.facetSummaries?.[facetName] || `Information for ${facetName} is not available for this worldview.`;
 
                     return (
@@ -430,6 +418,3 @@ export default function CodexPage() {
     </div>
   );
 }
-
-
-    
