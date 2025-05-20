@@ -7,16 +7,16 @@ import chroma from "chroma-js";
 import { LCH_DOMAIN_COLORS_HEX } from "@/lib/colors"; // Use centralized LCH colors
 
 interface FractalTriangleLogoProps {
-  size?: number; // Optional size prop
+  size?: number; // Optional size prop, defines intrinsic detail and aspect ratio
   className?: string;
 }
 
 export const FractalTriangleLogo: React.FC<FractalTriangleLogoProps> = ({
-  size = 160, // Default size
+  size = 160, // Default intrinsic size for viewBox calculation
   className,
 }) => {
   const numBands = LCH_DOMAIN_COLORS_HEX.length;
-  // Calculate height of an equilateral triangle based on its side length (size)
+  // Calculate height of an equilateral triangle based on its side length (intrinsic size)
   const totalHeight = (Math.sqrt(3) / 2) * size;
   const bandHeight = totalHeight / numBands;
 
@@ -27,9 +27,6 @@ export const FractalTriangleLogo: React.FC<FractalTriangleLogoProps> = ({
     const y2 = (index + 1) * bandHeight;
 
     // Half-width of the main triangle at a given y
-    // For an apex-up equilateral triangle, width at y = (2 / sqrt(3)) * y
-    // So half-width = (1 / sqrt(3)) * y
-    // But it's easier to scale from base: halfWidth at y = (y / totalHeight) * (size / 2)
     const halfWidthAtY1 = (y1 / totalHeight) * (size / 2);
     const halfWidthAtY2 = (y2 / totalHeight) * (size / 2);
 
@@ -43,11 +40,12 @@ export const FractalTriangleLogo: React.FC<FractalTriangleLogoProps> = ({
 
   return (
     <svg
-      width={size}
-      height={totalHeight} // Use calculated equilateral height
-      viewBox={`0 0 ${size} ${totalHeight}`}
+      width="100%" // Make SVG fill its container width
+      height="100%" // Make SVG fill its container height
+      viewBox={`0 0 ${size} ${totalHeight}`} // Define intrinsic coordinate system and aspect ratio
       className={className}
       aria-label="Meta-Prism Fractal Logo"
+      preserveAspectRatio="xMidYMid meet" // Ensures aspect ratio is maintained
     >
       {LCH_DOMAIN_COLORS_HEX.map((color, i) => {
         return (
@@ -55,7 +53,7 @@ export const FractalTriangleLogo: React.FC<FractalTriangleLogoProps> = ({
             key={i}
             d={getBandPath(i)}
             fill={color}
-            initial={{ opacity: 0, pathLength: 0 }} // Draw in effect
+            initial={{ opacity: 0, pathLength: 0 }}
             animate={{
               opacity: 1,
               pathLength: 1,
@@ -65,16 +63,15 @@ export const FractalTriangleLogo: React.FC<FractalTriangleLogoProps> = ({
               },
             }}
             whileHover={{
-              scale: 1.03, // Slight grow
-              filter: `drop-shadow(0 0 7px ${chroma(color).brighten(0.6).alpha(0.75).hex()})`, // Softer glow
+              scale: 1.03, // Simplified hover effect
               transition: { duration: 0.2 },
             }}
-            // Optional continuous subtle ripple animation
+            // Optional continuous subtle ripple animation (currently commented out)
             // custom={i}
             // variants={{
             //   animate: (custom) => ({
-            //     scale: [1, 1.005, 1], // Very subtle
-            //     opacity: [0.9, 1, 0.9], // Subtle opacity pulse
+            //     scale: [1, 1.005, 1],
+            //     opacity: [0.9, 1, 0.9],
             //     transition: {
             //       repeat: Infinity,
             //       duration: 3 + custom * 0.2,
@@ -83,7 +80,7 @@ export const FractalTriangleLogo: React.FC<FractalTriangleLogoProps> = ({
             //     },
             //   }),
             // }}
-            // animate="animate" // Uncomment to enable continuous ripple
+            // animate="animate"
           />
         );
       })}
