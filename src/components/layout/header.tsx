@@ -22,7 +22,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar"; // Removed AvatarImage as it's not used
 import { useWorldview } from "@/hooks/use-worldview"; 
 import * as React from 'react';
 import { AuthForm } from '@/components/auth/auth-form'; 
@@ -51,12 +51,12 @@ export function Header() {
   return (
     <>
       <header className="sticky top-0 z-50 w-full border-b border-border/30 bg-background/80 backdrop-blur-md">
-        <div className="container mx-auto flex h-16 items-center justify-between px-4 md:px-6">
-          <Link href="/" className="flex items-center space-x-2" onClick={() => setIsMobileMenuOpen(false)}>
+        <div className="container mx-auto flex h-16 items-center justify-between px-6 py-3">
+          <Link href="/" className="flex items-center space-x-2 flex-shrink-0" onClick={() => setIsMobileMenuOpen(false)}>
             <Logo />
           </Link>
           
-          <nav className="hidden md:flex items-center space-x-1">
+          <nav className="hidden md:flex flex-1 justify-center items-center gap-4">
             {mainNavItems.map((item) => {
               if (item.hideOnDesktop) return null;
               const IconComponent = item.icon ? Icons[item.icon] : null;
@@ -98,7 +98,7 @@ export function Header() {
                       <p className="text-lg font-bold leading-none tracking-tighter text-foreground">
                         {currentUser.displayName || "User"}
                       </p>
-                      {currentUser.email && (
+                      {currentUser.email && ( // Conditionally render email if it exists
                         <p className="text-xs leading-none text-muted-foreground">
                           {currentUser.email}
                         </p>
@@ -112,7 +112,7 @@ export function Header() {
                       Dashboard
                     </Link>
                   </DropdownMenuItem>
-                  <DropdownMenuItem asChild className="cursor-pointer hover:bg-muted/50 focus:bg-muted/50 p-2.5">
+                   <DropdownMenuItem asChild className="cursor-pointer hover:bg-muted/50 focus:bg-muted/50 p-2.5">
                     <Link href="/results" className="flex items-center text-sm">
                       <Icons.results className="mr-2.5 h-4 w-4 text-muted-foreground" />
                        Results
@@ -125,9 +125,18 @@ export function Header() {
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuSeparator className="mx-0 my-2 bg-border/50" />
+                   {/* Settings Link - can be uncommented if needed 
+                   <DropdownMenuItem asChild className="cursor-pointer hover:bg-muted/50 focus:bg-muted/50 p-2.5">
+                    <Link href="/settings" className="flex items-center text-sm">
+                      <Icons.settings className="mr-2.5 h-4 w-4 text-muted-foreground" />
+                      Settings
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator className="mx-0 my-2 bg-border/50" /> 
+                  */}
                   <DropdownMenuItem
                     onClick={signOutUser}
-                    className="cursor-pointer !text-red-100 !bg-red-600 hover:!bg-red-700 focus:!bg-red-700 p-2.5 flex items-center text-sm font-medium rounded-md"
+                    className="cursor-pointer !text-red-100 !bg-red-600/80 hover:!bg-red-600/90 focus:!bg-red-700/90 p-2.5 flex items-center text-sm font-medium rounded-md"
                   >
                     <Icons.logout className="mr-2.5 h-4 w-4" />
                     Sign Out
@@ -158,6 +167,7 @@ export function Header() {
                   <div className="p-6 pt-8">
                   <Link href="/" className="flex items-center space-x-2 mb-6" onClick={() => setIsMobileMenuOpen(false)}>
                     <MinimalLogo />
+                     <span className="text-xl font-bold text-foreground">Meta-Prism</span>
                   </Link>
                     <nav className="flex flex-col space-y-2">
                       {allNavItemsForMobile.map((item) => {
