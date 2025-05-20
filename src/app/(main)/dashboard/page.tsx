@@ -17,6 +17,7 @@ import { Badge } from '@/components/ui/badge';
 import { FacetIcon } from "@/components/facet-icon";
 import chroma from 'chroma-js';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { cn } from "@/lib/utils";
 
 
 // --- Archetype Data & Helpers ---
@@ -88,7 +89,6 @@ const rawArchetypeData: any[] = [
 const mapRawArchetypeToCodexEntry = (raw: any): CodexEntry | null => {
   try {
     if (!raw || typeof raw !== 'object' || (typeof raw.title !== 'string' && typeof raw.name !== 'string')) {
-      // console.error("mapRawArchetypeToCodexEntry: Invalid raw data item, skipping:", raw);
       return null;
     }
 
@@ -112,7 +112,6 @@ const mapRawArchetypeToCodexEntry = (raw: any): CodexEntry | null => {
         return { facetName: facetKey, score: Math.max(0, Math.min(1, Number(scoreValue))) };
       });
     } else {
-      // console.warn(`Scores missing for archetype: ${titleToUse}. Defaulting all to 0.5.`);
       domainScoresArray = FACET_NAMES.map(name => ({ facetName: name, score: 0.5 }));
     }
 
@@ -150,8 +149,7 @@ const mapRawArchetypeToCodexEntry = (raw: any): CodexEntry | null => {
       tags: raw.tags || [id], 
     };
   } catch (error) {
-    // console.error("Error in mapRawArchetypeToCodexEntry for item:", raw, error);
-    return null; // Return null if any error occurs during mapping
+    return null; 
   }
 };
 
@@ -210,14 +208,12 @@ export default function DashboardPage() {
   const mappedArchetypes = useMemo(() => {
     try {
       if (!Array.isArray(rawArchetypeData)) {
-        // console.error("rawArchetypeData is not an array in Dashboard:", rawArchetypeData);
         return []; 
       }
       return rawArchetypeData
         .map(item => mapRawArchetypeToCodexEntry(item))
-        .filter(item => item !== null) as CodexEntry[]; // Filter out nulls from failed mappings
+        .filter(item => item !== null) as CodexEntry[]; 
     } catch (error) {
-      // console.error("Error mapping archetypes in Dashboard:", error);
       return []; 
     }
   }, []);
@@ -236,20 +232,18 @@ export default function DashboardPage() {
     try {
       return mappedArchetypes
         .map(archetype => {
-          if (!archetype || !archetype.domainScores) { // Add a check for archetype and its domainScores
-            // console.warn("Skipping archetype with missing domainScores:", archetype);
-            return { ...archetype, similarity: 0 }; // Assign 0 similarity if domainScores are missing
+          if (!archetype || !archetype.domainScores) { 
+            return { ...archetype, similarity: 0 }; 
           }
           return {
             ...archetype,
             similarity: calculateSimilarity(userDomainScores, archetype.domainScores),
           };
         })
-        .filter(archetype => archetype !== null) // Ensure nulls are filtered if mapRawArchetypeToCodexEntry returns null
+        .filter(archetype => archetype !== null) 
         .sort((a, b) => b.similarity - a.similarity)
         .slice(0, 3);
     } catch (error) {
-      // console.error("Error calculating top three matches:", error);
       return [];
     }
   }, [userDomainScores, mappedArchetypes, hasAssessmentBeenRun]);
@@ -268,8 +262,8 @@ export default function DashboardPage() {
   const currentSelectedFacetData = selectedFacetForInsight ? FACETS[selectedFacetForInsight] : null;
   const currentUserScoreForSelectedFacet = selectedFacetForInsight && userDomainScores?.find(ds => ds.facetName === selectedFacetForInsight)?.score;
 
-  const getQualitativeScoreDescription = (score: number | undefined, facetName: FacetName | undefined): string => {
-    if (score === undefined || !facetName || !FACETS[facetName]) return "A balanced perspective.";
+ const getQualitativeScoreDescription = (score: number | undefined, facetName: FacetName | undefined): string => {
+    if (score === undefined || !facetName || !FACETS[facetName]) return "Perspective noted.";
     const facetConfig = FACETS[facetName];
     const anchors = facetConfig.deepDive?.spectrumAnchors || [];
 
@@ -277,10 +271,10 @@ export default function DashboardPage() {
       if (score < 0.34) return `Primarily aligns with: ${anchors[0]}`;
       if (score <= 0.66) return `Suggests a perspective of: ${anchors[1]}`;
       return `Primarily aligns with: ${anchors[2]}`;
-    } else if (anchors.length === 2) {
+    } else if (anchors.length === 2) { // Fallback for 2 anchors
       return score < 0.5 ? `Aligns more with: ${anchors[0]}` : `Aligns more with: ${anchors[1]}`;
     } else if (anchors.length === 1) {
-      return `Aligns with: ${anchors[0]}`;
+        return `Aligns with: ${anchors[0]}`;
     }
     return "Perspective noted.";
   };
@@ -301,37 +295,12 @@ export default function DashboardPage() {
 
     return scoresToDisplay.map(ds => {
       const facetConfig = FACETS[ds.facetName];
-      const facetName = ds.facetName; 
+      if (!facetConfig) return null; 
       
-      let anchorLeftText = SPECTRUM_LABELS[facetName]?.left || "Spectrum Low";
-      let anchorRightText = SPECTRUM_LABELS[facetName]?.right || "Spectrum High";
+      const facetSpecificLabels = SPECTRUM_LABELS[ds.facetName];
+      const anchorLeftText = facetSpecificLabels?.left || "Spectrum Low";
+      const anchorRightText = facetSpecificLabels?.right || "Spectrum High";
       
-      if (facetConfig) { // Check if facetConfig exists
-          if (facetName === "Ontology") {
-            anchorLeftText = "Materialism";
-            anchorRightText = "Idealism";
-          } else if (facetName === "Epistemology") {
-            anchorLeftText = "Empirical";
-            anchorRightText = "Revelatory";
-          } else if (facetName === "Praxeology") {
-            anchorLeftText = "Hierarchical";
-            anchorRightText = "Egalitarian";
-          } else if (facetName === "Axiology") {
-            anchorLeftText = "Individualism";
-            anchorRightText = "Collectivism";
-          } else if (facetName === "Mythology") {
-            anchorLeftText = "Linear";
-            anchorRightText = "Cyclical";
-          } else if (facetName === "Cosmology") {
-            anchorLeftText = "Mechanistic";
-            anchorRightText = "Holistic";
-          } else if (facetName === "Teleology") {
-            anchorLeftText = "Existential"; // Reversed from previous
-            anchorRightText = "Divine";      // Reversed from previous
-          }
-      }
-
-
       return (
         <DomainFeedbackBar
           key={ds.facetName}
@@ -540,12 +509,11 @@ export default function DashboardPage() {
 
 
                     return (
-                      <div key={facetName} className="p-4 rounded-md border border-border/30 bg-background/40">
+                      <div key={facetName} className="p-4 rounded-md border border-border/30 bg-background/40 space-y-2">
                         <div className="flex justify-between items-center mb-1">
                           <h4 className="text-lg font-semibold" style={{color: getFacetColorHsl(facetName)}}>
                             {facetName}
                           </h4>
-                          <span className="text-sm font-bold" style={{color: getFacetColorHsl(facetName)}}>{Math.round(score * 100)}%</span>
                         </div>
                         <p className="text-xs text-muted-foreground italic mb-1">{facetConfig?.tagline || "..."}</p>
                         <p className="text-sm text-muted-foreground">{facetSummary}</p>
@@ -678,12 +646,10 @@ export default function DashboardPage() {
   );
 }
 
-// Helper Component for Domain Feedback Bars
 
 function DomainFeedbackBar({ facetName, score, anchorLeft, anchorRight }: { facetName: FacetName, score: number, anchorLeft: string, anchorRight: string }) {
   const facetConfig = FACETS[facetName];
   if (!facetConfig) {
-    // console.warn(`Facet configuration not found for: ${facetName} in DomainFeedbackBar`);
     return (
       <div className="mb-4 p-3 rounded-md border border-destructive/50 bg-destructive/10">
         <p className="text-destructive text-sm">Configuration error for facet: {facetName}</p>
@@ -699,7 +665,6 @@ function DomainFeedbackBar({ facetName, score, anchorLeft, anchorRight }: { face
     <div className="mb-6 p-3 rounded-md border border-border/30 bg-background/40">
       <div className="flex justify-between items-center mb-1.5">
         <span className="text-sm font-medium" style={{ color: getFacetColorHsl(facetName) }}>{facetConfig.name}</span>
-        <span className="text-xs font-semibold" style={{ color: getFacetColorHsl(facetName) }}>{Math.round(score * 100)}%</span>
       </div>
       
       <Tooltip>
@@ -709,7 +674,6 @@ function DomainFeedbackBar({ facetName, score, anchorLeft, anchorRight }: { face
               className="h-full rounded"
               style={{ background: `linear-gradient(to right, ${barColorDark}, ${barColorLight})` }}
             />
-            {/* Marker Group: Positioned at the score percentage, vertically centered in the bar */}
             <div
               className="absolute top-1/2 transform -translate-y-1/2 -translate-x-1/2 flex flex-col items-center"
               style={{
@@ -719,13 +683,11 @@ function DomainFeedbackBar({ facetName, score, anchorLeft, anchorRight }: { face
               }}
               aria-hidden="true"
             >
-              {/* Text Bubble */}
               <div 
                 className="px-1.5 py-0 text-[10px] bg-black/70 text-white rounded shadow-md whitespace-nowrap"
               >
                 {Math.round(score * 100)}%
               </div>
-              {/* Triangle pointing downwards, centered under the text bubble */}
               <svg
                 width="8"
                 height="5"
@@ -749,6 +711,3 @@ function DomainFeedbackBar({ facetName, score, anchorLeft, anchorRight }: { face
     </div>
   );
 }
-
-
-    

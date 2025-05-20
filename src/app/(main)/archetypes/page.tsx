@@ -110,6 +110,8 @@ const mapRawArchetypeToCodexEntry = (raw: any): CodexEntry => {
     };
   }
 
+  const id = titleToUse.toLowerCase().replace(/\s+/g, '_').replace(/[^\w-]+/g, '');
+
   const domainScoresArray: DomainScore[] = FACET_NAMES.map(facetKey => {
     const scoreSource = raw.scores || raw.facetScores; // Allow for 'scores' or 'facetScores'
     let score = 0.5; // Default score
@@ -144,7 +146,7 @@ const mapRawArchetypeToCodexEntry = (raw: any): CodexEntry => {
   }
 
   return {
-    id: titleToUse.toLowerCase().replace(/\s+/g, '_').replace(/[^\w-]+/g, ''),
+    id,
     title: titleToUse,
     summary: raw.summary || "No summary available.",
     domainScores: domainScoresArray,
@@ -152,7 +154,7 @@ const mapRawArchetypeToCodexEntry = (raw: any): CodexEntry => {
     category: "archetypal", // All entries here are archetypes
     isArchetype: true,
     createdAt: raw.createdAt || new Date().toISOString(),
-    tags: raw.tags || [titleToUse.toLowerCase().replace(/\s+/g, '_').replace(/[^\w-]+/g, '')], // Default tag from title
+    tags: raw.tags || [id], // Default tag from title
   };
 };
 
@@ -366,7 +368,6 @@ export default function ArchetypesPage() {
                           <h4 className="text-lg font-semibold" style={{color: getFacetColorHsl(facetName)}}>
                             {facetName}
                           </h4>
-                          <span className="text-sm font-bold" style={{color: getFacetColorHsl(facetName)}}>{Math.round(score * 100)}%</span>
                         </div>
                         <p className="text-xs text-muted-foreground italic mb-1">{facetConfig?.tagline || "..."}</p>
                         <p className="text-sm text-muted-foreground">{facetSummary}</p>
@@ -378,7 +379,6 @@ export default function ArchetypesPage() {
                                 className="h-full rounded"
                                 style={{ background: `linear-gradient(to right, ${barColorDark}, ${barColorLight})` }}
                               />
-                              {/* Marker Group: Positioned at the score percentage, vertically centered in the bar */}
                               <div
                                 className="absolute top-1/2 transform -translate-y-1/2 -translate-x-1/2 flex flex-col items-center"
                                 style={{
@@ -388,13 +388,11 @@ export default function ArchetypesPage() {
                                 }}
                                 aria-hidden="true"
                               >
-                                {/* Text Bubble */}
                                 <div 
                                   className="px-1.5 py-0 text-[10px] bg-black/70 text-white rounded shadow-md whitespace-nowrap"
                                 >
                                   {Math.round(score * 100)}%
                                 </div>
-                                {/* Triangle pointing downwards, centered under the text bubble */}
                                 <svg
                                   width="8"
                                   height="5"

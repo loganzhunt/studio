@@ -358,7 +358,7 @@ export default function CodexPage() {
                   </div>
                 </SheetHeader>
                 
-                <div className="flex justify-center mb-6">
+                <div className="mb-6 flex justify-center">
                    <TriangleChart scores={selectedEntry.domainScores} width={250} height={217} className="mx-auto !p-0 !bg-transparent !shadow-none !backdrop-blur-none" />
                 </div>
                 
@@ -399,7 +399,6 @@ export default function CodexPage() {
                           <h4 className="text-lg font-semibold" style={{color: getFacetColorHsl(facetName)}}>
                             {facetName}
                           </h4>
-                          <span className="text-sm font-bold" style={{color: getFacetColorHsl(facetName)}}>{Math.round(score * 100)}%</span>
                         </div>
                         <p className="text-xs text-muted-foreground italic mb-1">{facetConfig?.tagline || "..."}</p>
                         <p className="text-sm text-muted-foreground mb-2">{facetSummary}</p>
@@ -411,7 +410,6 @@ export default function CodexPage() {
                                 className="h-full rounded"
                                 style={{ background: `linear-gradient(to right, ${barColorDark}, ${barColorLight})` }}
                               />
-                              {/* Marker Group: Positioned at the score percentage, vertically centered in the bar */}
                               <div
                                 className="absolute top-1/2 transform -translate-y-1/2 -translate-x-1/2 flex flex-col items-center"
                                 style={{
@@ -421,13 +419,11 @@ export default function CodexPage() {
                                 }}
                                 aria-hidden="true"
                               >
-                                {/* Text Bubble */}
                                 <div 
                                   className="px-1.5 py-0 text-[10px] bg-black/70 text-white rounded shadow-md whitespace-nowrap"
                                 >
                                   {Math.round(score * 100)}%
                                 </div>
-                                {/* Triangle pointing downwards, centered under the text bubble */}
                                 <svg
                                   width="8"
                                   height="5"
