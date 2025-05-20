@@ -1,15 +1,15 @@
 import chroma from "chroma-js";
-import type { FacetName } from "@/types";
-import { FACETS } from "@/config/facets"; // Import FACETS for colorVariable
+import type { FacetName, DomainScore } from "@/types"; // Added DomainScore
+import { FACETS, FACET_NAMES } from "@/config/facets"; // Import FACETS for colorVariable and FACET_NAMES
 
 // Updated ROYGBIV palette (capitalized keys to match FacetName)
 export const DOMAIN_COLORS: Record<FacetName | string, string> = {
-  Ontology:     "#E53935", // Red
-  Epistemology: "#FB8C00", // Orange
-  Praxeology:   "#FDD835", // Yellow
-  Axiology:     "#43A047", // Green
-  Mythology:    "#1E88E5", // Blue
-  Cosmology:    "#5E35B1", // Indigo
+  Ontology:     "#FF3333", // Red
+  Epistemology: "#FF9900", // Orange
+  Praxeology:   "#FFEB3B", // Yellow
+  Axiology:     "#38C172", // Green
+  Mythology:    "#2196F3", // Blue
+  Cosmology:    "#6B47DC", // Indigo
   Teleology:    "#B455B6", // Violet
 };
 
@@ -27,13 +27,13 @@ export function getBandColor(domainName: FacetName, score: number): string {
   const baseColorKey = domainName;
   const baseColor = DOMAIN_COLORS[baseColorKey] || FALLBACK_COLOR;
 
-  // Score thresholds: 0-0.33 (dark), 0.34-0.66 (base), 0.67-1.0 (light)
-  if (score <= 0.33) {
-    return chroma(baseColor).darken(1.2).desaturate(0.2).hex();
-  } else if (score <= 0.66) {
-    return baseColor; 
-  } else {
-    return chroma(baseColor).brighten(0.8).saturate(0.2).hex();
+  // Score thresholds for color shades
+  if (score <= 0.33) { // Low scores -> darker shade
+    return chroma(baseColor).darken(1.2).saturate(0.1).hex();
+  } else if (score <= 0.66) { // Mid scores -> base color
+    return baseColor;
+  } else { // High scores -> lighter shade
+    return chroma(baseColor).brighten(0.8).saturate(0.1).hex();
   }
 }
 
@@ -60,5 +60,29 @@ export const SPECTRUM_LABELS: Record<FacetName, { left: string; right: string }>
   Axiology: { left: "Individualism", right: "Collectivism" },
   Mythology: { left: "Linear", right: "Cyclical" },
   Cosmology: { left: "Mechanistic", right: "Holistic" },
-  Teleology: { left: "Existential", right: "Divine" }, // Note: Reversed from an earlier state
+  Teleology: { left: "Existential", right: "Divine" },
+};
+
+/**
+ * Determines the dominant facet from a list of domain scores.
+ * @param scores An array of DomainScore objects.
+ * @returns The FacetName of the domain with the highest score.
+ */
+export const getDominantFacet = (scores: DomainScore[]): FacetName => {
+  if (!scores || scores.length === 0) {
+    // If no scores, or empty array, return the first facet name as a default
+    return FACET_NAMES[0];
+  }
+
+  const validScores = scores.filter(s => s && typeof s.score === 'number' && s.facetName && FACET_NAMES.includes(s.facetName));
+
+  if (validScores.length === 0) {
+    // If no valid scores with recognized facet names, return the first facet name as a default
+    return FACET_NAMES[0];
+  }
+
+  // Find the facet with the highest score
+  return validScores.reduce((prev, current) => {
+    return (current.score > prev.score) ? current : prev;
+  }).facetName;
 };
