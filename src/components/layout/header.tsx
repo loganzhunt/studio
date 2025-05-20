@@ -6,11 +6,11 @@ import { usePathname } from 'next/navigation';
 import { Logo, MinimalLogo } from '@/components/logo';
 import { Button } from '@/components/ui/button';
 import { Icons } from '@/components/icons';
-import { mainNavItems, allNavItemsForMobile, secondaryNavItems } from '@/config/site';
+import { mainNavItems, allNavItemsForMobile } from '@/config/site';
 import { cn } from '@/lib/utils';
-import { 
-  Sheet, 
-  SheetContent, 
+import {
+  Sheet,
+  SheetContent,
   SheetTrigger,
   SheetClose
 } from '@/components/ui/sheet';
@@ -23,16 +23,16 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { useWorldview } from "@/hooks/use-worldview"; 
+import { useWorldview } from "@/hooks/use-worldview";
 import * as React from 'react';
-import { AuthForm } from '@/components/auth/auth-form'; 
-import { ScrollArea } from '@/components/ui/scroll-area'; 
+import { AuthForm } from '@/components/auth/auth-form';
+import { ScrollArea } from '@/components/ui/scroll-area';
 
 export function Header() {
   const pathname = usePathname();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = React.useState(false);
-  const { 
-    currentUser, 
+  const {
+    currentUser,
     signOutUser,
     openAuthModal,
   } = useWorldview();
@@ -51,15 +51,16 @@ export function Header() {
   return (
     <>
       <header className="sticky top-0 z-50 w-full border-b border-border/30 bg-background/80 backdrop-blur-md">
-        <div className="flex h-16 items-center justify-between px-6 py-3"> {/* Removed container mx-auto */}
+        <div className="flex h-16 items-center justify-between px-12 py-3"> {/* Changed px-6 to px-12 */}
           <Link href="/" className="flex items-center space-x-2 flex-shrink-0" onClick={() => setIsMobileMenuOpen(false)}>
             <Logo />
           </Link>
-          
+
           <nav className="hidden md:flex flex-1 justify-start items-center gap-4 ml-6">
             {mainNavItems.map((item) => {
-              if (item.hideOnDesktop && item.title !== "Results" && item.title !== "Saved") return null; // Keep Results & Saved for mobile logic, hide others
-              if (item.hideOnDesktop && (item.title === "Results" || item.title === "Saved")) return null; // Explicitly hide from desktop nav
+              if (item.hideOnDesktop && (item.title === "Results" || item.title === "Saved")) return null;
+              if (item.hideOnDesktop && item.title !== "Results" && item.title !== "Saved") return null;
+
 
               const IconComponent = item.icon ? Icons[item.icon] : null;
               const isActive = pathname === item.href || (item.href !== "/" && pathname.startsWith(item.href));
@@ -142,8 +143,8 @@ export function Header() {
                 </DropdownMenuContent>
               </DropdownMenu>
             ) : (
-              <Button 
-                variant="outline" 
+              <Button
+                variant="outline"
                 size="sm"
                 onClick={openAuthModal}
                 className="border-primary/50 text-primary hover:bg-primary/10 hover:text-primary px-3 py-1.5 h-9 font-medium text-xs sm:text-sm"
@@ -177,7 +178,7 @@ export function Header() {
                               href={item.href}
                               onClick={() => setIsMobileMenuOpen(false)}
                               className={cn(
-                                "flex items-center rounded-md py-2.5 px-3 text-base font-medium transition-colors", 
+                                "flex items-center rounded-md py-2.5 px-3 text-base font-medium transition-colors",
                                 isActive ? "bg-primary/10 text-primary" : "text-muted-foreground hover:bg-muted/50 hover:text-foreground"
                               )}
                             >
@@ -187,7 +188,6 @@ export function Header() {
                           </SheetClose>
                         );
                       })}
-                      {/* Secondary items are already part of allNavItemsForMobile due to its construction */}
                     </nav>
                   </div>
                 </ScrollArea>
