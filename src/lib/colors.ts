@@ -14,23 +14,23 @@ export const DOMAIN_COLORS: Record<FacetName | string, string> = {
   Teleology:    "#B455B6", // Violet
 };
 
-// New chroma.js scales for triangle chart bands (vibrant, with 3 stops)
-// Note: The color assignments here are based on the user's "Domain Color Endpoints" prompt:
+// Chroma.js scales for triangle chart bands using HCL mode
+// Color assignments based on user's "Domain Color Endpoints" prompt:
 // Ontology (Violet), Epistemology (Indigo), Praxeology (Blue), etc.
 const DOMAIN_SCALES: Record<FacetName, chroma.Scale> = {
-  Ontology:     chroma.scale(['#f3e8ff', '#7c3aed', '#3d1c65']).mode('lch'), // Violet tones
-  Epistemology: chroma.scale(['#e0e7ff', '#6366f1', '#1e293b']).mode('lch'), // Indigo tones
-  Praxeology:   chroma.scale(['#dbeafe', '#3b82f6', '#1e40af']).mode('lch'), // Blue tones
-  Axiology:     chroma.scale(['#d1fae5', '#10b981', '#065f46']).mode('lch'), // Green tones
-  Mythology:    chroma.scale(['#fef9c3', '#fde047', '#ca8a04']).mode('lch'), // Yellow tones
-  Cosmology:    chroma.scale(['#ffedd5', '#fb923c', '#7c2d12']).mode('lch'), // Orange tones
-  Teleology:    chroma.scale(['#fee2e2', '#ef4444', '#7f1d1d']).mode('lch'), // Red tones
+  Ontology:     chroma.scale(['#f3e8ff', '#7c3aed', '#3d1c65']).mode('hcl'), // Violet tones
+  Epistemology: chroma.scale(['#e0e7ff', '#6366f1', '#1e293b']).mode('hcl'), // Indigo tones
+  Praxeology:   chroma.scale(['#dbeafe', '#3b82f6', '#1e40af']).mode('hcl'), // Blue tones
+  Axiology:     chroma.scale(['#d1fae5', '#10b981', '#065f46']).mode('hcl'), // Green tones
+  Mythology:    chroma.scale(['#fef9c3', '#fde047', '#ca8a04']).mode('hcl'), // Yellow tones
+  Cosmology:    chroma.scale(['#ffedd5', '#fb923c', '#7c2d12']).mode('hcl'), // Orange tones
+  Teleology:    chroma.scale(['#fee2e2', '#ef4444', '#7f1d1d']).mode('hcl'), // Red tones
 };
 
 const FALLBACK_COLOR_HEX = "#BDBDBD"; // Medium Gray
 
 /**
- * Calculates the band color for the TriangleChart using chroma-js scales.
+ * Calculates the band color for the TriangleChart using chroma-js scales in HCL mode.
  * @param facetName The name of the facet.
  * @param score The normalized score (0.0 - 1.0).
  * @returns A hex color string.
@@ -40,7 +40,8 @@ export function getFacetScoreColor(facetName: FacetName, score: number): string 
   if (scale) {
     return scale(Math.max(0, Math.min(1, score))).hex(); // Clamp score to 0-1
   }
-  return FALLBACK_COLOR_HEX; // Fallback if facetName is somehow invalid
+  console.warn(`Scale not found for facet: ${facetName}. Using fallback color.`);
+  return FALLBACK_COLOR_HEX; 
 }
 
 /**
@@ -63,16 +64,18 @@ export const SPECTRUM_LABELS: Record<FacetName, { left: string; right: string }>
   Axiology:     { left: "Individualism", right: "Collectivism" },
   Mythology:    { left: "Linear", right: "Cyclical" },
   Cosmology:    { left: "Mechanistic", right: "Holistic" },
-  Teleology:    { left: "Existential", right: "Divine" }, // Reversed per user request
+  Teleology:    { left: "Existential", right: "Divine" }, // Reversed
 };
 
 export const getDominantFacet = (scores: DomainScore[]): FacetName => {
   if (!scores || scores.length === 0) {
-    return FACET_NAMES[0];
+    return FACET_NAMES[0]; // Default to the first facet name if no scores
   }
+  // Filter out any potentially malformed score objects and ensure score is a number
   const validScores = scores.filter(s => s && typeof s.score === 'number' && FACET_NAMES.includes(s.facetName));
   if (validScores.length === 0) {
-    return FACET_NAMES[0];
+    return FACET_NAMES[0]; // Default if no valid scores found
   }
+  // Find the facet with the highest score
   return validScores.reduce((prev, current) => (current.score > prev.score) ? current : prev).facetName;
 };
