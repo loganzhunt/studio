@@ -1,4 +1,3 @@
-
 import Link from 'next/link';
 import Image from 'next/image';
 import { Button } from '@/components/ui/button';
@@ -18,7 +17,7 @@ import { getDominantFacet, getFacetColorHsl } from '@/lib/colors';
 const featuredWorldviewsData: Array<{
   id: string;
   title: string;
-  icon?: string; // Added icon
+  icon?: string; 
   summary: string;
   category: string;
   domainScores: DomainScore[];
@@ -142,7 +141,7 @@ export default function HomePage() {
   ];
 
   return (
-    <div className="flex flex-col"> {/* Removed min-h-screen, as RootLayout handles it */}
+    <div className="flex flex-col">
       <main className="flex-1">
         {/* Hero Section */}
         <section className="relative py-20 md:py-32 text-center bg-gradient-to-br from-background via-card to-background">
@@ -214,19 +213,19 @@ export default function HomePage() {
               Browse some of the diverse philosophical and spiritual perspectives mapped in our Codex.
             </p>
             <div className="flex justify-center">
-              <Carousel 
-                opts={{ 
+              <Carousel
+                opts={{
                   align: "start",
-                  loop: featuredWorldviewsData.length > 3, // Loop if more than 3 items
-                }} 
+                  loop: featuredWorldviewsData.length > 3,
+                }}
                 className="w-full max-w-xs sm:max-w-2xl md:max-w-4xl lg:max-w-6xl"
               >
-                <CarouselContent className="-ml-1 sm:-ml-2 md:-ml-4">
-                  {featuredWorldviewsData.map((entry, index) => {
+                <CarouselContent className="-ml-4">
+                  {featuredWorldviewsData.map((entry) => {
                     const dominantFacet = getDominantFacet(entry.domainScores);
                     const titleColor = getFacetColorHsl(dominantFacet);
                     return (
-                      <CarouselItem key={entry.id} className="pl-1 sm:pl-2 md:pl-4 sm:basis-1/2 lg:basis-1/3 xl:basis-1/4">
+                      <CarouselItem key={entry.id} className="pl-4 sm:basis-1/2 lg:basis-1/3 xl:basis-1/4">
                         <div className="p-1 h-full">
                           <Card className="flex flex-col h-full overflow-hidden hover:shadow-lg transition-shadow duration-300 glassmorphic-card">
                             <CardHeader className="p-6 text-center">
@@ -240,9 +239,8 @@ export default function HomePage() {
                                 {entry.summary}
                               </CardDescription>
                             </CardHeader>
-                            <CardContent className="flex-grow flex flex-col justify-center items-center pt-0 pb-4">
+                            <CardContent className="flex-grow flex flex-col justify-center items-center pt-2 pb-4">
                               <TriangleChart scores={entry.domainScores} width={180} height={156} className="!p-0 !bg-transparent !shadow-none !backdrop-blur-none mb-3" />
-                              {/* Tags removed as per previous request */}
                             </CardContent>
                             <CardFooter className="p-3 border-t border-border/30 mt-auto">
                               <Button variant="outline" size="sm" className="w-full text-xs" asChild>
@@ -309,9 +307,14 @@ export default function HomePage() {
 
       {/* Footer */}
       <footer className="py-8 border-t border-border/30 bg-background">
-        <div className="container mx-auto text-center text-muted-foreground">
+        <div className="container mx-auto text-center text-muted-foreground space-y-2">
           <p>&copy; {new Date().getFullYear()} Meta-Prism. All rights reserved.</p>
-          <p className="text-sm mt-1">Explore your reality.</p>
+          <p className="text-sm">Explore your reality.</p>
+          <p className="mt-2">
+            <Link href="/about" className="text-xs text-primary hover:underline">
+              Learn More About the Meta-Prism Model
+            </Link>
+          </p>
         </div>
       </footer>
     </div>

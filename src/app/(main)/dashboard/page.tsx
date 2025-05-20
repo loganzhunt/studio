@@ -8,11 +8,11 @@ import { Button } from "@/components/ui/button";
 import { Icons } from "@/components/icons";
 import Link from "next/link";
 import { FACETS, FACET_NAMES, type FacetName } from "@/config/facets";
-import type { DomainScore, CodexEntry, LocalUser, WorldviewProfile } from "@/types";
+import type { DomainScore, CodexEntry } from "@/types"; // Removed LocalUser, WorldviewProfile as they are less direct here
 import React, { useState, useMemo, useEffect } from 'react';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from "@/components/ui/sheet";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { getFacetColorHsl, DOMAIN_COLORS, SPECTRUM_LABELS } from '@/lib/colors';
+import { getFacetColorHsl, DOMAIN_COLORS, SPECTRUM_LABELS, getDominantFacet } from '@/lib/colors'; // Added getDominantFacet
 import { Badge } from '@/components/ui/badge';
 import { FacetIcon } from "@/components/facet-icon";
 import chroma from 'chroma-js';
@@ -89,6 +89,7 @@ const rawArchetypeData: any[] = [
 const mapRawArchetypeToCodexEntry = (raw: any): CodexEntry | null => {
   try {
     if (!raw || typeof raw !== 'object' || (typeof raw.title !== 'string' && typeof raw.name !== 'string')) {
+      console.warn("mapRawArchetypeToCodexEntry: Skipping invalid raw data item", raw);
       return null;
     }
 
@@ -102,7 +103,7 @@ const mapRawArchetypeToCodexEntry = (raw: any): CodexEntry | null => {
       domainScoresArray = FACET_NAMES.map(facetKey => {
         const scoreKeyLower = facetKey.toLowerCase() as keyof typeof scoresSource;
         const scoreKeyOriginal = facetKey as keyof typeof scoresSource;
-        let scoreValue = 0.5; 
+        let scoreValue = 0.5;
 
         if (scoresSource.hasOwnProperty(scoreKeyLower) && typeof scoresSource[scoreKeyLower] === 'number') {
           scoreValue = scoresSource[scoreKeyLower];
@@ -112,6 +113,7 @@ const mapRawArchetypeToCodexEntry = (raw: any): CodexEntry | null => {
         return { facetName: facetKey, score: Math.max(0, Math.min(1, Number(scoreValue))) };
       });
     } else {
+      console.warn(`Scores missing or invalid for archetype: ${titleToUse}. Defaulting all to 0.5.`);
       domainScoresArray = FACET_NAMES.map(name => ({ facetName: name, score: 0.5 }));
     }
 
@@ -122,7 +124,7 @@ const mapRawArchetypeToCodexEntry = (raw: any): CodexEntry | null => {
       for (const facetKey of FACET_NAMES) {
         const summaryKeyLower = facetKey.toLowerCase() as keyof typeof facetSummariesSource;
         const summaryKeyOriginal = facetKey as keyof typeof facetSummariesSource;
-        let summary = `Details for ${facetKey} not available for ${titleToUse}.`; 
+        let summary = `Details for ${facetKey} not available for ${titleToUse}.`;
 
         if (facetSummariesSource.hasOwnProperty(summaryKeyLower) && typeof facetSummariesSource[summaryKeyLower] === 'string') {
           summary = facetSummariesSource[summaryKeyLower];
@@ -132,6 +134,7 @@ const mapRawArchetypeToCodexEntry = (raw: any): CodexEntry | null => {
         processedFacetSummaries[facetKey] = summary;
       }
     } else {
+      // console.warn(`Facet summaries/descriptions missing for archetype: ${titleToUse}. Setting defaults.`);
       FACET_NAMES.forEach(name => {
           processedFacetSummaries[name] = `Details for ${name} not available for ${titleToUse}.`;
       });
@@ -143,13 +146,14 @@ const mapRawArchetypeToCodexEntry = (raw: any): CodexEntry | null => {
       summary: raw.summary || "No summary available.",
       domainScores: domainScoresArray,
       facetSummaries: processedFacetSummaries,
-      category: "archetypal", 
+      category: "archetypal",
       isArchetype: true,
       createdAt: raw.createdAt || new Date().toISOString(),
-      tags: raw.tags || [id], 
+      tags: raw.tags || [id],
     };
   } catch (error) {
-    return null; 
+    console.error("Error in mapRawArchetypeToCodexEntry for item:", raw, error);
+    return null;
   }
 };
 
@@ -184,13 +188,6 @@ const calculateSimilarity = (userScores: DomainScore[], archetypeScores: DomainS
   return Math.max(0, Math.min(100, similarity));
 };
 
-const getDominantFacet = (scores: DomainScore[]): FacetName => {
-  if (!scores || scores.length === 0) return FACET_NAMES[0]; 
-  const validScores = scores.filter(s => s && typeof s.score === 'number');
-  if (validScores.length === 0) return FACET_NAMES[0];
-  return validScores.reduce((prev, current) => (current.score > prev.score) ? current : prev).facetName || FACET_NAMES[0];
-};
-
 
 export default function DashboardPage() {
   const {
@@ -205,16 +202,18 @@ export default function DashboardPage() {
   const [selectedFacetForInsight, setSelectedFacetForInsight] = useState<FacetName | null>(null);
   const [isInsightPanelOpen, setIsInsightPanelOpen] = useState(false);
 
-  const mappedArchetypes = useMemo(() => {
+  const mappedArchetypes: CodexEntry[] = useMemo(() => {
     try {
       if (!Array.isArray(rawArchetypeData)) {
-        return []; 
+        console.error("rawArchetypeData is not an array:", rawArchetypeData);
+        return [];
       }
       return rawArchetypeData
         .map(item => mapRawArchetypeToCodexEntry(item))
-        .filter(item => item !== null) as CodexEntry[]; 
+        .filter(item => item !== null) as CodexEntry[];
     } catch (error) {
-      return []; 
+      console.error("Error mapping rawArchetypeData:", error);
+      return [];
     }
   }, []);
 
@@ -232,18 +231,19 @@ export default function DashboardPage() {
     try {
       return mappedArchetypes
         .map(archetype => {
-          if (!archetype || !archetype.domainScores) { 
-            return { ...archetype, similarity: 0 }; 
+          if (!archetype || !archetype.domainScores) {
+            return { ...archetype, similarity: 0 };
           }
           return {
             ...archetype,
             similarity: calculateSimilarity(userDomainScores, archetype.domainScores),
           };
         })
-        .filter(archetype => archetype !== null) 
+        .filter(archetype => archetype !== null)
         .sort((a, b) => b.similarity - a.similarity)
         .slice(0, 3);
     } catch (error) {
+      console.error("Error calculating topThreeMatches:", error);
       return [];
     }
   }, [userDomainScores, mappedArchetypes, hasAssessmentBeenRun]);
@@ -271,7 +271,7 @@ export default function DashboardPage() {
       if (score < 0.34) return `Primarily aligns with: ${anchors[0]}`;
       if (score <= 0.66) return `Suggests a perspective of: ${anchors[1]}`;
       return `Primarily aligns with: ${anchors[2]}`;
-    } else if (anchors.length === 2) { // Fallback for 2 anchors
+    } else if (anchors.length === 2) {
       return score < 0.5 ? `Aligns more with: ${anchors[0]}` : `Aligns more with: ${anchors[1]}`;
     } else if (anchors.length === 1) {
         return `Aligns with: ${anchors[0]}`;
@@ -295,11 +295,18 @@ export default function DashboardPage() {
 
     return scoresToDisplay.map(ds => {
       const facetConfig = FACETS[ds.facetName];
-      if (!facetConfig) return null; 
+      if (!facetConfig) {
+        console.warn(`Configuration for facet ${ds.facetName} not found in DomainFeedbackBar render.`);
+        return (
+          <div key={ds.facetName} className="mb-4 p-3 rounded-md border border-destructive/50 bg-destructive/10">
+            <p className="text-destructive text-sm">Configuration error for facet: {ds.facetName}</p>
+          </div>
+        );
+      }
       
-      const facetSpecificLabels = SPECTRUM_LABELS[ds.facetName];
-      const anchorLeftText = facetSpecificLabels?.left || "Spectrum Low";
-      const anchorRightText = facetSpecificLabels?.right || "Spectrum High";
+      const labels = SPECTRUM_LABELS[ds.facetName];
+      const anchorLeftText = labels ? labels.left : "Spectrum Low";
+      const anchorRightText = labels ? labels.right : "Spectrum High";
       
       return (
         <DomainFeedbackBar
@@ -313,9 +320,36 @@ export default function DashboardPage() {
     });
   };
 
+  const aboutContent = [
+    {
+      title: "What Does It Measure?",
+      icon: Icons.sliders,
+      accentFacet: "Teleology" as FacetName,
+      text: "The assessment helps uncover the symbolic architecture behind your worldview—how you interpret reality, knowledge, ethics, values, and meaning across seven key dimensions."
+    },
+    {
+      title: "A Seven-Facet Model of Reality",
+      icon: Icons.logo,
+      accentFacet: "Mythology" as FacetName,
+      text: "Each facet—Ontology, Epistemology, Praxeology, Axiology, Mythology, Cosmology, and Teleology—represents a domain of meaning-making. Together they form your personal prism of perception."
+    },
+    {
+      title: "Why It Matters",
+      icon: Icons.info,
+      accentFacet: "Axiology" as FacetName,
+      text: "Our assumptions are often unconscious—but they shape how we think, feel, and act. Mapping them makes it possible to reflect, realign, or intentionally redesign how you relate to the world."
+    },
+    {
+      title: "Your Symbolic Signature",
+      icon: Icons.facet,
+      accentFacet: "Praxeology" as FacetName,
+      text: "When you finish, your answers form a seven-layered triangle—a symbolic signature that visualizes your worldview across the spectrum of each domain."
+    }
+  ];
+
 
   return (
-    <TooltipProvider> 
+    <TooltipProvider>
     <div className="container mx-auto py-8 space-y-12">
       <Card className="glassmorphic-card text-center p-6">
         {currentUser ? (
@@ -346,7 +380,6 @@ export default function DashboardPage() {
             onLayerClick={handleTriangleLayerClick}
             width={320}
             height={277}
-            className="!p-0 !bg-transparent !shadow-none !backdrop-blur-none"
           />
         </CardContent>
         {!hasAssessmentBeenRun && (
@@ -415,7 +448,7 @@ export default function DashboardPage() {
         <CardContent>
           {!hasAssessmentBeenRun ? (
             <div className="text-center py-8">
-              <TriangleChart scores={defaultNeutralScores} width={200} height={173} interactive={false} className="mx-auto mb-4 opacity-50 !p-0 !bg-transparent !shadow-none !backdrop-blur-none" />
+              <TriangleChart scores={defaultNeutralScores} width={200} height={173} interactive={false} />
               <p className="text-muted-foreground">Take the Assessment to Discover Your Archetypal Matches.</p>
               <Button asChild className="mt-4">
                 <Link href="/assessment"><Icons.assessment className="mr-2 h-4 w-4" /> Begin Assessment</Link>
@@ -438,7 +471,7 @@ export default function DashboardPage() {
                   </CardHeader>
                   <CardContent className="grid grid-cols-1 md:grid-cols-3 gap-4 items-center">
                     <div className="md:col-span-1 flex justify-center">
-                      <TriangleChart scores={topThreeMatches[0].domainScores} width={180} height={156} className="!p-0 !bg-transparent !shadow-none !backdrop-blur-none" />
+                      <TriangleChart scores={topThreeMatches[0].domainScores} width={180} height={156} />
                     </div>
                     <p className="md:col-span-2 text-sm text-muted-foreground line-clamp-4">{topThreeMatches[0].summary}</p>
                   </CardContent>
@@ -457,7 +490,7 @@ export default function DashboardPage() {
                         </div>
                       </CardHeader>
                       <CardContent className="flex flex-col items-center">
-                        <TriangleChart scores={match.domainScores} width={150} height={130} className="mb-3 !p-0 !bg-transparent !shadow-none !backdrop-blur-none" />
+                        <TriangleChart scores={match.domainScores} width={150} height={130} className="mb-3" />
                         <Button size="xs" variant="ghost" className="w-full mt-2" onClick={() => handleOpenArchetypeDrawer(match)}>View Details</Button>
                       </CardContent>
                     </Card>
@@ -520,7 +553,7 @@ export default function DashboardPage() {
                         <Tooltip>
                           <TooltipTrigger asChild>
                             <div className="w-full h-6 rounded bg-muted/30 relative mt-2" aria-label={`${facetName} spectrum: ${spectrumPoleLabels.left} to ${spectrumPoleLabels.right}. Score: ${Math.round(score * 100)}%`}>
-                              <div 
+                              <div
                                 className="h-full rounded"
                                 style={{ background: `linear-gradient(to right, ${barColorDark}, ${barColorLight})` }}
                               />
@@ -528,12 +561,12 @@ export default function DashboardPage() {
                                 className="absolute top-1/2 transform -translate-y-1/2 -translate-x-1/2 flex flex-col items-center"
                                 style={{
                                   left: `${score * 100}%`,
-                                  pointerEvents: 'none', 
-                                  zIndex: 10 
+                                  pointerEvents: 'none',
+                                  zIndex: 10
                                 }}
                                 aria-hidden="true"
                               >
-                                <div 
+                                <div
                                   className="px-1.5 py-0 text-[10px] bg-black/70 text-white rounded shadow-md whitespace-nowrap"
                                 >
                                   {Math.round(score * 100)}%
@@ -542,7 +575,7 @@ export default function DashboardPage() {
                                   width="8"
                                   height="5"
                                   viewBox="0 0 8 5"
-                                  className="fill-black/70 mx-auto" 
+                                  className="fill-black/70 mx-auto"
                                 >
                                   <path d="M4 5L0 0H8L4 5Z" />
                                 </svg>
@@ -618,7 +651,7 @@ export default function DashboardPage() {
                       {currentSelectedFacetData.deepDive.blindSpotsPlaceholder && <p className="text-sm text-muted-foreground mt-1">{currentSelectedFacetData.deepDive.blindSpotsPlaceholder}</p>}
                     </Card>
                   )}
-                  
+
                   {currentSelectedFacetData.deepDive?.reflectionPrompts && currentSelectedFacetData.deepDive.reflectionPrompts.length > 0 && (
                     <Card className="bg-background/40 p-4">
                       <h3 className="text-lg font-semibold mb-2">Reflection Prompts</h3>
@@ -641,6 +674,29 @@ export default function DashboardPage() {
           </SheetContent>
         </Sheet>
       )}
+      <section className="glassmorphic-card p-6 md:p-8 mt-12">
+        <h2 className="text-2xl font-bold mb-6 text-center text-foreground roygbiv-gradient-underline pb-2">About the Meta-Prism Worldview Assessment Tool</h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {aboutContent.map((item, index) => (
+            <div 
+              key={index} 
+              className="flex flex-col p-6 rounded-2xl shadow-lg transition-all duration-300 ease-in-out bg-card/30 hover:bg-card/50 border"
+              style={{ borderColor: getFacetColorHsl(item.accentFacet) }}
+            >
+              <div className="flex items-center gap-3 mb-3">
+                <item.icon className="h-7 w-7" style={{ color: getFacetColorHsl(item.accentFacet) }} />
+                <strong className="text-lg font-semibold" style={{ color: getFacetColorHsl(item.accentFacet) }}>{item.title}</strong>
+              </div>
+              <p className="text-sm text-muted-foreground leading-relaxed">{item.text}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+      <footer className="mt-12 pt-8 border-t border-border/30 text-center">
+        <Link href="/about" className="text-sm text-primary hover:underline">
+          Learn More About the Meta-Prism Model
+        </Link>
+      </footer>
     </div>
     </TooltipProvider>
   );
@@ -666,11 +722,11 @@ function DomainFeedbackBar({ facetName, score, anchorLeft, anchorRight }: { face
       <div className="flex justify-between items-center mb-1.5">
         <span className="text-sm font-medium" style={{ color: getFacetColorHsl(facetName) }}>{facetConfig.name}</span>
       </div>
-      
+
       <Tooltip>
         <TooltipTrigger asChild>
           <div className="w-full h-6 rounded bg-muted/30 relative mt-1" aria-label={`${facetName} spectrum: ${spectrumPoleLabels.left} to ${spectrumPoleLabels.right}. Score: ${Math.round(score * 100)}%`}>
-            <div 
+            <div
               className="h-full rounded"
               style={{ background: `linear-gradient(to right, ${barColorDark}, ${barColorLight})` }}
             />
@@ -678,12 +734,12 @@ function DomainFeedbackBar({ facetName, score, anchorLeft, anchorRight }: { face
               className="absolute top-1/2 transform -translate-y-1/2 -translate-x-1/2 flex flex-col items-center"
               style={{
                 left: `${score * 100}%`,
-                pointerEvents: 'none', 
-                zIndex: 10 
+                pointerEvents: 'none',
+                zIndex: 10
               }}
               aria-hidden="true"
             >
-              <div 
+              <div
                 className="px-1.5 py-0 text-[10px] bg-black/70 text-white rounded shadow-md whitespace-nowrap"
               >
                 {Math.round(score * 100)}%
@@ -692,7 +748,7 @@ function DomainFeedbackBar({ facetName, score, anchorLeft, anchorRight }: { face
                 width="8"
                 height="5"
                 viewBox="0 0 8 5"
-                className="fill-black/70 mx-auto" 
+                className="fill-black/70 mx-auto"
               >
                 <path d="M4 5L0 0H8L4 5Z" />
               </svg>
@@ -703,7 +759,7 @@ function DomainFeedbackBar({ facetName, score, anchorLeft, anchorRight }: { face
           <p>{spectrumPoleLabels.left} <span className="text-muted-foreground mx-1">←</span> Score: {Math.round(score * 100)}% <span className="text-muted-foreground mx-1">→</span> {spectrumPoleLabels.right}</p>
         </TooltipContent>
       </Tooltip>
-      
+
       <div className="flex justify-between text-xs text-muted-foreground mt-1.5">
         <span className="font-semibold">{anchorLeft}</span>
         <span className="font-semibold">{anchorRight}</span>
@@ -711,3 +767,4 @@ function DomainFeedbackBar({ facetName, score, anchorLeft, anchorRight }: { face
     </div>
   );
 }
+
