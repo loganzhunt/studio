@@ -1,3 +1,4 @@
+
 import Link from 'next/link';
 import Image from 'next/image';
 import { Button } from '@/components/ui/button';
@@ -153,6 +154,7 @@ export default function HomePage() {
               backgroundSize: '40px 40px',
               maskImage: 'radial-gradient(circle at center, white 20%, transparent 70%)'
             }}
+            
           />
           <div className="container mx-auto relative z-10">
             <div className="mx-auto mb-8 h-24 w-24">
@@ -309,7 +311,6 @@ export default function HomePage() {
       <footer className="py-8 border-t border-border/30 bg-background">
         <div className="container mx-auto text-center text-muted-foreground space-y-2">
           <p>&copy; {new Date().getFullYear()} Meta-Prism. All rights reserved.</p>
-          <p className="text-sm">Explore your reality.</p>
           <p className="mt-2">
             <Link href="/about" className="text-xs text-primary hover:underline">
               Learn More About the Meta-Prism Model
