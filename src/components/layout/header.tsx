@@ -22,7 +22,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar"; // Removed AvatarImage as it's not used
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { useWorldview } from "@/hooks/use-worldview"; 
 import * as React from 'react';
 import { AuthForm } from '@/components/auth/auth-form'; 
@@ -56,7 +56,7 @@ export function Header() {
             <Logo />
           </Link>
           
-          <nav className="hidden md:flex flex-1 justify-center items-center gap-4">
+          <nav className="hidden md:flex flex-1 justify-start items-center gap-4 ml-6"> {/* Changed justify-center to justify-start and added ml-6 for spacing */}
             {mainNavItems.map((item) => {
               if (item.hideOnDesktop) return null;
               const IconComponent = item.icon ? Icons[item.icon] : null;
@@ -71,8 +71,8 @@ export function Header() {
                     isActive ? "text-primary bg-primary/10" : "text-muted-foreground hover:text-foreground hover:bg-muted/50",
                   )}
                 >
-                  <Link href={item.href}>
-                    {IconComponent && <IconComponent className="mr-2 h-4 w-4" />}
+                  <Link href={item.href} className="flex items-center gap-1.5"> {/* Ensured flex, items-center and added gap-1.5 */}
+                    {IconComponent && <IconComponent className="h-4 w-4" />} {/* Removed mr-2 */}
                     {item.title}
                   </Link>
                 </Button>
@@ -96,9 +96,9 @@ export function Header() {
                   <DropdownMenuLabel className="font-normal px-0 py-2">
                     <div className="flex flex-col space-y-1">
                       <p className="text-lg font-bold leading-none tracking-tighter text-foreground">
-                        {currentUser.displayName || "User"}
+                        {currentUser.displayName}
                       </p>
-                      {currentUser.email && ( // Conditionally render email if it exists
+                      {currentUser.email && (
                         <p className="text-xs leading-none text-muted-foreground">
                           {currentUser.email}
                         </p>
@@ -124,19 +124,9 @@ export function Header() {
                        My Saved Profiles
                     </Link>
                   </DropdownMenuItem>
-                  <DropdownMenuSeparator className="mx-0 my-2 bg-border/50" />
-                   {/* Settings Link - can be uncommented if needed 
-                   <DropdownMenuItem asChild className="cursor-pointer hover:bg-muted/50 focus:bg-muted/50 p-2.5">
-                    <Link href="/settings" className="flex items-center text-sm">
-                      <Icons.settings className="mr-2.5 h-4 w-4 text-muted-foreground" />
-                      Settings
-                    </Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuSeparator className="mx-0 my-2 bg-border/50" /> 
-                  */}
                   <DropdownMenuItem
                     onClick={signOutUser}
-                    className="cursor-pointer !text-red-100 !bg-red-600/80 hover:!bg-red-600/90 focus:!bg-red-700/90 p-2.5 flex items-center text-sm font-medium rounded-md"
+                    className="cursor-pointer !text-red-100 !bg-red-600/80 hover:!bg-red-600/90 focus:!bg-red-700/90 p-2.5 flex items-center text-sm font-medium rounded-md mt-2"
                   >
                     <Icons.logout className="mr-2.5 h-4 w-4" />
                     Sign Out
@@ -148,9 +138,9 @@ export function Header() {
                 variant="outline" 
                 size="sm"
                 onClick={openAuthModal}
-                className="border-primary/50 text-primary hover:bg-primary/10 hover:text-primary px-4 py-2 font-medium"
+                className="border-primary/50 text-primary hover:bg-primary/10 hover:text-primary px-3 py-1.5 h-9 font-medium text-xs sm:text-sm"
               >
-                <Icons.user className="mr-2 h-4 w-4" />
+                <Icons.user className="mr-1.5 h-3.5 w-3.5 sm:mr-2 sm:h-4 sm:w-4" />
                 Sign In
               </Button>
             )}
@@ -174,18 +164,19 @@ export function Header() {
                         const IconComponent = item.icon ? Icons[item.icon] : null;
                         const isActive = pathname === item.href || (item.href !== "/" && pathname.startsWith(item.href));
                         return (
-                          <Link
-                            key={item.title}
-                            href={item.href}
-                            onClick={() => setIsMobileMenuOpen(false)}
-                            className={cn(
-                              "flex items-center rounded-md py-2 px-3 text-base font-medium transition-colors",
-                              isActive ? "bg-primary/10 text-primary" : "text-muted-foreground hover:bg-muted/50 hover:text-foreground"
-                            )}
-                          >
-                            {IconComponent && <IconComponent className="mr-3 h-5 w-5" />}
-                            {item.title}
-                          </Link>
+                          <SheetClose asChild key={item.title}>
+                            <Link
+                              href={item.href}
+                              onClick={() => setIsMobileMenuOpen(false)}
+                              className={cn(
+                                "flex items-center rounded-md py-2.5 px-3 text-base font-medium transition-colors", 
+                                isActive ? "bg-primary/10 text-primary" : "text-muted-foreground hover:bg-muted/50 hover:text-foreground"
+                              )}
+                            >
+                              {IconComponent && <IconComponent className="mr-3 h-5 w-5" />}
+                              {item.title}
+                            </Link>
+                          </SheetClose>
                         );
                       })}
                       {secondaryNavItems.length > 0 && <DropdownMenuSeparator className="my-3 bg-border/50" />}
@@ -193,18 +184,19 @@ export function Header() {
                         const IconComponent = item.icon ? Icons[item.icon] : null;
                         const isActive = pathname === item.href || (item.href !== "/" && pathname.startsWith(item.href));
                         return (
-                          <Link
-                            key={item.title}
-                            href={item.href}
-                            onClick={() => setIsMobileMenuOpen(false)}
-                            className={cn(
-                              "flex items-center rounded-md py-2 px-3 text-base font-medium transition-colors",
-                              isActive ? "bg-primary/10 text-primary" : "text-muted-foreground hover:bg-muted/50 hover:text-foreground"
-                            )}
-                          >
-                            {IconComponent && <IconComponent className="mr-3 h-5 w-5" />}
-                            {item.title}
-                          </Link>
+                          <SheetClose asChild key={item.title}>
+                            <Link
+                              href={item.href}
+                              onClick={() => setIsMobileMenuOpen(false)}
+                              className={cn(
+                                "flex items-center rounded-md py-2.5 px-3 text-base font-medium transition-colors", 
+                                isActive ? "bg-primary/10 text-primary" : "text-muted-foreground hover:bg-muted/50 hover:text-foreground"
+                              )}
+                            >
+                              {IconComponent && <IconComponent className="mr-3 h-5 w-5" />}
+                              {item.title}
+                            </Link>
+                          </SheetClose>
                         );
                       })}
                     </nav>
