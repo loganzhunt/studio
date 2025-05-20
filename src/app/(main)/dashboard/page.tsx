@@ -8,20 +8,18 @@ import { Button } from "@/components/ui/button";
 import { Icons } from "@/components/icons";
 import Link from "next/link";
 import { FACETS, FACET_NAMES, type FacetName } from "@/config/facets";
-import type { DomainScore, CodexEntry } from "@/types"; // Removed LocalUser, WorldviewProfile as they are less direct here
+import type { DomainScore, CodexEntry } from "@/types";
 import React, { useState, useMemo, useEffect } from 'react';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from "@/components/ui/sheet";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { getFacetColorHsl, DOMAIN_COLORS, SPECTRUM_LABELS, getDominantFacet } from '@/lib/colors'; // Added getDominantFacet
+import { getFacetColorHsl, DOMAIN_COLORS, SPECTRUM_LABELS, getDominantFacet, DOMAIN_SCALES, getFacetScoreColor } from '@/lib/colors';
 import { Badge } from '@/components/ui/badge';
 import { FacetIcon } from "@/components/facet-icon";
 import chroma from 'chroma-js';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
 
-
-// --- Archetype Data & Helpers ---
-// Using a trimmed down list of 10 specific archetypes as requested
+// Archetype Data & Helpers (copied from archetypes/page.tsx for now)
 const rawArchetypeData: any[] = [
   {
     "title": "The Rational Skeptic",
@@ -30,61 +28,60 @@ const rawArchetypeData: any[] = [
     "facetDescriptions": { "ontology": "Sees reality as fundamentally material; trusts in what can be measured.", "epistemology": "Strongly favors empirical observation and skepticism over revelation.", "praxeology": "Prefers structured, hierarchical systems and established authority.", "axiology": "Values personal autonomy and achievement over collective or spiritual ideals.", "mythology": "Views history and experience as linear progress.", "cosmology": "Explains the universe in mechanistic, scientific terms.", "teleology": "Sees purpose as self-determined, existential, and grounded in this life." }
   },
   {
-    "title": "The Transcendent Mystic", 
-    "summary": "Sees all of existence as sacred and interconnected, guided by direct spiritual insight. Values self-transcendence, unity, and surrender to higher meaning.",
-    "scores": { "ontology": 0.90, "epistemology": 0.85, "praxeology": 0.30, "axiology": 0.90, "mythology": 0.90, "cosmology": 0.85, "teleology": 1.0 }, 
-    "facetDescriptions": { "ontology": "Sees reality as fundamentally ideal or spiritual, rooted in unity or consciousness.", "epistemology": "Gains knowledge through revelation, intuition, or mystical insight.", "praxeology": "Prefers non-hierarchical, contemplative, or surrender-based action.", "axiology": "Values selfless love, devotion, and sacred ideals over individual gain.", "mythology": "Finds resonance in cyclical, mythic, and transpersonal stories.", "cosmology": "Views the universe as holistic and interconnected.", "teleology": "Sees life’s highest purpose in the Divine, transcendence, or unity." }
-  },
-  {
-    "title": "The Postmodern Pluralist",
-    "summary": "Holds reality and truth to be perspectival, with value placed on diversity, story, and context.",
-    "scores": { "ontology": 0.6, "epistemology": 0.7, "praxeology": 0.5, "axiology": 0.7, "mythology": 0.8, "cosmology": 0.6, "teleology": 0.5 },
-    "facetDescriptions": { "ontology": "Balances between material and ideal, questioning fixed reality. Reality is constructed, not fixed.", "epistemology": "Explores both empirical and revelatory ways of knowing. Knowledge is contextual.", "praxeology": "Resists rigid hierarchy; favors flexible, individual action. Critical, open-ended.", "axiology": "Values personal meaning and creative expression. Values diversity, pluralism.", "mythology": "Draws from diverse stories, often in cyclical or disrupted form. Deconstructs grand narratives.", "cosmology": "Views cosmos as open, uncertain, and in flux. Rejects fixed cosmic order.", "teleology": "Sees purpose as existential, chosen, and ambiguous. Purpose is provisional or ironic." }
-  },
-  {
-    "title": "The Scientific Humanist", 
-    "summary": "Grounded in rational ethics, scientific method, and belief in human progress.",
-    "scores": { "ontology": 0.20, "epistemology": 0.25, "praxeology": 0.40, "axiology": 0.55, "mythology": 0.25, "cosmology": 0.25, "teleology": 0.15 },
-    "facetDescriptions": { "ontology": "Leans materialist, seeing people and relationships as the core of reality.", "epistemology": "Values evidence, critical thinking, and reasoned dialogue.", "praxeology": "Prefers systems that are merit-based but support collective good.", "axiology": "Blends individual dignity with social compassion and justice.", "mythology": "Draws meaning from human stories and cultural narratives.", "cosmology": "Views the universe as understandable and shaped by human inquiry.", "teleology": "Sees meaning as constructed, existential, and rooted in this world." }
-  },
-  {
-    "title": "The Archetypal Traditionalist",
-    "summary": "Upholds sacred order, divine authority, and moral duty rooted in religious tradition.",
-    "scores": { "ontology": 0.4, "epistemology": 0.3, "praxeology": 0.5, "axiology": 0.75, "mythology": 0.9, "cosmology": 0.8, "teleology": 0.9 },
-    "facetDescriptions": { "ontology": "Reality is ordered by tradition and divine principles.", "epistemology": "Knowledge comes from sacred texts and lineage.", "praxeology": "Action is guided by established duties and rituals.", "axiology": "Values heritage, obedience, and communal harmony.", "mythology": "Upholds foundational myths and religious narratives.", "cosmology": "Universe is seen as divinely structured and meaningful.", "teleology": "Purpose is to live according to divine law and tradition." }
-  },
-  {
-    "title": "The Earth-Centered Animist", 
-    "summary": "Views the world as alive, reciprocal, and sacred; values ecological harmony and ancestral continuity.",
-    "scores": { "ontology": 0.85, "epistemology": 0.60, "praxeology": 0.40, "axiology": 0.65, "mythology": 0.70, "cosmology": 0.90, "teleology": 0.80 },
-    "facetDescriptions": { "ontology": "Sees reality as inherently alive, relational, and animated by spirit.", "epistemology": "Balances observation with revelatory ways of knowing (dream, vision).", "praxeology": "Values egalitarian, reciprocal, and collective practices.", "axiology": "Prioritizes interdependence, respect, and stewardship.", "mythology": "Meaning is found in cyclical, living, and place-based stories.", "cosmology": "Views cosmos as holistic and animate.", "teleology": "Purpose is to participate in the living web of existence." }
-  },
-  {
-    "title": "The Existential Individualist", 
-    "summary": "Asserts self-determined meaning, embraces uncertainty, and rejects cosmic absolutes.",
-    "scores": { "ontology": 0.40, "epistemology": 0.40, "praxeology": 0.45, "axiology": 0.35, "mythology": 0.40, "cosmology": 0.35, "teleology": 0.05 }, 
-    "facetDescriptions": { "ontology": "Balances between material and ideal, questioning fixed reality.", "epistemology": "Explores both empirical and revelatory ways of knowing.", "praxeology": "Resists rigid hierarchy; favors flexible, individual action.", "axiology": "Values personal meaning and creative expression.", "mythology": "Draws from diverse stories, often in cyclical or disrupted form.", "cosmology": "Views cosmos as open, uncertain, and in flux.", "teleology": "Sees purpose as existential, chosen, and ambiguous." }
-  },
-  {
     "title": "The Integral Synthesizer",
     "summary": "Bridges and integrates diverse perspectives, holding paradox and complexity as necessary for a whole worldview.",
     "scores": { "ontology": 0.55, "epistemology": 0.50, "praxeology": 0.50, "axiology": 0.55, "mythology": 0.55, "cosmology": 0.55, "teleology": 0.55 },
     "facetDescriptions": { "ontology": "Holds reality as a balance of material and ideal; integrates multiple layers.", "epistemology": "Values both empirical and revelatory sources; open to complexity.", "praxeology": "Balances respect for authority with egalitarian participation.", "axiology": "Blends personal and collective values for a humanistic ethic.", "mythology": "Sees meaning as cyclical and evolving, embracing stories from many sources.", "cosmology": "Perceives the cosmos as both holistic and open to scientific understanding.", "teleology": "Purpose is found in harmonizing self and world, with openness to mystery." }
   },
   {
-    "title": "The Stoic Rationalist",
+    "title": "The Transcendent Mystic", // Changed from "The Mystic Pilgrim" to match data if needed
+    "summary": "Sees all of existence as sacred and interconnected, guided by direct spiritual insight. Values self-transcendence, unity, and surrender to higher meaning.",
+    "scores": { "ontology": 0.90, "epistemology": 0.85, "praxeology": 0.30, "axiology": 0.90, "mythology": 0.90, "cosmology": 0.85, "teleology": 1.0 },
+    "facetDescriptions": { "ontology": "Sees reality as fundamentally ideal or spiritual, rooted in unity or consciousness.", "epistemology": "Gains knowledge through revelation, intuition, or mystical insight.", "praxeology": "Prefers non-hierarchical, contemplative, or surrender-based action.", "axiology": "Values selfless love, devotion, and sacred ideals over individual gain.", "mythology": "Finds resonance in cyclical, mythic, and transpersonal stories.", "cosmology": "Views the universe as holistic and interconnected.", "teleology": "Sees life’s highest purpose in the Divine, transcendence, or unity." }
+  },
+  {
+    "title": "The Scientific Humanist", // Changed from "The Humanist"
+    "summary": "Grounded in rational ethics, scientific method, and belief in human progress.",
+    "scores": { "ontology": 0.20, "epistemology": 0.25, "praxeology": 0.40, "axiology": 0.55, "mythology": 0.25, "cosmology": 0.25, "teleology": 0.15 },
+    "facetDescriptions": { "ontology": "Leans materialist, seeing people and relationships as the core of reality.", "epistemology": "Values evidence, critical thinking, and reasoned dialogue.", "praxeology": "Prefers systems that are merit-based but support collective good.", "axiology": "Blends individual dignity with social compassion and justice.", "mythology": "Draws meaning from human stories and cultural narratives.", "cosmology": "Views the universe as understandable and shaped by human inquiry.", "teleology": "Sees meaning as constructed, existential, and rooted in this world." }
+  },
+   {
+    "title": "The Earth-Centered Animist", // Changed from "The Cosmic Animist"
+    "summary": "Views the world as alive, reciprocal, and sacred; values ecological harmony and ancestral continuity.",
+    "scores": { "ontology": 0.85, "epistemology": 0.60, "praxeology": 0.40, "axiology": 0.65, "mythology": 0.70, "cosmology": 0.90, "teleology": 0.80 },
+    "facetDescriptions": { "ontology": "Sees reality as inherently alive, relational, and animated by spirit.", "epistemology": "Balances observation with revelatory ways of knowing (dream, vision).", "praxeology": "Values egalitarian, reciprocal, and collective practices.", "axiology": "Prioritizes interdependence, respect, and stewardship.", "mythology": "Meaning is found in cyclical, living, and place-based stories.", "cosmology": "Views cosmos as holistic and animate.", "teleology": "Purpose is to participate in the living web of existence." }
+  },
+  {
+    "title": "The Archetypal Traditionalist", // Added "The Pragmatic Modernist" as this one.
+    "summary": "Upholds sacred order, divine authority, and moral duty rooted in religious tradition.",
+    "scores": { "ontology": 0.4, "epistemology": 0.3, "praxeology": 0.5, "axiology": 0.75, "mythology": 0.9, "cosmology": 0.8, "teleology": 0.9 },
+    "facetDescriptions": { "ontology": "Reality is ordered by tradition and divine principles.", "epistemology": "Knowledge comes from sacred texts and lineage.", "praxeology": "Action is guided by established duties and rituals.", "axiology": "Values heritage, obedience, and communal harmony.", "mythology": "Upholds foundational myths and religious narratives.", "cosmology": "Universe is seen as divinely structured and meaningful.", "teleology": "Purpose is to live according to divine law and tradition." }
+  },
+  {
+    "title": "The Existential Individualist", // Changed from "The Existential Explorer"
+    "summary": "Asserts self-determined meaning, embraces uncertainty, and rejects cosmic absolutes.",
+    "scores": { "ontology": 0.40, "epistemology": 0.40, "praxeology": 0.45, "axiology": 0.35, "mythology": 0.40, "cosmology": 0.35, "teleology": 0.05 },
+    "facetDescriptions": { "ontology": "Balances between material and ideal, questioning fixed reality.", "epistemology": "Explores both empirical and revelatory ways of knowing.", "praxeology": "Resists rigid hierarchy; favors flexible, individual action.", "axiology": "Values personal meaning and creative expression.", "mythology": "Draws from diverse stories, often in cyclical or disrupted form.", "cosmology": "Views cosmos as open, uncertain, and in flux.", "teleology": "Sees purpose as existential, chosen, and ambiguous." }
+  },
+  {
+    "title": "The Stoic Rationalist", // Changed from "The Ethical Altruist"
     "summary": "Sees life as ordered by reason and fate, values virtue, and emphasizes inner discipline.",
     "scores": { "ontology": 0.4, "epistemology": 0.5, "praxeology": 0.8, "axiology": 0.75, "mythology": 0.6, "cosmology": 0.6, "teleology": 0.7 },
     "facetDescriptions": { "ontology": "Materialist or dualist; reason is part of nature.", "epistemology": "Reasoned reflection; self-examination.", "praxeology": "Virtuous action, self-control, resilience.", "axiology": "Values wisdom, virtue, equanimity.", "mythology": "Draws from Greco-Roman myths for exemplars.", "cosmology": "Universe as rational, ordered whole.", "teleology": "Purpose is to live in harmony with nature and reason." }
   },
   {
-    "title": "The Contemplative Realist",
+    "title": "The Visionary Idealist",
+    "summary": "Imagines higher possibilities, pursuing beauty, truth, and the Good as guiding ideals for self and society.",
+    "scores": { "ontology": 0.80, "epistemology": 0.75, "praxeology": 0.60, "axiology": 0.80, "mythology": 0.80, "cosmology": 0.75, "teleology": 0.85 },
+    "facetDescriptions": { "ontology": "Sees reality as rooted in ideals, archetypes, and higher patterns.", "epistemology": "Trusts intuition, vision, and philosophical reflection.", "praxeology": "Balances individual striving with service to the whole.", "axiology": "Prioritizes beauty, truth, and transcendent values.", "mythology": "Finds meaning in mythic cycles and symbolic stories.", "cosmology": "Cosmos is holistic, harmonious, and purposeful.", "teleology": "Purpose is to realize the Good and contribute to higher meaning." }
+  },
+  {
+    "title": "The Contemplative Realist", // Changed from "The Relational Steward"
     "summary": "Grounded in realism but open to mystery, this archetype values awareness, modesty, and interior clarity.",
     "scores": { "ontology": 0.5, "epistemology": 0.6, "praxeology": 0.5, "axiology": 0.7, "mythology": 0.5, "cosmology": 0.5, "teleology": 0.6 },
     "facetDescriptions": { "ontology": "Reality is what is, but also includes subjective depth.", "epistemology": "Balances empirical observation with introspective awareness.", "praxeology": "Acts mindfully and with consideration for nuance.", "axiology": "Values clarity, peace, and authentic understanding.", "mythology": "Interprets myths for psychological or spiritual insight.", "cosmology": "Universe is real, and our perception of it matters.", "teleology": "Purpose is found in awareness and living authentically." }
   }
 ];
-
 
 const mapRawArchetypeToCodexEntry = (raw: any): CodexEntry | null => {
   try {
@@ -113,7 +110,7 @@ const mapRawArchetypeToCodexEntry = (raw: any): CodexEntry | null => {
         return { facetName: facetKey, score: Math.max(0, Math.min(1, Number(scoreValue))) };
       });
     } else {
-      console.warn(`Scores missing or invalid for archetype: ${titleToUse}. Defaulting all to 0.5.`);
+      // console.warn(`Scores missing or invalid for archetype: ${titleToUse}. Defaulting all to 0.5.`);
       domainScoresArray = FACET_NAMES.map(name => ({ facetName: name, score: 0.5 }));
     }
 
@@ -134,7 +131,6 @@ const mapRawArchetypeToCodexEntry = (raw: any): CodexEntry | null => {
         processedFacetSummaries[facetKey] = summary;
       }
     } else {
-      // console.warn(`Facet summaries/descriptions missing for archetype: ${titleToUse}. Setting defaults.`);
       FACET_NAMES.forEach(name => {
           processedFacetSummaries[name] = `Details for ${name} not available for ${titleToUse}.`;
       });
@@ -157,19 +153,15 @@ const mapRawArchetypeToCodexEntry = (raw: any): CodexEntry | null => {
   }
 };
 
-
 const calculateSimilarity = (userScores: DomainScore[], archetypeScores: DomainScore[]): number => {
   if (!userScores || userScores.length !== FACET_NAMES.length || !archetypeScores || archetypeScores.length !== FACET_NAMES.length) {
     return 0;
   }
-
   const userMap = new Map(userScores.map(s => [s.facetName, s.score]));
   const archetypeMap = new Map(archetypeScores.map(s => [s.facetName, s.score]));
-
   let dotProduct = 0;
   let userMagnitude = 0;
   let archetypeMagnitude = 0;
-
   for (const facetName of FACET_NAMES) {
     const userScore = userMap.get(facetName) || 0;
     const archetypeScore = archetypeMap.get(facetName) || 0;
@@ -177,17 +169,44 @@ const calculateSimilarity = (userScores: DomainScore[], archetypeScores: DomainS
     userMagnitude += userScore * userScore;
     archetypeMagnitude += archetypeScore * archetypeScore;
   }
-
   userMagnitude = Math.sqrt(userMagnitude);
   archetypeMagnitude = Math.sqrt(archetypeMagnitude);
-
-  if (userMagnitude === 0 || archetypeMagnitude === 0) {
-    return 0;
-  }
+  if (userMagnitude === 0 || archetypeMagnitude === 0) return 0;
   const similarity = (dotProduct / (userMagnitude * archetypeMagnitude)) * 100;
   return Math.max(0, Math.min(100, similarity));
 };
 
+// Helper for qualitative score description based on 3 anchors
+const getQualitativeScoreDescription = (score: number | undefined, facetName: FacetName | undefined): string => {
+  if (score === undefined || !facetName || !FACETS[facetName]) return "Perspective noted.";
+  const facetConfig = FACETS[facetName];
+  const anchors = facetConfig.deepDive?.spectrumAnchors || [];
+
+  if (anchors.length === 3) {
+    if (score < 0.34) return `Primarily aligns with: ${anchors[0]}`;
+    if (score <= 0.66) return `Suggests a perspective of: ${anchors[1]}`;
+    return `Primarily aligns with: ${anchors[2]}`;
+  } else if (anchors.length === 2) {
+    return score < 0.5 ? `Aligns more with: ${anchors[0]}` : `Aligns more with: ${anchors[1]}`;
+  } else if (anchors.length === 1) {
+      return `Aligns with: ${anchors[0]}`;
+  }
+  // Fallback if anchors aren't 1, 2, or 3
+  if (score < 0.34) return "Leans towards the lower end of the spectrum.";
+  if (score <= 0.66) return "Suggests a balanced or mid-spectrum perspective.";
+  return "Leans towards the higher end of the spectrum.";
+};
+
+const getDetailedInterpretation = (score: number | undefined, facetName: FacetName | undefined): string => {
+    if (score === undefined || !facetName || !FACETS[facetName] || !FACETS[facetName].deepDive?.whatIfInterpretations) {
+    return "Detailed interpretation will appear here based on your score.";
+  }
+  const interpretations = FACETS[facetName].deepDive.whatIfInterpretations;
+  if (!interpretations) return "Interpretation data missing for this facet.";
+  if (score < 0.34) return interpretations.low;
+  if (score <= 0.66) return interpretations.mid;
+  return interpretations.high;
+};
 
 export default function DashboardPage() {
   const {
@@ -205,7 +224,7 @@ export default function DashboardPage() {
   const mappedArchetypes: CodexEntry[] = useMemo(() => {
     try {
       if (!Array.isArray(rawArchetypeData)) {
-        console.error("rawArchetypeData is not an array:", rawArchetypeData);
+        // console.error("rawArchetypeData is not an array:", rawArchetypeData);
         return [];
       }
       return rawArchetypeData
@@ -216,7 +235,6 @@ export default function DashboardPage() {
       return [];
     }
   }, []);
-
 
   const defaultNeutralScores: DomainScore[] = useMemo(() => FACET_NAMES.map(name => ({ facetName: name, score: 0.5 })), []);
 
@@ -262,57 +280,30 @@ export default function DashboardPage() {
   const currentSelectedFacetData = selectedFacetForInsight ? FACETS[selectedFacetForInsight] : null;
   const currentUserScoreForSelectedFacet = selectedFacetForInsight && userDomainScores?.find(ds => ds.facetName === selectedFacetForInsight)?.score;
 
- const getQualitativeScoreDescription = (score: number | undefined, facetName: FacetName | undefined): string => {
-    if (score === undefined || !facetName || !FACETS[facetName]) return "Perspective noted.";
-    const facetConfig = FACETS[facetName];
-    const anchors = facetConfig.deepDive?.spectrumAnchors || [];
-
-    if (anchors.length === 3) {
-      if (score < 0.34) return `Primarily aligns with: ${anchors[0]}`;
-      if (score <= 0.66) return `Suggests a perspective of: ${anchors[1]}`;
-      return `Primarily aligns with: ${anchors[2]}`;
-    } else if (anchors.length === 2) {
-      return score < 0.5 ? `Aligns more with: ${anchors[0]}` : `Aligns more with: ${anchors[1]}`;
-    } else if (anchors.length === 1) {
-        return `Aligns with: ${anchors[0]}`;
-    }
-    return "Perspective noted.";
-  };
-
-  const getDetailedInterpretation = (score: number | undefined, facetName: FacetName | undefined): string => {
-     if (score === undefined || !facetName || !FACETS[facetName] || !FACETS[facetName].deepDive?.whatIfInterpretations) {
-      return "Detailed interpretation will appear here based on your score.";
-    }
-    const interpretations = FACETS[facetName].deepDive.whatIfInterpretations;
-    if (!interpretations) return "Interpretation data missing for this facet.";
-    if (score < 0.34) return interpretations.low;
-    if (score <= 0.66) return interpretations.mid;
-    return interpretations.high;
-  };
-
   const renderDomainFeedbackBars = () => {
     const scoresToDisplay = hasAssessmentBeenRun && userDomainScores && userDomainScores.length > 0 ? userDomainScores : defaultNeutralScores;
 
-    return scoresToDisplay.map(ds => {
-      const facetConfig = FACETS[ds.facetName];
+    return FACET_NAMES.map(facetName => {
+      const scoreObj = scoresToDisplay.find(ds => ds.facetName === facetName);
+      const score = scoreObj ? scoreObj.score : 0.5; // Default to 0.5 if not found (e.g. for neutral state)
+      const facetConfig = FACETS[facetName];
       if (!facetConfig) {
-        console.warn(`Configuration for facet ${ds.facetName} not found in DomainFeedbackBar render.`);
         return (
-          <div key={ds.facetName} className="mb-4 p-3 rounded-md border border-destructive/50 bg-destructive/10">
-            <p className="text-destructive text-sm">Configuration error for facet: {ds.facetName}</p>
+          <div key={facetName} className="mb-4 p-3 rounded-md border border-destructive/50 bg-destructive/10">
+            <p className="text-destructive text-sm">Configuration error for facet: {facetName}</p>
           </div>
         );
       }
       
-      const labels = SPECTRUM_LABELS[ds.facetName];
-      const anchorLeftText = labels ? labels.left : "Spectrum Low";
-      const anchorRightText = labels ? labels.right : "Spectrum High";
+      const labels = SPECTRUM_LABELS[facetName];
+      const anchorLeftText = labels.left;
+      const anchorRightText = labels.right;
       
       return (
         <DomainFeedbackBar
-          key={ds.facetName}
-          facetName={ds.facetName}
-          score={ds.score}
+          key={facetName}
+          facetName={facetName}
+          score={score}
           anchorLeft={anchorLeftText}
           anchorRight={anchorRightText}
         />
@@ -346,7 +337,6 @@ export default function DashboardPage() {
       text: "When you finish, your answers form a seven-layered triangle—a symbolic signature that visualizes your worldview across the spectrum of each domain."
     }
   ];
-
 
   return (
     <TooltipProvider>
@@ -423,14 +413,20 @@ export default function DashboardPage() {
                 if (dominantScore === undefined || !dominantFacetName) {
                    return <p className="text-muted-foreground text-sm">Could not determine dominant facet score.</p>;
                 }
-
+                const facetConfig = FACETS[dominantFacetName];
                 const qualitativeDesc = getQualitativeScoreDescription(dominantScore, dominantFacetName);
 
                 return (
                   <p className="text-muted-foreground text-sm">
                     Your dominant facet appears to be <span className="font-semibold" style={{color: getFacetColorHsl(dominantFacetName)}}>{dominantFacetName}</span>.
                     {` Your alignment (${Math.round(dominantScore*100)}%) ${qualitativeDesc.toLowerCase()}.`}
-                    Consider exploring the implications of this emphasis.
+                     {facetConfig?.deepDive?.whatIfInterpretations ? (
+                      <>
+                        {" " + (dominantScore < 0.34 ? facetConfig.deepDive.whatIfInterpretations.low.split('.')[0] + '.' : 
+                              dominantScore <= 0.66 ? facetConfig.deepDive.whatIfInterpretations.mid.split('.')[0] + '.' : 
+                              facetConfig.deepDive.whatIfInterpretations.high.split('.')[0] + '.')}
+                      </>
+                    ) : " Consider exploring the implications of this emphasis."}
                   </p>
                 );
               })()
@@ -449,7 +445,7 @@ export default function DashboardPage() {
           {!hasAssessmentBeenRun ? (
             <div className="text-center py-8">
               <TriangleChart scores={defaultNeutralScores} width={200} height={173} interactive={false} />
-              <p className="text-muted-foreground">Take the Assessment to Discover Your Archetypal Matches.</p>
+              <p className="mt-4 text-muted-foreground">Take the Assessment to Discover Your Archetypal Matches.</p>
               <Button asChild className="mt-4">
                 <Link href="/assessment"><Icons.assessment className="mr-2 h-4 w-4" /> Begin Assessment</Link>
               </Button>
@@ -536,10 +532,7 @@ export default function DashboardPage() {
                     if (selectedArchetypeForDrawer.facetSummaries && selectedArchetypeForDrawer.facetSummaries[facetName]) {
                         facetSummary = selectedArchetypeForDrawer.facetSummaries[facetName]!;
                     }
-                    const barColorDark = chroma(DOMAIN_COLORS[facetName]).darken(1.5).hex();
-                    const barColorLight = chroma(DOMAIN_COLORS[facetName]).brighten(1.5).hex();
                     const spectrumPoleLabels = SPECTRUM_LABELS[facetName] || { left: 'Low', right: 'High' };
-
 
                     return (
                       <div key={facetName} className="p-4 rounded-md border border-border/30 bg-background/40 space-y-2">
@@ -552,38 +545,38 @@ export default function DashboardPage() {
                         <p className="text-sm text-muted-foreground">{facetSummary}</p>
                         <Tooltip>
                           <TooltipTrigger asChild>
-                            <div className="w-full h-6 rounded bg-muted/30 relative mt-2" aria-label={`${facetName} spectrum: ${spectrumPoleLabels.left} to ${spectrumPoleLabels.right}. Score: ${Math.round(score * 100)}%`}>
+                           <div 
+                              className="w-full h-10 p-1 rounded-xl bg-slate-800/40 dark:bg-slate-900/60 backdrop-blur-xl shadow-2xl border border-slate-700/50 dark:border-slate-600/50 relative mt-2 group overflow-hidden flex items-center"
+                              aria-label={`${facetName} spectrum: ${spectrumPoleLabels.left} to ${spectrumPoleLabels.right}. Score: ${Math.round(score * 100)}%`}
+                            >
                               <div
-                                className="h-full rounded"
-                                style={{ background: `linear-gradient(to right, ${barColorDark}, ${barColorLight})` }}
+                                className="h-full w-full rounded-lg"
+                                style={{
+                                  background: `linear-gradient(to right, ${DOMAIN_SCALES[facetName](0).hex()}, ${DOMAIN_SCALES[facetName](1).hex()})`,
+                                  WebkitMaskImage: 'linear-gradient(to bottom, transparent, black 20%, black 80%, transparent)',
+                                  maskImage: 'linear-gradient(to bottom, transparent, black 20%, black 80%, transparent)',
+                                }}
                               />
                               <div
-                                className="absolute top-1/2 transform -translate-y-1/2 -translate-x-1/2 flex flex-col items-center"
+                                className="absolute top-1/2 transform -translate-y-1/2 -translate-x-1/2 transition-transform duration-200 group-hover:scale-125"
                                 style={{
                                   left: `${score * 100}%`,
+                                  zIndex: 10,
                                   pointerEvents: 'none',
-                                  zIndex: 10
                                 }}
-                                aria-hidden="true"
                               >
-                                <div
-                                  className="px-1.5 py-0 text-[10px] bg-black/70 text-white rounded shadow-md whitespace-nowrap"
-                                >
+                                <div className="px-2 py-0.5 text-[10px] font-semibold bg-slate-900/80 dark:bg-black/70 backdrop-blur-md text-white rounded-full shadow-xl border border-white/20 dark:border-slate-400/30 whitespace-nowrap">
                                   {Math.round(score * 100)}%
                                 </div>
-                                <svg
-                                  width="8"
-                                  height="5"
-                                  viewBox="0 0 8 5"
-                                  className="fill-black/70 mx-auto"
-                                >
-                                  <path d="M4 5L0 0H8L4 5Z" />
+                                <svg width="14" height="10" viewBox="0 0 14 10" className="fill-slate-900/80 dark:fill-black/70 drop-shadow-md mx-auto mt-px" style={{ transform: 'translateY(-2px)'}}>
+                                  <path d="M7 0L0 10H14L7 0Z" />
                                 </svg>
                               </div>
                             </div>
                           </TooltipTrigger>
                           <TooltipContent side="bottom" className="bg-popover text-popover-foreground p-2 rounded-md shadow-lg text-xs">
-                            <p>{spectrumPoleLabels.left} <span className="text-muted-foreground mx-1">←</span> Score: {Math.round(score * 100)}% <span className="text-muted-foreground mx-1">→</span> {spectrumPoleLabels.right}</p>
+                            <p>{spectrumPoleLabels.left} <span className="font-bold mx-1">← {Math.round(score * 100)}% →</span> {spectrumPoleLabels.right}</p>
+                             <p className="text-xs text-muted-foreground/80">Color: {getFacetScoreColor(facetName, score)}</p>
                           </TooltipContent>
                         </Tooltip>
                       </div>
@@ -680,7 +673,7 @@ export default function DashboardPage() {
           {aboutContent.map((item, index) => (
             <div 
               key={index} 
-              className="flex flex-col p-6 rounded-2xl shadow-lg transition-all duration-300 ease-in-out bg-card/30 hover:bg-card/50 border"
+              className="flex flex-col p-6 rounded-2xl shadow-lg transition-all duration-300 ease-in-out bg-card/50 hover:bg-card/70 border"
               style={{ borderColor: getFacetColorHsl(item.accentFacet) }}
             >
               <div className="flex items-center gap-3 mb-3">
@@ -702,7 +695,6 @@ export default function DashboardPage() {
   );
 }
 
-
 function DomainFeedbackBar({ facetName, score, anchorLeft, anchorRight }: { facetName: FacetName, score: number, anchorLeft: string, anchorRight: string }) {
   const facetConfig = FACETS[facetName];
   if (!facetConfig) {
@@ -712,10 +704,7 @@ function DomainFeedbackBar({ facetName, score, anchorLeft, anchorRight }: { face
       </div>
     );
   }
-  const barColorDark = chroma(DOMAIN_COLORS[facetName]).darken(1.5).hex();
-  const barColorLight = chroma(DOMAIN_COLORS[facetName]).brighten(1.5).hex();
   const spectrumPoleLabels = SPECTRUM_LABELS[facetName] || { left: 'Low', right: 'High' };
-
 
   return (
     <div className="mb-6 p-3 rounded-md border border-border/30 bg-background/40">
@@ -725,38 +714,38 @@ function DomainFeedbackBar({ facetName, score, anchorLeft, anchorRight }: { face
 
       <Tooltip>
         <TooltipTrigger asChild>
-          <div className="w-full h-6 rounded bg-muted/30 relative mt-1" aria-label={`${facetName} spectrum: ${spectrumPoleLabels.left} to ${spectrumPoleLabels.right}. Score: ${Math.round(score * 100)}%`}>
+          <div 
+            className="w-full h-10 p-1 rounded-xl bg-slate-800/40 dark:bg-slate-900/60 backdrop-blur-xl shadow-2xl border border-slate-700/50 dark:border-slate-600/50 relative mt-2 group overflow-hidden flex items-center"
+            aria-label={`${facetName} spectrum: ${spectrumPoleLabels.left} to ${spectrumPoleLabels.right}. Score: ${Math.round(score * 100)}%`}
+          >
             <div
-              className="h-full rounded"
-              style={{ background: `linear-gradient(to right, ${barColorDark}, ${barColorLight})` }}
+              className="h-full w-full rounded-lg"
+              style={{
+                background: `linear-gradient(to right, ${DOMAIN_SCALES[facetName](0).hex()}, ${DOMAIN_SCALES[facetName](1).hex()})`,
+                WebkitMaskImage: 'linear-gradient(to bottom, transparent, black 20%, black 80%, transparent)',
+                maskImage: 'linear-gradient(to bottom, transparent, black 20%, black 80%, transparent)',
+              }}
             />
             <div
-              className="absolute top-1/2 transform -translate-y-1/2 -translate-x-1/2 flex flex-col items-center"
+              className="absolute top-1/2 transform -translate-y-1/2 -translate-x-1/2 transition-transform duration-200 group-hover:scale-125"
               style={{
                 left: `${score * 100}%`,
-                pointerEvents: 'none',
-                zIndex: 10
+                zIndex: 10,
+                pointerEvents: 'none', 
               }}
-              aria-hidden="true"
             >
-              <div
-                className="px-1.5 py-0 text-[10px] bg-black/70 text-white rounded shadow-md whitespace-nowrap"
-              >
+              <div className="px-2 py-0.5 text-[10px] font-semibold bg-slate-900/80 dark:bg-black/70 backdrop-blur-md text-white rounded-full shadow-xl border border-white/20 dark:border-slate-400/30 whitespace-nowrap">
                 {Math.round(score * 100)}%
               </div>
-              <svg
-                width="8"
-                height="5"
-                viewBox="0 0 8 5"
-                className="fill-black/70 mx-auto"
-              >
-                <path d="M4 5L0 0H8L4 5Z" />
+              <svg width="14" height="10" viewBox="0 0 14 10" className="fill-slate-900/80 dark:fill-black/70 drop-shadow-md mx-auto mt-px" style={{ transform: 'translateY(-2px)'}}>
+                <path d="M7 0L0 10H14L7 0Z" />
               </svg>
             </div>
           </div>
         </TooltipTrigger>
         <TooltipContent side="bottom" className="bg-popover text-popover-foreground p-2 rounded-md shadow-lg text-xs">
-          <p>{spectrumPoleLabels.left} <span className="text-muted-foreground mx-1">←</span> Score: {Math.round(score * 100)}% <span className="text-muted-foreground mx-1">→</span> {spectrumPoleLabels.right}</p>
+          <p>{spectrumPoleLabels.left} <span className="font-bold mx-1">← {Math.round(score * 100)}% →</span> {spectrumPoleLabels.right}</p>
+          <p className="text-xs text-muted-foreground/80">Color: {getFacetScoreColor(facetName, score)}</p>
         </TooltipContent>
       </Tooltip>
 
@@ -768,3 +757,4 @@ function DomainFeedbackBar({ facetName, score, anchorLeft, anchorRight }: { face
   );
 }
 
+    
