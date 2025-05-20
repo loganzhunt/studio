@@ -9,13 +9,16 @@ import { FACETS, FACET_NAMES } from '@/config/facets';
 import { FacetIcon } from '@/components/facet-icon';
 import { TriangleChart } from '@/components/visualization/TriangleChart';
 import { GlassCard } from '@/components/glass-card';
-import { Badge } from '@/components/ui/badge'; // Added Badge import
-import type { DomainScore } from '@/types'; // Added DomainScore type import
+import type { DomainScore } from '@/types';
+import { Carousel, CarouselContent, CarouselItem, CarouselPrevious, CarouselNext } from "@/components/ui/carousel";
+import { getDominantFacet, getFacetColorHsl } from '@/lib/colors';
+
 
 // Data for Featured Worldviews
 const featuredWorldviewsData: Array<{
   id: string;
   title: string;
+  icon?: string; // Added icon
   summary: string;
   category: string;
   domainScores: DomainScore[];
@@ -23,62 +26,98 @@ const featuredWorldviewsData: Array<{
   {
     id: "stoicism",
     title: "Stoicism",
+    icon: "\u221D", // Proportional to
     summary: "A philosophy of rational resilience and self-mastery, emphasizing virtue and acceptance of nature.",
     category: "Philosophical",
     domainScores: [
-      { facetName: "Ontology", score: 0.65 },
-      { facetName: "Epistemology", score: 0.7 },
-      { facetName: "Praxeology", score: 0.9 },
-      { facetName: "Axiology", score: 0.85 },
-      { facetName: "Mythology", score: 0.4 },
-      { facetName: "Cosmology", score: 0.7 },
-      { facetName: "Teleology", score: 0.7 },
+      { facetName: "Ontology", score: 0.30 },
+      { facetName: "Epistemology", score: 0.20 },
+      { facetName: "Praxeology", score: 0.65 },
+      { facetName: "Axiology", score: 0.75 },
+      { facetName: "Mythology", score: 0.30 },
+      { facetName: "Cosmology", score: 0.40 },
+      { facetName: "Teleology", score: 0.30 },
     ],
   },
   {
     id: "buddhism",
     title: "Buddhism",
+    icon: "\u2638", // Wheel of Dharma
     summary: "A spiritual philosophy emphasizing awakening, impermanence, and the end of suffering.",
     category: "Spiritual",
     domainScores: [
-      { facetName: "Ontology", score: 0.4 },
-      { facetName: "Epistemology", score: 0.8 },
-      { facetName: "Praxeology", score: 0.9 },
-      { facetName: "Axiology", score: 0.75 },
-      { facetName: "Mythology", score: 0.7 },
-      { facetName: "Cosmology", score: 0.7 },
-      { facetName: "Teleology", score: 0.85 },
+      { facetName: "Ontology", score: 0.55 },
+      { facetName: "Epistemology", score: 0.55 },
+      { facetName: "Praxeology", score: 0.60 },
+      { facetName: "Axiology", score: 0.70 },
+      { facetName: "Mythology", score: 0.70 },
+      { facetName: "Cosmology", score: 0.60 },
+      { facetName: "Teleology", score: 0.70 },
     ],
   },
   {
     id: "existentialism",
     title: "Existentialism",
+    icon: "\u2203", // Existential quantifier
     summary: "Focuses on authentic existence, choice, and the creation of meaning in an indifferent universe.",
     category: "Philosophical",
     domainScores: [
-      { facetName: "Ontology", score: 0.5 },
-      { facetName: "Epistemology", score: 0.6 },
-      { facetName: "Praxeology", score: 0.8 },
-      { facetName: "Axiology", score: 0.65 },
+      { facetName: "Ontology", score: 0.30 },
+      { facetName: "Epistemology", score: 0.30 },
+      { facetName: "Praxeology", score: 0.55 },
+      { facetName: "Axiology", score: 0.35 },
       { facetName: "Mythology", score: 0.25 },
-      { facetName: "Cosmology", score: 0.4 },
-      { facetName: "Teleology", score: 0.6 },
+      { facetName: "Cosmology", score: 0.25 },
+      { facetName: "Teleology", score: 0.05 },
     ],
   },
   {
     id: "animism",
     title: "Animism",
+    icon: "\u273F", // Flower/Nature symbol
     summary: "Sees spirit or consciousness present in all beings, places, and phenomena, emphasizing reciprocity.",
     category: "Indigenous",
     domainScores: [
-      { facetName: "Ontology", score: 0.8 },
-      { facetName: "Epistemology", score: 0.6 },
-      { facetName: "Praxeology", score: 0.7 },
-      { facetName: "Axiology", score: 0.7 },
-      { facetName: "Mythology", score: 0.9 },
-      { facetName: "Cosmology", score: 0.75 },
-      { facetName: "Teleology", score: 0.6 },
+      { facetName: "Ontology", score: 0.80 },
+      { facetName: "Epistemology", score: 0.70 },
+      { facetName: "Praxeology", score: 0.40 },
+      { facetName: "Axiology", score: 0.70 },
+      { facetName: "Mythology", score: 0.80 },
+      { facetName: "Cosmology", score: 0.90 },
+      { facetName: "Teleology", score: 0.80 },
     ],
+  },
+  {
+    id: "scientific_materialism",
+    title: "Scientific Materialism",
+    icon: "\u23DA", // Earth ground symbol
+    summary: "Grounded in physicalism and empirical science. Reality is ultimately material and measurable.",
+    category: "Scientific",
+    domainScores: [
+        { facetName: "Ontology", score: 0.05 },
+        { facetName: "Epistemology", score: 0.05 },
+        { facetName: "Praxeology", score: 0.35 },
+        { facetName: "Axiology", score: 0.20 },
+        { facetName: "Mythology", score: 0.05 },
+        { facetName: "Cosmology", score: 0.10 },
+        { facetName: "Teleology", score: 0.05 },
+    ]
+  },
+  {
+    id: "platonism",
+    title: "Platonism",
+    icon: "\u03A6", // Phi
+    summary: "A philosophical tradition centered on transcendent forms and the pursuit of the Good.",
+    category: "Philosophical",
+    domainScores: [
+      { facetName: "Ontology", score: 0.90 },
+      { facetName: "Epistemology", score: 0.80 },
+      { facetName: "Praxeology", score: 0.45 },
+      { facetName: "Axiology", score: 0.65 },
+      { facetName: "Mythology", score: 0.70 },
+      { facetName: "Cosmology", score: 0.80 },
+      { facetName: "Teleology", score: 0.75 },
+    ]
   }
 ];
 
@@ -110,9 +149,9 @@ export default function HomePage() {
           <div
             className="absolute inset-0 opacity-10"
             style={{
-              backgroundImage: "url('https://via.placeholder.com/10x10.png/000000/FFFFFF?text=+')", 
+              backgroundImage: "url('https://via.placeholder.com/10x10.png/000000/FFFFFF?text=+')",
               backgroundRepeat: 'repeat',
-              backgroundSize: '40px 40px', 
+              backgroundSize: '40px 40px',
               maskImage: 'radial-gradient(circle at center, white 20%, transparent 70%)'
             }}
           />
@@ -129,7 +168,7 @@ export default function HomePage() {
             <Button
               size="lg"
               variant="outline"
-              className="border-primary/50 text-primary hover:bg-primary/10 hover:text-primary px-6 py-2.5 text-base font-medium shadow-md hover:shadow-primary/30 transition-all duration-300 group"
+              className="border-primary/50 text-primary hover:bg-primary/10 hover:text-primary px-6 py-4 text-base font-medium shadow-md hover:shadow-primary/30 transition-all duration-300 group"
               asChild
             >
               <Link href="/assessment">
@@ -174,24 +213,51 @@ export default function HomePage() {
             <p className="text-center text-muted-foreground mb-12 max-w-2xl mx-auto">
               Browse some of the diverse philosophical and spiritual perspectives mapped in our Codex.
             </p>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-              {featuredWorldviewsData.map(entry => (
-                <Card key={entry.id} className="flex flex-col overflow-hidden hover:shadow-lg transition-shadow duration-300 glassmorphic-card">
-                  <CardHeader className="pb-2">
-                    <CardTitle className="text-xl line-clamp-1">{entry.title}</CardTitle>
-                    <CardDescription className="text-xs h-10 line-clamp-2">{entry.summary}</CardDescription>
-                  </CardHeader>
-                  <CardContent className="flex-grow flex flex-col justify-center items-center pt-2 pb-4">
-                    <TriangleChart scores={entry.domainScores} width={180} height={156} className="!p-0 !bg-transparent !shadow-none !backdrop-blur-none mb-3" />
-                    <Badge variant="secondary" className="text-xs">{entry.category}</Badge>
-                  </CardContent>
-                  <CardFooter className="p-4 border-t border-border/30 mt-auto">
-                    <Button variant="outline" size="sm" className="w-full" asChild>
-                      <Link href={`/codex/${entry.id}`}>Explore <Icons.chevronRight className="ml-1 h-4 w-4" /></Link>
-                    </Button>
-                  </CardFooter>
-                </Card>
-              ))}
+            <div className="flex justify-center">
+              <Carousel 
+                opts={{ 
+                  align: "start",
+                  loop: featuredWorldviewsData.length > 3, // Loop if more than 3 items
+                }} 
+                className="w-full max-w-xs sm:max-w-2xl md:max-w-4xl lg:max-w-6xl"
+              >
+                <CarouselContent className="-ml-1 sm:-ml-2 md:-ml-4">
+                  {featuredWorldviewsData.map((entry, index) => {
+                    const dominantFacet = getDominantFacet(entry.domainScores);
+                    const titleColor = getFacetColorHsl(dominantFacet);
+                    return (
+                      <CarouselItem key={entry.id} className="pl-1 sm:pl-2 md:pl-4 sm:basis-1/2 lg:basis-1/3 xl:basis-1/4">
+                        <div className="p-1 h-full">
+                          <Card className="flex flex-col h-full overflow-hidden hover:shadow-lg transition-shadow duration-300 glassmorphic-card">
+                            <CardHeader className="p-6 text-center">
+                               <div className="flex items-center justify-center gap-2 mb-1">
+                                {entry.icon && <span className="text-3xl" style={{ color: titleColor }}>{entry.icon}</span>}
+                                <CardTitle className="text-xl line-clamp-1" style={{ color: titleColor }}>
+                                  {entry.title}
+                                </CardTitle>
+                              </div>
+                              <CardDescription className="line-clamp-2 text-xs pt-1 text-left h-10">
+                                {entry.summary}
+                              </CardDescription>
+                            </CardHeader>
+                            <CardContent className="flex-grow flex flex-col justify-center items-center pt-0 pb-4">
+                              <TriangleChart scores={entry.domainScores} width={180} height={156} className="!p-0 !bg-transparent !shadow-none !backdrop-blur-none mb-3" />
+                              {/* Tags removed as per previous request */}
+                            </CardContent>
+                            <CardFooter className="p-3 border-t border-border/30 mt-auto">
+                              <Button variant="outline" size="sm" className="w-full text-xs" asChild>
+                                <Link href={`/codex/${entry.id}`}>Explore <Icons.chevronRight className="ml-1 h-4 w-4" /></Link>
+                              </Button>
+                            </CardFooter>
+                          </Card>
+                        </div>
+                      </CarouselItem>
+                    );
+                  })}
+                </CarouselContent>
+                <CarouselPrevious className="hidden sm:flex absolute left-[-50px] top-1/2 -translate-y-1/2" />
+                <CarouselNext className="hidden sm:flex absolute right-[-50px] top-1/2 -translate-y-1/2" />
+              </Carousel>
             </div>
             <div className="text-center mt-12">
               <Button size="lg" variant="outline" asChild>
