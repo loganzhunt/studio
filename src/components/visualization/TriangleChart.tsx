@@ -4,7 +4,7 @@
 import type { DomainScore, FacetName } from '@/types';
 import { FACET_NAMES, FACETS } from '@/config/facets';
 import { cn } from '@/lib/utils';
-import { getFacetScoreColor } from '@/lib/colors'; // Updated import
+import { getFacetScoreColor } from '@/lib/colors'; 
 import React, { useState, useEffect } from 'react';
 
 interface TriangleChartProps {
@@ -17,7 +17,7 @@ interface TriangleChartProps {
 }
 
 const DEFAULT_WIDTH = 300;
-const DEFAULT_HEIGHT = 260;
+const DEFAULT_HEIGHT = 260; // approx for equilateral triangle
 const NUM_BANDS = FACET_NAMES.length;
 
 export function TriangleChart({
@@ -39,7 +39,7 @@ export function TriangleChart({
 
   const scoreMap = new Map<FacetName, number>();
   if (scores) {
-    scores.forEach(score => scoreMap.set(score.facetName, Math.max(0, Math.min(1, score.score)))); // Clamp scores
+    scores.forEach(score => scoreMap.set(score.facetName, Math.max(0, Math.min(1, score.score ?? 0.5))));
   } else {
     FACET_NAMES.forEach(name => scoreMap.set(name, 0.5)); // Default neutral scores
   }
@@ -51,22 +51,22 @@ export function TriangleChart({
     const y1 = index * bandSegmentHeight;
     const y2 = (index + 1) * bandSegmentHeight;
 
-    // X-coordinate of the left edge of the triangle at a given y
-    const xLeftAtY = (y: number) => (width / 2) * (y / height);
-    // X-coordinate of the right edge of the triangle at a given y
-    const xRightAtY = (y: number) => width - (width / 2) * (y / height);
+    // Half-width of the triangle at a given y (distance from apex)
+    const halfWidthAtY1 = (y1 / height) * (width / 2);
+    const halfWidthAtY2 = (y2 / height) * (width / 2);
 
-    const p1x = xLeftAtY(y1);
-    const p2x = xRightAtY(y1);
-    const p3x = xRightAtY(y2);
-    const p4x = xLeftAtY(y2);
+    // X-coordinates for the band points
+    const p1x = (width / 2) - halfWidthAtY1; // Top-left X
+    const p2x = (width / 2) + halfWidthAtY1; // Top-right X
+    const p3x = (width / 2) + halfWidthAtY2; // Bottom-right X
+    const p4x = (width / 2) - halfWidthAtY2; // Bottom-left X
 
     return `M ${p1x},${y1} L ${p2x},${y1} L ${p3x},${y2} L ${p4x},${y2} Z`;
   };
 
 
   return (
-    <div className={cn("p-0", className)}> {/* Removed default p-4 for more control by parent */}
+    <div className={cn("p-0", className)}>
       <svg
         viewBox={`0 0 ${width} ${height}`}
         width={width}
@@ -79,19 +79,18 @@ export function TriangleChart({
       >
         <g>
           {FACET_NAMES.map((facetName, index) => {
-            const score = scoreMap.get(facetName) ?? 0.5; // Default score if not found
-            const bandColor = getFacetScoreColor(facetName, score); // Use new color function
+            const score = scoreMap.get(facetName) ?? 0.5; 
+            const bandColor = getFacetScoreColor(facetName, score);
 
             return (
               <path
                 key={facetName}
                 d={getBandPath(index)}
-                fill={bandColor} // Use dynamically calculated color
-                stroke="hsl(var(--card-foreground) / 0.1)" // Subtle border
+                fill={bandColor}
+                stroke="hsl(var(--card-foreground) / 0.1)"
                 strokeWidth="0.5"
-                // Opacity is now fixed at 1, color intensity handles the score representation
                 className={cn(
-                  "transition-all duration-300 ease-in-out", // transition for potential future color changes
+                  "transition-all duration-300 ease-in-out",
                   interactive && "cursor-pointer group outline-none",
                   interactive && "hover:stroke-[hsl(var(--card-foreground)_/_0.7)] hover:stroke-[1.5px] focus-visible:stroke-[hsl(var(--card-foreground)_/_0.7)] focus-visible:stroke-[1.5px]"
                 )}
