@@ -51,16 +51,14 @@ export function Header() {
   return (
     <>
       <header className="sticky top-0 z-50 w-full border-b border-border/30 bg-background/80 backdrop-blur-md">
-        <div className="flex h-16 items-center justify-between px-12 py-3"> {/* Changed px-6 to px-12 */}
+        <div className="flex h-16 items-center justify-between px-16 py-3"> {/* Increased px from 12 to 16 */}
           <Link href="/" className="flex items-center space-x-2 flex-shrink-0" onClick={() => setIsMobileMenuOpen(false)}>
             <Logo />
           </Link>
 
-          <nav className="hidden md:flex flex-1 justify-start items-center gap-4 ml-6">
+          <nav className="hidden md:flex flex-1 justify-start items-center gap-2 ml-6"> {/* Decreased gap from 4 to 2 */}
             {mainNavItems.map((item) => {
-              if (item.hideOnDesktop && (item.title === "Results" || item.title === "Saved")) return null;
-              if (item.hideOnDesktop && item.title !== "Results" && item.title !== "Saved") return null;
-
+              if (item.hideOnDesktop) return null;
 
               const IconComponent = item.icon ? Icons[item.icon] : null;
               const isActive = pathname === item.href || (item.href !== "/" && pathname.startsWith(item.href));
