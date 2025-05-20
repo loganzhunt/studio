@@ -1,6 +1,5 @@
 
 import Link from 'next/link';
-import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
@@ -8,10 +7,10 @@ import { Icons } from '@/components/icons';
 import { FACETS, FACET_NAMES } from '@/config/facets';
 import { FacetIcon } from '@/components/facet-icon';
 import { TriangleChart } from '@/components/visualization/TriangleChart';
-import { GlassCard } from '@/components/glass-card';
 import type { DomainScore } from '@/types';
 import { Carousel, CarouselContent, CarouselItem, CarouselPrevious, CarouselNext } from "@/components/ui/carousel";
 import { getDominantFacet, getFacetColorHsl } from '@/lib/colors';
+import { FractalTriangleLogo } from "@/components/FractalTriangleLogo"; // Updated import
 
 
 // Data for Featured Worldviews
@@ -26,96 +25,78 @@ const featuredWorldviewsData: Array<{
   {
     id: "stoicism",
     title: "Stoicism",
-    icon: "\u221D", // Proportional to
+    icon: "\u221D", 
     summary: "A philosophy of rational resilience and self-mastery, emphasizing virtue and acceptance of nature.",
     category: "Philosophical",
     domainScores: [
-      { facetName: "Ontology", score: 0.30 },
-      { facetName: "Epistemology", score: 0.20 },
-      { facetName: "Praxeology", score: 0.65 },
-      { facetName: "Axiology", score: 0.75 },
-      { facetName: "Mythology", score: 0.30 },
-      { facetName: "Cosmology", score: 0.40 },
+      { facetName: "Ontology", score: 0.30 }, { facetName: "Epistemology", score: 0.20 },
+      { facetName: "Praxeology", score: 0.65 }, { facetName: "Axiology", score: 0.75 },
+      { facetName: "Mythology", score: 0.30 }, { facetName: "Cosmology", score: 0.40 },
       { facetName: "Teleology", score: 0.30 },
     ],
   },
   {
     id: "buddhism",
     title: "Buddhism",
-    icon: "\u2638", // Wheel of Dharma
+    icon: "\u2638", 
     summary: "A spiritual philosophy emphasizing awakening, impermanence, and the end of suffering.",
     category: "Spiritual",
     domainScores: [
-      { facetName: "Ontology", score: 0.55 },
-      { facetName: "Epistemology", score: 0.55 },
-      { facetName: "Praxeology", score: 0.60 },
-      { facetName: "Axiology", score: 0.70 },
-      { facetName: "Mythology", score: 0.70 },
-      { facetName: "Cosmology", score: 0.60 },
+      { facetName: "Ontology", score: 0.55 }, { facetName: "Epistemology", score: 0.55 },
+      { facetName: "Praxeology", score: 0.60 }, { facetName: "Axiology", score: 0.70 },
+      { facetName: "Mythology", score: 0.70 }, { facetName: "Cosmology", score: 0.60 },
       { facetName: "Teleology", score: 0.70 },
     ],
   },
   {
     id: "existentialism",
     title: "Existentialism",
-    icon: "\u2203", // Existential quantifier
+    icon: "\u2203", 
     summary: "Focuses on authentic existence, choice, and the creation of meaning in an indifferent universe.",
     category: "Philosophical",
     domainScores: [
-      { facetName: "Ontology", score: 0.30 },
-      { facetName: "Epistemology", score: 0.30 },
-      { facetName: "Praxeology", score: 0.55 },
-      { facetName: "Axiology", score: 0.35 },
-      { facetName: "Mythology", score: 0.25 },
-      { facetName: "Cosmology", score: 0.25 },
+      { facetName: "Ontology", score: 0.30 }, { facetName: "Epistemology", score: 0.30 },
+      { facetName: "Praxeology", score: 0.55 }, { facetName: "Axiology", score: 0.35 },
+      { facetName: "Mythology", score: 0.25 }, { facetName: "Cosmology", score: 0.25 },
       { facetName: "Teleology", score: 0.05 },
     ],
   },
   {
     id: "animism",
     title: "Animism",
-    icon: "\u273F", // Flower/Nature symbol
+    icon: "\u273F", 
     summary: "Sees spirit or consciousness present in all beings, places, and phenomena, emphasizing reciprocity.",
     category: "Indigenous",
     domainScores: [
-      { facetName: "Ontology", score: 0.80 },
-      { facetName: "Epistemology", score: 0.70 },
-      { facetName: "Praxeology", score: 0.40 },
-      { facetName: "Axiology", score: 0.70 },
-      { facetName: "Mythology", score: 0.80 },
-      { facetName: "Cosmology", score: 0.90 },
+      { facetName: "Ontology", score: 0.80 }, { facetName: "Epistemology", score: 0.70 },
+      { facetName: "Praxeology", score: 0.40 }, { facetName: "Axiology", score: 0.70 },
+      { facetName: "Mythology", score: 0.80 }, { facetName: "Cosmology", score: 0.90 },
       { facetName: "Teleology", score: 0.80 },
     ],
   },
   {
     id: "scientific_materialism",
     title: "Scientific Materialism",
-    icon: "\u23DA", // Earth ground symbol
+    icon: "\u23DA", 
     summary: "Grounded in physicalism and empirical science. Reality is ultimately material and measurable.",
     category: "Scientific",
     domainScores: [
-        { facetName: "Ontology", score: 0.05 },
-        { facetName: "Epistemology", score: 0.05 },
-        { facetName: "Praxeology", score: 0.35 },
-        { facetName: "Axiology", score: 0.20 },
-        { facetName: "Mythology", score: 0.05 },
-        { facetName: "Cosmology", score: 0.10 },
+        { facetName: "Ontology", score: 0.05 }, { facetName: "Epistemology", score: 0.05 },
+        { facetName: "Praxeology", score: 0.35 }, { facetName: "Axiology", score: 0.20 },
+        { facetName: "Mythology", score: 0.05 }, { facetName: "Cosmology", score: 0.10 },
         { facetName: "Teleology", score: 0.05 },
     ]
   },
   {
     id: "platonism",
     title: "Platonism",
-    icon: "\u03A6", // Phi
+    icon: "\u03A6", 
     summary: "A philosophical tradition centered on transcendent forms and the pursuit of the Good.",
     category: "Philosophical",
     domainScores: [
-      { facetName: "Ontology", score: 0.90 },
-      { facetName: "Epistemology", score: 0.80 },
-      { facetName: "Praxeology", score: 0.45 },
-      { facetName: "Axiology", score: 0.65 },
-      { facetName: "Mythology", score: 0.70 },
-      { facetName: "Cosmology", score: 0.80 },
+      { facetName: "Ontology", score: 0.90 }, { facetName: "Epistemology", score: 0.80 },
+      { facetName: "Praxeology", score: 0.45 }, { facetName: "Axiology", score: 0.65 },
+      { facetName: "Mythology", score: 0.70 }, { facetName: "Cosmology", score: 0.80 },
       { facetName: "Teleology", score: 0.75 },
     ]
   }
@@ -144,39 +125,50 @@ export default function HomePage() {
   return (
     <div className="flex flex-col">
       <main className="flex-1">
-        {/* Hero Section */}
-        <section className="relative py-20 md:py-32 text-center bg-gradient-to-br from-background via-card to-background">
+        {/* Hero Section Updated */}
+        <section className="relative py-20 md:py-28 text-center overflow-hidden bg-gradient-to-br from-background via-card to-background">
           <div
-            className="absolute inset-0 opacity-10"
+            className="absolute inset-0 opacity-5"
             style={{
-              backgroundImage: "url('https://via.placeholder.com/10x10.png/000000/FFFFFF?text=+')",
+              backgroundImage: "url('https://www.transparenttextures.com/patterns/cubes.png')",
               backgroundRepeat: 'repeat',
-              backgroundSize: '40px 40px',
-              maskImage: 'radial-gradient(circle at center, white 20%, transparent 70%)'
+              backgroundSize: 'auto',
             }}
-            
+            data-ai-hint="subtle geometric texture"
           />
           <div className="container mx-auto relative z-10">
-            <div className="mx-auto mb-8 h-24 w-24">
-              <Icons.logo className="h-full w-full text-primary" />
+            <div className="bg-card/30 backdrop-blur-xl rounded-3xl shadow-2xl p-6 sm:p-10 md:p-16 max-w-4xl mx-auto animate-in fade-in duration-700 ease-out">
+              <div className="mx-auto mb-6 md:mb-8 flex justify-center">
+                 {/* Responsive Logo Size */}
+                <div className="w-28 md:w-36">
+                  <FractalTriangleLogo />
+                </div>
+              </div>
+
+              <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-extrabold tracking-tighter text-foreground">
+                The Meta-Prism
+              </h1>
+
+              <p className="mt-3 md:mt-4 mb-6 md:mb-8 text-lg sm:text-xl md:text-2xl font-medium tracking-wider bg-clip-text text-transparent bg-gradient-to-r from-primary via-purple-500 to-pink-500 px-2">
+                Illuminate the Patterns Shaping Your Reality
+              </p>
+
+              <p className="max-w-2xl mx-auto text-md sm:text-lg md:text-xl text-muted-foreground/90 leading-relaxed mb-8 md:mb-10">
+                Unlock a symbolic mirror of your worldview. Take our interactive self-assessment to reveal the hidden prisms through which you see existence—and discover how to consciously redesign your beliefs, values, and sense of purpose.
+              </p>
+
+              <Button
+                size="lg"
+                variant="default"
+                className="h-12 px-8 text-sm sm:text-base font-semibold shadow-lg hover:shadow-primary/40 transition-all duration-300 group bg-gradient-to-r from-primary to-purple-600 hover:from-primary/90 hover:to-purple-600/90 text-primary-foreground"
+                asChild
+              >
+                <Link href="/assessment">
+                  <Icons.sparkles className="mr-2 h-5 w-5 transition-transform group-hover:scale-110" />
+                  Begin Your Journey
+                </Link>
+              </Button>
             </div>
-            <h1 className="text-4xl md:text-6xl font-extrabold mb-6 bg-clip-text text-transparent bg-gradient-to-r from-primary via-purple-400 to-pink-500">
-              Discover Your Meta-Prism
-            </h1>
-            <p className="text-xl md:text-2xl text-muted-foreground mb-10 max-w-3xl mx-auto">
-              A symbolic self-assessment tool for exploring how you construct reality.
-            </p>
-            <Button
-              size="lg"
-              variant="outline"
-              className="border-primary/50 text-primary hover:bg-primary/10 hover:text-primary px-6 py-4 text-base font-medium shadow-md hover:shadow-primary/30 transition-all duration-300 group"
-              asChild
-            >
-              <Link href="/assessment">
-                <Icons.sparkles className="mr-2 h-5 w-5 text-primary/80 group-hover:text-primary transition-colors" />
-                Begin Your Journey
-              </Link>
-            </Button>
           </div>
         </section>
 
@@ -192,13 +184,13 @@ export default function HomePage() {
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
               {howItWorksSteps.map((step, index) => (
-                <GlassCard key={index} className="text-center p-8 hover:shadow-primary/20 transition-shadow duration-300">
+                <Card key={index} className="text-center p-8 hover:shadow-primary/20 transition-shadow duration-300 glassmorphic-card">
                   <div className="mb-6">
                     <step.icon className="h-16 w-16 mx-auto text-primary" />
                   </div>
                   <h3 className="text-2xl font-semibold mb-3 text-foreground">{step.title}</h3>
                   <p className="text-muted-foreground">{step.description}</p>
-                </GlassCard>
+                </Card>
               ))}
             </div>
           </div>
@@ -311,8 +303,8 @@ export default function HomePage() {
       <footer className="py-8 border-t border-border/30 bg-background">
         <div className="container mx-auto text-center text-muted-foreground space-y-2">
           <p>&copy; {new Date().getFullYear()} Meta-Prism. All rights reserved.</p>
-          <p className="mt-2">
-            <Link href="/about" className="text-xs text-primary hover:underline">
+          <p className="mt-4">
+            <Link href="/about" className="text-sm text-primary hover:underline">
               Learn More About the Meta-Prism Model
             </Link>
           </p>
