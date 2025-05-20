@@ -51,14 +51,16 @@ export function Header() {
   return (
     <>
       <header className="sticky top-0 z-50 w-full border-b border-border/30 bg-background/80 backdrop-blur-md">
-        <div className="container mx-auto flex h-16 items-center justify-between px-6 py-3">
+        <div className="flex h-16 items-center justify-between px-6 py-3"> {/* Removed container mx-auto */}
           <Link href="/" className="flex items-center space-x-2 flex-shrink-0" onClick={() => setIsMobileMenuOpen(false)}>
             <Logo />
           </Link>
           
-          <nav className="hidden md:flex flex-1 justify-start items-center gap-4 ml-6"> {/* Changed justify-center to justify-start and added ml-6 for spacing */}
+          <nav className="hidden md:flex flex-1 justify-start items-center gap-4 ml-6">
             {mainNavItems.map((item) => {
-              if (item.hideOnDesktop) return null;
+              if (item.hideOnDesktop && item.title !== "Results" && item.title !== "Saved") return null; // Keep Results & Saved for mobile logic, hide others
+              if (item.hideOnDesktop && (item.title === "Results" || item.title === "Saved")) return null; // Explicitly hide from desktop nav
+
               const IconComponent = item.icon ? Icons[item.icon] : null;
               const isActive = pathname === item.href || (item.href !== "/" && pathname.startsWith(item.href));
               return (
@@ -71,8 +73,8 @@ export function Header() {
                     isActive ? "text-primary bg-primary/10" : "text-muted-foreground hover:text-foreground hover:bg-muted/50",
                   )}
                 >
-                  <Link href={item.href} className="flex items-center gap-1.5"> {/* Ensured flex, items-center and added gap-1.5 */}
-                    {IconComponent && <IconComponent className="h-4 w-4" />} {/* Removed mr-2 */}
+                  <Link href={item.href} className="flex items-center gap-1.5">
+                    {IconComponent && <IconComponent className="h-4 w-4" />}
                     {item.title}
                   </Link>
                 </Button>
@@ -99,7 +101,7 @@ export function Header() {
                         {currentUser.displayName}
                       </p>
                       {currentUser.email && (
-                        <p className="text-xs leading-none text-muted-foreground">
+                        <p className="text-sm leading-none text-muted-foreground">
                           {currentUser.email}
                         </p>
                       )}
@@ -122,6 +124,12 @@ export function Header() {
                     <Link href="/saved-worldviews" className="flex items-center text-sm">
                       <Icons.saved className="mr-2.5 h-4 w-4 text-muted-foreground" />
                        My Saved Profiles
+                    </Link>
+                  </DropdownMenuItem>
+                   <DropdownMenuItem asChild className="cursor-pointer hover:bg-muted/50 focus:bg-muted/50 p-2.5">
+                    <Link href="/about" className="flex items-center text-sm">
+                      <Icons.about className="mr-2.5 h-4 w-4 text-muted-foreground" />
+                      About Meta-Prism
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem
@@ -179,26 +187,7 @@ export function Header() {
                           </SheetClose>
                         );
                       })}
-                      {secondaryNavItems.length > 0 && <DropdownMenuSeparator className="my-3 bg-border/50" />}
-                       {secondaryNavItems.map((item) => {
-                        const IconComponent = item.icon ? Icons[item.icon] : null;
-                        const isActive = pathname === item.href || (item.href !== "/" && pathname.startsWith(item.href));
-                        return (
-                          <SheetClose asChild key={item.title}>
-                            <Link
-                              href={item.href}
-                              onClick={() => setIsMobileMenuOpen(false)}
-                              className={cn(
-                                "flex items-center rounded-md py-2.5 px-3 text-base font-medium transition-colors", 
-                                isActive ? "bg-primary/10 text-primary" : "text-muted-foreground hover:bg-muted/50 hover:text-foreground"
-                              )}
-                            >
-                              {IconComponent && <IconComponent className="mr-3 h-5 w-5" />}
-                              {item.title}
-                            </Link>
-                          </SheetClose>
-                        );
-                      })}
+                      {/* Secondary items are already part of allNavItemsForMobile due to its construction */}
                     </nav>
                   </div>
                 </ScrollArea>
