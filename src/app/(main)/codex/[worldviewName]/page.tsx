@@ -1,8 +1,7 @@
 
 "use client";
 
-import { useParams, useRouter } from 'next/navigation';
-import { TriangleChart } from '@/components/visualization/TriangleChart'; 
+import { useParams, useRouter } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';

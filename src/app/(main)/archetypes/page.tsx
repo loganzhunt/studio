@@ -2,7 +2,6 @@
 "use client";
 
 import { useState, useMemo } from 'react';
-import { TriangleChart } from "@/components/visualization/TriangleChart";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Icons } from "@/components/icons";
@@ -16,6 +15,9 @@ import { getFacetColorHsl, DOMAIN_COLORS, SPECTRUM_LABELS } from '@/lib/colors';
 import { useToast } from '@/hooks/use-toast';
 import chroma from 'chroma-js';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import dynamic from 'next/dynamic';
+const TriangleChart = dynamic(() => import('@/components/visualization/TriangleChart'), { ssr: false });
+
 
 
 // Helper Functions

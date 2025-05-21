@@ -6,7 +6,6 @@ import { FACETS, FACET_NAMES } from '@/config/facets';
 import type { FacetName } from '@/types';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Icons } from '@/components/icons'; // Added this import
 import { FacetIcon } from '@/components/facet-icon';
 import Link from 'next/link';
 import { Slider } from "@/components/ui/slider";

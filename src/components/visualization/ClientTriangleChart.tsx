@@ -11,7 +11,6 @@ import type { DomainScore } from '@/types';
 import { Carousel, CarouselContent, CarouselItem, CarouselPrevious, CarouselNext } from "@/components/ui/carousel";
 import { getDominantFacet, getFacetColorHsl } from '@/lib/colors';
 import { FractalTriangleLogo } from "@/components/FractalTriangleLogo";
-// Removed existing dynamic import of TriangleChart
 
 // Import the new ClientTriangleChart wrapper component
 import ClientTriangleChart from "@/components/visualization/ClientTriangleChart";

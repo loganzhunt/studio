@@ -244,15 +244,8 @@ export default function HomePage() {
                               </CardDescription>
                             </CardHeader>
                             <CardContent className="flex-grow flex flex-col justify-center items-center pt-2 pb-4">
-                              {/* Using the new ClientTriangleChart with isClient check */}
-                              {isClient && (
-                                <ClientTriangleChart
-                                  scores={entry.domainScores}
-                                  width={180}
-                                  height={156}
-                                  className="!p-0 !bg-transparent !shadow-none !backdrop-blur-none mb-3"
-                                />
-                              )}
+                              {/* Using the new ClientTriangleChart */}
+                              <ClientTriangleChart scores={entry.domainScores} width={180} height={156} className="!p-0 !bg-transparent !shadow-none !backdrop-blur-none mb-3" />
                             </CardContent>
                             <CardFooter className="p-3 border-t border-border/30 mt-auto">
                               <Button variant="outline" size="sm" className="w-full text-xs" asChild>

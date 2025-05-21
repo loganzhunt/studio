@@ -1,4 +1,4 @@
-"use client";
+'use client';
 import Link from 'next/link';
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
@@ -11,10 +11,9 @@ import type { DomainScore } from '@/types';
 import { Carousel, CarouselContent, CarouselItem, CarouselPrevious, CarouselNext } from "@/components/ui/carousel";
 import { getDominantFacet, getFacetColorHsl } from '@/lib/colors';
 import { FractalTriangleLogo } from "@/components/FractalTriangleLogo";
-// Removed existing dynamic import of TriangleChart
-
-// Import the new ClientTriangleChart wrapper component
-import ClientTriangleChart from "@/components/visualization/ClientTriangleChart";
+// REMOVED: import dynamic from 'next/dynamic';
+// REMOVED: const TriangleChart = dynamic(() => import('@/components/visualization/TriangleChart'), { ssr: false });
+import ClientTriangleChart from "@/components/visualization/ClientTriangleChart"; // Added new import
 
 
 // Data for Featured Worldviews
@@ -244,15 +243,7 @@ export default function HomePage() {
                               </CardDescription>
                             </CardHeader>
                             <CardContent className="flex-grow flex flex-col justify-center items-center pt-2 pb-4">
-                              {/* Using the new ClientTriangleChart with isClient check */}
-                              {isClient && (
-                                <ClientTriangleChart
-                                  scores={entry.domainScores}
-                                  width={180}
-                                  height={156}
-                                  className="!p-0 !bg-transparent !shadow-none !backdrop-blur-none mb-3"
-                                />
-                              )}
+                              {isClient && <ClientTriangleChart scores={entry.domainScores} width={180} height={156} className="!p-0 !bg-transparent !shadow-none !backdrop-blur-none mb-3" />} {/* Used ClientTriangleChart */}
                             </CardContent>
                             <CardFooter className="p-3 border-t border-border/30 mt-auto">
                               <Button variant="outline" size="sm" className="w-full text-xs" asChild>

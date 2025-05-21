@@ -1,18 +1,22 @@
-
 "use client";
 
 import { useWorldview } from "@/hooks/use-worldview";
-import { TriangleChart } from "@/components/visualization/TriangleChart";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Icons } from "@/components/icons";
 import Link from "next/link";
-import { FACETS, FACET_NAMES, FacetName } from "@/config/facets";
-import { Progress } from "@/components/ui/progress";
-import { getFacetColorHsl } from '@/lib/colors';
-import React, { useState, useEffect } from 'react';
+
+import React, { useState, useEffect, useMemo } from 'react';
 import { useToast } from "@/hooks/use-toast";
-import type { WorldviewProfile } from "@/types";
+import type { WorldviewProfile, FacetName } from "@/types";
+
+import ClientTriangleChart from "@/components/visualization/ClientTriangleChart"; // Use the client-side wrapper
+
+import { FACETS, FACET_NAMES } from "@/config/facets";
+import { getFacetColorHsl, DOMAIN_COLORS } from '@/lib/colors';
+import chroma from 'chroma-js';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+
 
 const SPECTRUM_LABELS: Record<FacetName, { left: string; right: string }> = {
   Ontology: { left: "Materialism", right: "Idealism" },
@@ -24,33 +28,18 @@ const SPECTRUM_LABELS: Record<FacetName, { left: string; right: string }> = {
   Teleology: { left: "Existential", right: "Divine" },
 };
 
-function DomainFeedbackBar({ facetName, score, anchorLeft, anchorRight }: { facetName: FacetName, score: number, anchorLeft: string, anchorRight: string }) {
-  const facetConfig = FACETS[facetName];
-  if (!facetConfig) {
-    console.warn(`Facet configuration not found for: ${facetName} in DomainFeedbackBar`);
-    return null;
-  }
-
-  return (
-    <div className="mb-4 p-3 rounded-md border border-border/30 bg-background/40">
-      <div className="flex justify-between items-center mb-1">
-        <span className="text-sm font-medium" style={{ color: getFacetColorHsl(facetName) }}>{facetConfig.name}</span>
-        <span className="text-xs font-semibold" style={{ color: getFacetColorHsl(facetName) }}>{Math.round(score * 100)}%</span>
-      </div>
-      <Progress value={score * 100} className="h-3" indicatorStyle={{ backgroundColor: getFacetColorHsl(facetName) }} />
-      <div className="flex justify-between text-xs text-muted-foreground mt-1">
-        <span className="font-semibold">{anchorLeft}</span>
-        <span className="font-semibold">{anchorRight}</span>
-      </div>
-    </div>
-  );
-}
 
 export default function ResultsPage() {
   const { domainScores, activeProfile, savedWorldviews, addSavedWorldview, hasAssessmentBeenRun } = useWorldview();
   const { toast } = useToast();
   const [isSaved, setIsSaved] = useState(false);
   const [profileTitle, setProfileTitle] = useState(activeProfile?.title || "My Assessment Results");
+   const [isClient, setIsClient] = useState(false); // Added isClient state
+
+  useEffect(() => {
+    setIsClient(true); // Set isClient on mount
+  }, []);
+
 
   useEffect(() => {
     if (activeProfile?.id) {
@@ -65,22 +54,7 @@ export default function ResultsPage() {
     }
   }, [activeProfile, savedWorldviews, hasAssessmentBeenRun]);
 
-  const currentScoresToDisplay = useMemo(() => {
-    if (activeProfile?.domainScores) return activeProfile.domainScores;
-    if (hasAssessmentBeenRun && domainScores && domainScores.length > 0) return domainScores;
-    return FACET_NAMES.map(name => ({ facetName: name, score: 0.5 })); // Neutral scores for placeholder
-  }, [activeProfile, domainScores, hasAssessmentBeenRun]);
-
   const displayTitle = activeProfile?.title || (hasAssessmentBeenRun ? profileTitle : "Neutral Baseline");
-
-  if (!currentScoresToDisplay) { // Should almost never happen with the default above
-    return (
-      <div className="flex flex-col items-center justify-center h-[calc(100vh-10rem)] text-center">
-        <Icons.loader className="w-16 h-16 text-muted-foreground mb-4 animate-spin" />
-        <h2 className="text-2xl font-semibold mb-2">Loading Results...</h2>
-      </div>
-    );
-  }
 
   return (
     <div className="container mx-auto py-8">
@@ -97,69 +71,61 @@ export default function ResultsPage() {
         </Card>
       )}
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        <Card className="lg:col-span-2 glassmorphic-card">
+      {(hasAssessmentBeenRun || activeProfile) && (
+        <Card className="mb-8 glassmorphic-card">
           <CardHeader>
-            <CardTitle className="text-2xl">Facet Breakdown</CardTitle>
-            <CardDescription>
-              {hasAssessmentBeenRun || activeProfile
-                ? "Your scores across the 7 worldview dimensions."
-                : "Showing neutral baseline scores. Complete an assessment or load a profile to see a breakdown."
-              }
-            </CardDescription>
+            <CardTitle className="text-2xl">Meta-Prism Signature</CardTitle>
+            <CardDescription>Your scores across the 7 facets of worldview.</CardDescription>
           </CardHeader>
-          <CardContent>
-            {currentScoresToDisplay.map(ds => {
-              const facetConfig = FACETS[ds.facetName];
-              if (!facetConfig) return null;
+          <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-8 items-start">
+            <div className="md:sticky md:top-24 flex justify-center">
+               {/* Use ClientTriangleChart with isClient check */}
+              {isClient && (
+                <ClientTriangleChart scores={activeProfile?.domainScores || domainScores} width={300} height={260} className="max-w-sm !p-0 !bg-transparent !shadow-none !backdrop-blur-none" />
+              )}
+            </div>
+            <div className="space-y-4">
+              {FACET_NAMES.map(facetName => {
+                const scoreObj = (activeProfile?.domainScores || domainScores).find(ds => ds.facetName === facetName);
+                const score = scoreObj ? scoreObj.score : 0.5; // Default to 0.5 if score not found
+                const facetConfig = FACETS[facetName];
+                const spectrumPoleLabels = SPECTRUM_LABELS[facetName] || { left: 'Low', right: 'High' };
 
-              const labels = SPECTRUM_LABELS[ds.facetName];
-              const anchorLeftText = labels ? labels.left : "Spectrum Low";
-              const anchorRightText = labels ? labels.right : "Spectrum High";
+                const barColorDark = chroma(DOMAIN_COLORS[facetName]).darken(1.5).hex();
+                const barColorLight = chroma(DOMAIN_COLORS[facetName]).brighten(1.5).hex();
 
-              return (
-                <DomainFeedbackBar
-                  key={ds.facetName}
-                  facetName={ds.facetName}
-                  score={ds.score}
-                  anchorLeft={anchorLeftText}
-                  anchorRight={anchorRightText}
-                />
-              );
-            })}
-          </CardContent>
-        </Card>
-
-        <div className="space-y-8">
-          <Card className="glassmorphic-card">
-            <CardHeader className="text-center">
-              <CardTitle className="text-2xl">Your Signature</CardTitle>
-            </CardHeader>
-            <CardContent className="flex justify-center items-center">
-              <TriangleChart scores={currentScoresToDisplay} width={250} height={217} className="!p-0 !bg-transparent !shadow-none !backdrop-blur-none" />
-            </CardContent>
-          </Card>
-
-          <Card className="glassmorphic-card">
-            <CardHeader>
-              <CardTitle>Insights & Reflections</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-muted-foreground">
-                {hasAssessmentBeenRun || activeProfile
-                  ? "Explore your dashboard for detailed insights and archetype comparisons. You can also delve deeper into each facet through the 'Facet Deep Dive' pages."
-                  : "Complete the assessment or load a profile to unlock insights."
-                }
-              </p>
-               {(hasAssessmentBeenRun || activeProfile) && (
-                 <Button asChild variant="outline" className="mt-4 w-full">
-                   <Link href="/dashboard">Go to Dashboard <Icons.chevronRight className="ml-1 h-4 w-4" /></Link>
-                 </Button>
-               )}
-            </CardContent>
-          </Card>
-        </div>
-      </div>
+                return (
+                  <div key={facetName} className="p-4 rounded-md border border-border/30 bg-background/40 space-y-2">
+                    <div className="flex justify-between items-center">
+                      <h4 className="text-lg font-semibold" style={{color: getFacetColorHsl(facetName)}}>
+                        {facetName}
+                      </h4>
+                      <span className="text-sm font-semibold" style={{color: getFacetColorHsl(facetName)}}>
+                        {Math.round(score * 100)}%
+                      </span>
+                    </div>
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <div className="w-full h-6 rounded bg-muted/30 relative cursor-help" aria-label={`${facetName} spectrum: ${spectrumPoleLabels.left} to ${spectrumPoleLabels.right}. Score: ${Math.round(score * 100)}%`}>
+                            <div
+                              className="h-full rounded"
+                              style={{ background: `linear-gradient(to right, ${barColorDark}, ${barColorLight})` }}
+                            />
+                            <div
+                              className="absolute top-0 bottom-0 w-1.5 bg-foreground/50 rounded-sm transform -translate-x-1/2"
+                              style={{ left: `${score * 100}%` }}
+                            />
+                          </div>
+                        </TooltipTrigger>
+                        <TooltipContent side="bottom" className="bg-popover text-popover-foreground p-2 rounded-md shadow-lg text-xs">
+                          <p>{spectrumPoleLabels.left} <span className="text-muted-foreground mx-1">←</span> Score: {Math.round(score * 100)}% <span className="text-muted-foreground mx-1">→</span> {spectrumPoleLabels.right}</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                  </div>
+              );})}}
+            </div></CardContent></Card>)}
 
       {(hasAssessmentBeenRun || activeProfile) && (
         <Card className="mt-8 glassmorphic-card">
@@ -191,7 +157,7 @@ export default function ResultsPage() {
                 const profileToSave: WorldviewProfile = {
                   id: activeProfile?.id || `assessment_${Date.now()}`,
                   title: titleToSave,
-                  domainScores: currentScoresToDisplay, // Use the scores currently being displayed
+                  domainScores: activeProfile?.domainScores || domainScores, // Use the appropriate scores
                   createdAt: activeProfile?.createdAt || new Date().toISOString(),
                   summary: activeProfile?.summary || (hasAssessmentBeenRun ? "Assessment results" : "Custom profile"),
                   isArchetype: activeProfile?.isArchetype || false,

@@ -20,7 +20,8 @@ const DEFAULT_WIDTH = 300;
 const DEFAULT_HEIGHT = 260; // approx for equilateral triangle
 const NUM_BANDS = FACET_NAMES.length;
 
-export function TriangleChart({
+// Change to default export
+export default function TriangleChart({
   scores,
   width = DEFAULT_WIDTH,
   height = DEFAULT_HEIGHT,

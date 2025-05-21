@@ -2,7 +2,6 @@
 "use client";
 
 import { useWorldview } from "@/hooks/use-worldview";
-import { TriangleChart } from "@/components/visualization/TriangleChart";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Icons } from "@/components/icons";
@@ -18,6 +17,9 @@ import { FacetIcon } from "@/components/facet-icon";
 import chroma from 'chroma-js';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
+import dynamic from 'next/dynamic';
+
+const TriangleChart = dynamic(() => import('@/components/visualization/TriangleChart'), { ssr: false });
 
 // Archetype Data & Helpers (copied from archetypes/page.tsx for now)
 const rawArchetypeData: any[] = [
