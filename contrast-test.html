@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Meta-Prism Triangle Contrast Test</title>
+    <style>
+        body {
+            font-family: system-ui, -apple-system, sans-serif;
+            margin: 20px;
+            background: #f8f9fa;
+        }
+        .container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            max-width: 1200px;
+        }
+        .triangle-demo {
+            background: white;
+            border-radius: 8px;
+            padding: 15px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        .triangle-svg {
+            width: 100%;
+            height: 180px;
+        }
+        .score-info {
+            margin-top: 10px;
+            font-size: 12px;
+            color: #666;
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 30px;
+        }
+        h2 {
+            text-align: center;
+            color: #555;
+            margin: 20px 0 10px 0;
+            font-size: 16px;
+        }
+        .contrast-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+            margin-bottom: 30px;
+        }
+    </style>
+</head>
+<body>
+    <h1>🎨 Meta-Prism Triangle Contrast Maximization Test</h1>
+    
+    <h2>Current Contrast Levels - Different Score Patterns</h2>
+    <div class="container">
+        <!-- High Scores Triangle -->
+        <div class="triangle-demo">
+            <h3>High Scores (0.8-1.0)</h3>
+            <svg class="triangle-svg" viewBox="0 0 300 260">
+                <path d="M 75,0 L 225,0 L 300,37.14 L 225,37.14 Z" fill="#FF0045" opacity="1"/>
+                <path d="M 64.29,37.14 L 235.71,37.14 L 271.43,74.29 L 192.86,74.29 Z" fill="#FF9315" opacity="1"/>
+                <path d="M 53.57,74.29 L 246.43,74.29 L 242.86,111.43 L 160.71,111.43 Z" fill="#F1E800" opacity="1"/>
+                <path d="M 42.86,111.43 L 257.14,111.43 L 214.29,148.57 L 128.57,148.57 Z" fill="#2DF36C" opacity="1"/>
+                <path d="M 32.14,148.57 L 267.86,148.57 L 185.71,185.71 L 96.43,185.71 Z" fill="#00B8FF" opacity="1"/>
+                <path d="M 21.43,185.71 L 278.57,185.71 L 157.14,222.86 L 64.29,222.86 Z" fill="#0082FF" opacity="1"/>
+                <path d="M 10.71,222.86 L 289.29,222.86 L 128.57,260 L 32.14,260 Z" fill="#8E6BF7" opacity="1"/>
+            </svg>
+            <div class="score-info">
+                Teleology: 95% | Cosmology: 90% | Mythology: 85%<br>
+                Axiology: 88% | Praxeology: 92% | Epistemology: 87% | Ontology: 94%
+            </div>
+        </div>
+
+        <!-- Medium Scores Triangle -->
+        <div class="triangle-demo">
+            <h3>Medium Scores (0.4-0.7)</h3>
+            <svg class="triangle-svg" viewBox="0 0 300 260">
+                <path d="M 75,0 L 225,0 L 300,37.14 L 225,37.14 Z" fill="#B8003A" opacity="1"/>
+                <path d="M 64.29,37.14 L 235.71,37.14 L 271.43,74.29 L 192.86,74.29 Z" fill="#CC6B10" opacity="1"/>
+                <path d="M 53.57,74.29 L 246.43,74.29 L 242.86,111.43 L 160.71,111.43 Z" fill="#B8A800" opacity="1"/>
+                <path d="M 42.86,111.43 L 257.14,111.43 L 214.29,148.57 L 128.57,148.57 Z" fill="#23B555" opacity="1"/>
+                <path d="M 32.14,148.57 L 267.86,148.57 L 185.71,185.71 L 96.43,185.71 Z" fill="#0088CC" opacity="1"/>
+                <path d="M 21.43,185.71 L 278.57,185.71 L 157.14,222.86 L 64.29,222.86 Z" fill="#0066CC" opacity="1"/>
+                <path d="M 10.71,222.86 L 289.29,222.86 L 128.57,260 L 32.14,260 Z" fill="#6B4FB8" opacity="1"/>
+            </svg>
+            <div class="score-info">
+                Teleology: 65% | Cosmology: 60% | Mythology: 55%<br>
+                Axiology: 58% | Praxeology: 62% | Epistemology: 57% | Ontology: 64%
+            </div>
+        </div>
+
+        <!-- Low Scores Triangle -->
+        <div class="triangle-demo">
+            <h3>Low Scores (0.1-0.4)</h3>
+            <svg class="triangle-svg" viewBox="0 0 300 260">
+                <path d="M 75,0 L 225,0 L 300,37.14 L 225,37.14 Z" fill="#800028" opacity="1"/>
+                <path d="M 64.29,37.14 L 235.71,37.14 L 271.43,74.29 L 192.86,74.29 Z" fill="#994D0B" opacity="1"/>
+                <path d="M 53.57,74.29 L 246.43,74.29 L 242.86,111.43 L 160.71,111.43 Z" fill="#807000" opacity="1"/>
+                <path d="M 42.86,111.43 L 257.14,111.43 L 214.29,148.57 L 128.57,148.57 Z" fill="#1A7A3E" opacity="1"/>
+                <path d="M 32.14,148.57 L 267.86,148.57 L 185.71,185.71 L 96.43,185.71 Z" fill="#005999" opacity="1"/>
+                <path d="M 21.43,185.71 L 278.57,185.71 L 157.14,222.86 L 64.29,222.86 Z" fill="#004499" opacity="1"/>
+                <path d="M 10.71,222.86 L 289.29,222.86 L 128.57,260 L 32.14,260 Z" fill="#4A3380" opacity="1"/>
+            </svg>
+            <div class="score-info">
+                Teleology: 35% | Cosmology: 30% | Mythology: 25%<br>
+                Axiology: 28% | Praxeology: 32% | Epistemology: 27% | Ontology: 34%
+            </div>
+        </div>
+
+        <!-- Mixed Scores Triangle -->
+        <div class="triangle-demo">
+            <h3>Mixed Scores</h3>
+            <svg class="triangle-svg" viewBox="0 0 300 260">
+                <path d="M 75,0 L 225,0 L 300,37.14 L 225,37.14 Z" fill="#FF0045" opacity="1"/>
+                <path d="M 64.29,37.14 L 235.71,37.14 L 271.43,74.29 L 192.86,74.29 Z" fill="#994D0B" opacity="1"/>
+                <path d="M 53.57,74.29 L 246.43,74.29 L 242.86,111.43 L 160.71,111.43 Z" fill="#F1E800" opacity="1"/>
+                <path d="M 42.86,111.43 L 257.14,111.43 L 214.29,148.57 L 128.57,148.57 Z" fill="#1A7A3E" opacity="1"/>
+                <path d="M 32.14,148.57 L 267.86,148.57 L 185.71,185.71 L 96.43,185.71 Z" fill="#00B8FF" opacity="1"/>
+                <path d="M 21.43,185.71 L 278.57,185.71 L 157.14,222.86 L 64.29,222.86 Z" fill="#004499" opacity="1"/>
+                <path d="M 10.71,222.86 L 289.29,222.86 L 128.57,260 L 32.14,260 Z" fill="#8E6BF7" opacity="1"/>
+            </svg>
+            <div class="score-info">
+                Teleology: 95% | Cosmology: 30% | Mythology: 85%<br>
+                Axiology: 28% | Praxeology: 92% | Epistemology: 27% | Ontology: 94%
+            </div>
+        </div>
+    </div>
+
+    <h2>🎯 Analysis: Can You Tell The Difference?</h2>
+    <p style="text-align: center; color: #666; max-width: 800px; margin: 0 auto;">
+        The goal is to make triangles visually distinct so users can easily tell different worldviews apart.
+        Current system uses ultra-vivid LCH colors with dramatic lightness/chroma ranges.
+        <br><br>
+        <strong>Current Ranges:</strong><br>
+        • Lightness: 30-90 (massive 60-point range)<br>
+        • Chroma: 20-150 (extreme saturation differences)<br>
+        • Nonlinear Enhancement: pow(1.5) for dramatic separation<br>
+        • Band Contrast: ±2 lightness variation between adjacent bands
+    </p>
+
+    <script>
+        console.log('🎨 Triangle Contrast Test Loaded');
+        console.log('Current enhancement level: MAXIMUM');
+    </script>
+</body>
+</html>

@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Enhanced ROYGBIV Triangle Colors Demo</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+        }
+        
+        h1 {
+            text-align: center;
+            color: #2d3748;
+            margin-bottom: 10px;
+            font-size: 2.5em;
+        }
+        
+        .subtitle {
+            text-align: center;
+            color: #4a5568;
+            margin-bottom: 40px;
+            font-size: 1.2em;
+        }
+        
+        .demo-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+        
+        .triangle-demo {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+        
+        .triangle-demo h3 {
+            margin: 0 0 20px 0;
+            color: #2d3748;
+            font-size: 1.3em;
+        }
+        
+        .triangle {
+            width: 280px;
+            height: 243px;
+            margin: 0 auto 20px;
+            position: relative;
+        }
+        
+        .band {
+            position: absolute;
+            width: 100%;
+        }
+        
+        /* ROYGBIV Triangle Band Colors - Enhanced Ultra-Vivid */
+        .band-1 { /* Violet - Ontology */
+            clip-path: polygon(50% 0%, 42.9% 14.3%, 57.1% 14.3%);
+            background: #8B4BF7; /* Ultra-vivid violet */
+            height: 35px;
+            top: 0;
+        }
+        
+        .band-2 { /* Indigo - Epistemology */
+            clip-path: polygon(42.9% 14.3%, 35.7% 28.6%, 64.3% 28.6%, 57.1% 14.3%);
+            background: #5D4EF7; /* Ultra-vivid indigo */
+            height: 35px;
+            top: 35px;
+        }
+        
+        .band-3 { /* Blue - Praxeology */
+            clip-path: polygon(35.7% 28.6%, 28.6% 42.9%, 71.4% 42.9%, 64.3% 28.6%);
+            background: #2E7BF7; /* Ultra-vivid blue */
+            height: 35px;
+            top: 70px;
+        }
+        
+        .band-4 { /* Green - Axiology */
+            clip-path: polygon(28.6% 42.9%, 21.4% 57.1%, 78.6% 57.1%, 71.4% 42.9%);
+            background: #00E849; /* Ultra-vivid green */
+            height: 35px;
+            top: 105px;
+        }
+        
+        .band-5 { /* Yellow - Mythology */
+            clip-path: polygon(21.4% 57.1%, 14.3% 71.4%, 85.7% 71.4%, 78.6% 57.1%);
+            background: #FFE500; /* Ultra-vivid yellow */
+            height: 35px;
+            top: 140px;
+        }
+        
+        .band-6 { /* Orange - Cosmology */
+            clip-path: polygon(14.3% 71.4%, 7.1% 85.7%, 92.9% 85.7%, 85.7% 71.4%);
+            background: #FF7A00; /* Ultra-vivid orange */
+            height: 35px;
+            top: 175px;
+        }
+        
+        .band-7 { /* Red - Teleology */
+            clip-path: polygon(7.1% 85.7%, 0% 100%, 100% 100%, 92.9% 85.7%);
+            background: #FF2B47; /* Ultra-vivid red */
+            height: 35px;
+            top: 210px;
+        }
+        
+        .color-info {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 10px;
+            margin-top: 20px;
+        }
+        
+        .color-sample {
+            text-align: center;
+            padding: 10px;
+            border-radius: 8px;
+            color: white;
+            font-weight: bold;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+            font-size: 12px;
+        }
+        
+        .enhancement-info {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 15px;
+            margin-top: 30px;
+        }
+        
+        .enhancement-info h2 {
+            margin: 0 0 20px 0;
+            font-size: 1.8em;
+        }
+        
+        .enhancement-list {
+            list-style: none;
+            padding: 0;
+        }
+        
+        .enhancement-list li {
+            padding: 10px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .enhancement-list li:last-child {
+            border-bottom: none;
+        }
+        
+        .enhancement-list li strong {
+            color: #FFE500;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🌈 Enhanced ROYGBIV Triangle Colors</h1>
+        <p class="subtitle">Ultra-Vivid Color System with Clear Band Differences</p>
+        
+        <div class="demo-grid">
+            <div class="triangle-demo">
+                <h3>🎯 Before Enhancement</h3>
+                <div class="triangle">
+                    <div class="band band-1" style="background: #8b5cf6; opacity: 0.7;"></div>
+                    <div class="band band-2" style="background: #6366f1; opacity: 0.7;"></div>
+                    <div class="band band-3" style="background: #3b82f6; opacity: 0.7;"></div>
+                    <div class="band band-4" style="background: #10b981; opacity: 0.7;"></div>
+                    <div class="band band-5" style="background: #f59e0b; opacity: 0.7;"></div>
+                    <div class="band band-6" style="background: #f97316; opacity: 0.7;"></div>
+                    <div class="band band-7" style="background: #ef4444; opacity: 0.7;"></div>
+                </div>
+                <p>Previous colors were less saturated and less distinct</p>
+            </div>
+            
+            <div class="triangle-demo">
+                <h3>🔥 After Enhancement</h3>
+                <div class="triangle">
+                    <div class="band band-1"></div>
+                    <div class="band band-2"></div>
+                    <div class="band band-3"></div>
+                    <div class="band band-4"></div>
+                    <div class="band band-5"></div>
+                    <div class="band band-6"></div>
+                    <div class="band band-7"></div>
+                </div>
+                <p>Ultra-vivid ROYGBIV with crystal-clear band separation</p>
+            </div>
+        </div>
+        
+        <div class="color-info">
+            <div class="color-sample" style="background: #8B4BF7;">
+                Violet<br>
+                Ontology<br>
+                C: 110
+            </div>
+            <div class="color-sample" style="background: #5D4EF7;">
+                Indigo<br>
+                Epistemology<br>
+                C: 110
+            </div>
+            <div class="color-sample" style="background: #2E7BF7;">
+                Blue<br>
+                Praxeology<br>
+                C: 110
+            </div>
+            <div class="color-sample" style="background: #00E849;">
+                Green<br>
+                Axiology<br>
+                C: 70
+            </div>
+            <div class="color-sample" style="background: #FFE500;">
+                Yellow<br>
+                Mythology<br>
+                C: 65
+            </div>
+            <div class="color-sample" style="background: #FF7A00;">
+                Orange<br>
+                Cosmology<br>
+                C: 115
+            </div>
+            <div class="color-sample" style="background: #FF2B47;">
+                Red<br>
+                Teleology<br>
+                C: 120
+            </div>
+        </div>
+        
+        <div class="enhancement-info">
+            <h2>🚀 Key Enhancements Applied</h2>
+            <ul class="enhancement-list">
+                <li><strong>Ultra-Vivid Chroma Ranges:</strong> Increased to up to C=120 for maximum saturation</li>
+                <li><strong>Expanded Lightness Ranges:</strong> Wider contrast for dramatic band separation (50-98)</li>
+                <li><strong>Stronger Nonlinear Enhancement:</strong> Changed from pow(1.2) to pow(1.5) for pronounced score differences</li>
+                <li><strong>Band Contrast Optimization:</strong> Added lightness variation between adjacent bands</li>
+                <li><strong>Color-Specific Tuning:</strong> Each ROYGBIV band optimized for maximum impact</li>
+                <li><strong>No Opacity Changes:</strong> All colors remain 100% opaque and fully saturated</li>
+            </ul>
+        </div>
+    </div>
+</body>
+</html>

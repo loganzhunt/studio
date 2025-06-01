@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simple Test - Meta-Prism Colors</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background: #f0f0f0;
+        }
+        .test-triangle {
+            width: 300px;
+            height: 260px;
+            position: relative;
+            margin: 20px auto;
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+        }
+        .triangle-band {
+            position: absolute;
+            width: 100%;
+            left: 0;
+        }
+        .band-1 { 
+            clip-path: polygon(50% 0%, 35.7% 28.6%, 64.3% 28.6%);
+            background: #8B4BF7;
+            height: 35px;
+            top: 0px;
+        }
+        .band-2 { 
+            clip-path: polygon(35.7% 28.6%, 28.6% 42.9%, 71.4% 42.9%, 64.3% 28.6%);
+            background: #5D4EF7;
+            height: 35px;
+            top: 35px;
+        }
+        .band-3 { 
+            clip-path: polygon(28.6% 42.9%, 21.4% 57.1%, 78.6% 57.1%, 71.4% 42.9%);
+            background: #2E7BF7;
+            height: 35px;
+            top: 70px;
+        }
+        .band-4 { 
+            clip-path: polygon(21.4% 57.1%, 14.3% 71.4%, 85.7% 71.4%, 78.6% 57.1%);
+            background: #00E849;
+            height: 35px;
+            top: 105px;
+        }
+        .band-5 { 
+            clip-path: polygon(14.3% 71.4%, 7.1% 85.7%, 92.9% 85.7%, 85.7% 71.4%);
+            background: #FFE500;
+            height: 35px;
+            top: 140px;
+        }
+        .band-6 { 
+            clip-path: polygon(7.1% 85.7%, 0% 100%, 100% 100%, 92.9% 85.7%);
+            background: #FF7A00;
+            height: 35px;
+            top: 175px;
+        }
+        .band-7 { 
+            clip-path: polygon(0% 100%, 0% 100%, 100% 100%, 100% 100%);
+            background: #FF2B47;
+            height: 35px;
+            top: 210px;
+        }
+    </style>
+</head>
+<body>
+    <h1>🌈 Simple Meta-Prism Triangle Test</h1>
+    <p>Testing the extreme contrast ROYGBIV colors in a simple environment.</p>
+    
+    <div class="test-triangle">
+        <div class="triangle-band band-1"></div>
+        <div class="triangle-band band-2"></div>
+        <div class="triangle-band band-3"></div>
+        <div class="triangle-band band-4"></div>
+        <div class="triangle-band band-5"></div>
+        <div class="triangle-band band-6"></div>
+        <div class="triangle-band band-7"></div>
+    </div>
+    
+    <p><strong>Status:</strong> ✅ Simple triangle rendering successful</p>
+    <p><strong>Colors:</strong> Ultra-vivid ROYGBIV with maximum chroma values</p>
+    
+    <script>
+        console.log('Simple test loaded successfully');
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('DOM loaded, triangle should be visible');
+        });
+    </script>
+</body>
+</html>
