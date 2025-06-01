@@ -43,7 +43,7 @@ const mapRawDataToCodexEntries = (rawData: any[]): CodexEntry[] => {
   });
 };
 
-export default function CodexWorldviewClientPage({ params }) {
+export default function CodexWorldviewClientPage({ params }: { params: { worldviewName: string } }) {
   const routeParams = useParams();
   const worldviewNameFromParam = params?.worldviewName || routeParams?.worldviewName;
   

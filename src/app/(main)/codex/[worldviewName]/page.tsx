@@ -4,8 +4,17 @@ import { LATEST_CODEX_UPDATE_BATCH } from "@/data/codex/latest-codex-update-batc
 import { ADDITIONAL_CODEX_DATA } from "@/data/codex/additional-codex-data";
 import Link from 'next/link';
 
+// Define interface for CodexEntry
+interface CodexEntry {
+  id: string;
+  title: string;
+  description?: string;
+  era?: string;
+  [key: string]: any; // Allow other properties
+}
+
 // Function to clean up an ID or create one from a title
-const createIdFromTitle = (title) => {
+const createIdFromTitle = (title: string): string => {
   return title.toLowerCase().replace(/\s+/g, '_').replace(/[^a-z0-9_]/g, '');
 };
 
@@ -42,7 +51,7 @@ export async function generateStaticParams() {
 }
 
 // Convert raw data to a more usable format
-function mapRawDataToCodexEntries(rawData) {
+function mapRawDataToCodexEntries(rawData: any[]): CodexEntry[] {
   return rawData.map(item => {
     const id = item.id || createIdFromTitle(item.title || item.name || '');
     return {
@@ -60,7 +69,7 @@ function mapRawDataToCodexEntries(rawData) {
 }
 
 // Static fallback component
-export default function CodexWorldviewPage({ params }) {
+export default function CodexWorldviewPage({ params }: { params: { worldviewName: string } }) {
   const worldviewName = params?.worldviewName || '';
   
   // This page component is a server component with minimal features

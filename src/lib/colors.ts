@@ -4,7 +4,8 @@ import {
   calculateBandColor, 
   generateTriangleColorPalette, 
   getFacetScoreColorLCH,
-  FACET_COLORS_LCH
+  FACET_COLORS_LCH,
+  generateROYGBIVSpectrum
 } from "./lch-colors";
 
 // Vivid ROYGBIV Reference Colors (for static UI elements)
@@ -64,6 +65,14 @@ export function getFacetScoreColor(...args: any[]): string {
  */
 export function generateTriangleColors(domainScores: DomainScore[]): Record<FacetName, string> {
   return generateTriangleColorPalette(domainScores);
+}
+
+/**
+ * Generate ROYGBIV spectrum colors using LCH system
+ * Used for spectrum sliders and gradient backgrounds
+ */
+export function getROYGBIVSpectrum(score: number = 0.7): string[] {
+  return generateROYGBIVSpectrum(score);
 }
 
 /**

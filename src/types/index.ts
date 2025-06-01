@@ -1,4 +1,3 @@
-
 import type { LucideIcon } from 'lucide-react';
 import type { Icons } from '@/components/icons'; // Import Icons type
 import type { User as FirebaseUser } from 'firebase/auth';
@@ -25,7 +24,7 @@ export type FacetName =
   | "Cosmology" 
   | "Teleology";
 
-interface FacetDeepDive {
+export interface FacetDeepDive {
   introduction: string;
   spectrumExplanation: string;
   spectrumAnchors: string[];
@@ -39,24 +38,23 @@ interface FacetDeepDive {
   }>;
   reflectionPrompts: string[];
   strengthsPlaceholder?: string;
-  tensionsPlaceholder?: string;
-  blindSpotsPlaceholder?: string;
-  archetypalPatterns?: Array<{ 
-    title: string; 
-    scoreRange: string; // e.g., "Low (0.0-0.33)"
-    description: string; 
-    icon?: keyof typeof Icons; 
-  }>;
-  whatIfInterpretations?: { 
-    low: string; 
-    mid: string; 
-    high: string; 
-  };
+}
+
+export interface CodexEntry {
+  id: string;
+  title: string;
+  description?: string;
+  era?: string;
+  domainScores?: DomainScore[];
+  facet_descriptions?: { [key in FacetName]?: string };
+  key_thinkers?: string[];
+  key_texts?: string[];
+  [key: string]: any; // Allow other dynamic properties
 }
 
 export interface Facet {
   name: FacetName;
-  icon: LucideIcon | ((props: React.SVGProps<SVGSVGElement>) => JSX.Element); // Allow LucideIcon or custom SVG component
+  icon: LucideIcon | React.ComponentType<React.SVGProps<SVGSVGElement>>; // Allow LucideIcon or custom SVG component
   colorVariable: string; // e.g., "--domain-ontology"
   tagline: string;
   description: string;
@@ -83,6 +81,8 @@ export interface WorldviewProfile {
   isArchetype?: boolean;
   icon?: string; // Added for CodexEntry consistency
   facetSummaries?: { [K_FacetName in FacetName]?: string }; // Added for CodexEntry consistency
+  type?: 'codex' | 'assessment' | 'custom'; // Type of worldview
+  timestamp?: string; // Alternative to createdAt (for backward compatibility)
   // For Firebase, you might add:
   // userId?: string;
   // lastUpdated?: any; // Firestore Timestamp

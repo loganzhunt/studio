@@ -14,10 +14,10 @@ export async function generateStaticParams() {
 }
 
 // Simple server component for static generation
-export default function FacetPage({ params }) {
+export default function FacetPage({ params }: { params: { facetName: string } }) {
   const facetName = params?.facetName || '';
   const capitalizedFacetName = facetName.charAt(0).toUpperCase() + facetName.slice(1);
-  const facet = capitalizedFacetName ? FACETS[capitalizedFacetName] : undefined;
+  const facet = capitalizedFacetName && (capitalizedFacetName in FACETS) ? FACETS[capitalizedFacetName as keyof typeof FACETS] : undefined;
   
   return (
     <div className="container mx-auto py-8">

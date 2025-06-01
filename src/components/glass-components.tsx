@@ -6,19 +6,22 @@ import { cn } from '@/lib/utils';
 
 interface GlassCardProps extends React.HTMLAttributes<HTMLDivElement> {
   children: React.ReactNode;
-  variant?: 'default' | 'elevated' | 'subtle';
+  variant?: 'default' | 'elevated' | 'subtle' | 'large';
+  animated?: boolean;
 }
 
 export const GlassCard: React.FC<GlassCardProps> = ({ 
   children, 
   className, 
   variant = 'default',
+  animated = false,
   ...props 
 }) => {
   const variants = {
     default: 'bg-white/10 backdrop-blur-sm border border-white/20',
     elevated: 'bg-white/20 backdrop-blur-md border border-white/30 shadow-xl',
-    subtle: 'bg-white/5 backdrop-blur-sm border border-white/10'
+    subtle: 'bg-white/5 backdrop-blur-sm border border-white/10',
+    large: 'bg-white/15 backdrop-blur-md border border-white/25 shadow-lg p-6'
   };
 
   return (
@@ -26,6 +29,7 @@ export const GlassCard: React.FC<GlassCardProps> = ({
       className={cn(
         'glass-card',
         variants[variant],
+        animated && 'transition-all duration-300 hover:scale-[1.02] hover:shadow-2xl',
         className
       )} 
       {...props}
@@ -38,13 +42,15 @@ export const GlassCard: React.FC<GlassCardProps> = ({
 interface PrismButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   children: React.ReactNode;
   variant?: 'primary' | 'secondary' | 'ghost';
-  size?: 'sm' | 'md' | 'lg';
+  size?: 'sm' | 'md' | 'lg' | 'small' | 'large';
+  asChild?: boolean;
 }
 
 export const PrismButton: React.FC<PrismButtonProps> = ({
   children,
   variant = 'primary',
   size = 'md',
+  asChild = false,
   className,
   ...props
 }) => {
@@ -57,8 +63,27 @@ export const PrismButton: React.FC<PrismButtonProps> = ({
   const sizes = {
     sm: 'px-3 py-1.5 text-sm',
     md: 'px-4 py-2 text-base',
-    lg: 'px-6 py-3 text-lg'
+    lg: 'px-6 py-3 text-lg',
+    small: 'px-3 py-1.5 text-sm', // Alias for sm
+    large: 'px-6 py-3 text-lg'    // Alias for lg
   };
+
+  // If asChild is true, render as a span that can wrap other elements
+  if (asChild) {
+    return (
+      <span
+        className={cn(
+          'prism-button transition-all duration-200 inline-flex items-center justify-center',
+          variants[variant],
+          sizes[size],
+          className
+        )}
+        {...(props as any)}
+      >
+        {children}
+      </span>
+    );
+  }
 
   return (
     <Button
@@ -126,13 +151,17 @@ interface SpectrumBarProps {
   max?: number;
   colors?: string[];
   className?: string;
+  facet?: string;
+  animated?: boolean;
 }
 
 export const SpectrumBar: React.FC<SpectrumBarProps> = ({
   value = 0,
   max = 100,
   colors = ['#ff0045', '#ff9315', '#f1e800', '#2df36c', '#00b8ff', '#0082ff', '#8e6bf7'],
-  className
+  className,
+  facet,
+  animated = true
 }) => {
   const percentage = Math.min((value / max) * 100, 100);
   

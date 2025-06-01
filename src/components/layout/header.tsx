@@ -3,7 +3,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Logo, MinimalLogo } from '@/components/logo';
+import { DynamicLogo, MinimalDynamicLogo } from '@/components/DynamicLogo';
 import { Button } from '@/components/ui/button';
 import { Icons } from '@/components/icons';
 import { mainNavItems, allNavItemsForMobile } from '@/config/site';
@@ -53,7 +53,7 @@ export function Header() {
       <header className="sticky top-0 z-50 w-full border-b border-border/30 bg-background/80 backdrop-blur-md">
         <div className="flex h-16 items-center justify-between px-16 py-3"> {/* Increased px from 12 to 16 */}
           <Link href="/" className="flex items-center space-x-2 flex-shrink-0" onClick={() => setIsMobileMenuOpen(false)}>
-            <Logo />
+            <DynamicLogo showText={true} size="md" />
           </Link>
 
           <nav className="hidden md:flex flex-1 justify-start items-center gap-2 ml-6"> {/* Decreased gap from 4 to 2 */}
@@ -163,7 +163,7 @@ export function Header() {
                 <ScrollArea className="h-full">
                   <div className="p-6 pt-8">
                   <Link href="/" className="flex items-center space-x-2 mb-6" onClick={() => setIsMobileMenuOpen(false)}>
-                    <MinimalLogo />
+                    <MinimalDynamicLogo />
                      <span className="text-xl font-bold text-foreground">Meta-Prism</span>
                   </Link>
                     <nav className="flex flex-col space-y-2">

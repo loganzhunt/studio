@@ -256,3 +256,22 @@ export const FACET_COLORS_LCH = Object.fromEntries(
     calculateBandColor(facetName, 0.6) // Use 0.6 for vivid reference colors
   ]) : []
 ) as Record<FacetName, string>;
+
+/**
+ * Generate a ROYGBIV spectrum array for gradients and spectrum sliders
+ * Returns an array of vivid LCH colors in ROYGBIV order
+ */
+export function generateROYGBIVSpectrum(score: number = 0.7): string[] {
+  // Return colors in ROYGBIV order for spectrum display
+  const roygbivOrder: FacetName[] = [
+    'Teleology',     // Red
+    'Cosmology',     // Orange  
+    'Mythology',     // Yellow
+    'Axiology',      // Green
+    'Praxeology',    // Blue
+    'Epistemology',  // Indigo
+    'Ontology'       // Violet
+  ];
+  
+  return roygbivOrder.map(facetName => calculateBandColor(facetName, score));
+}

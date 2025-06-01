@@ -1,37 +1,49 @@
 // Spectrum Slider Component for Meta-Prism
 import React from 'react';
-import { FACET_COLORS } from '@/lib/colors';
+import { getROYGBIVSpectrum } from '@/lib/colors';
 import { cn } from '@/lib/utils';
 
 interface SpectrumSliderProps {
   value: number;
-  onChange: (value: number) => void;
+  onChange?: (value: number) => void;
+  onValueChange?: (value: number) => void;
   min?: number;
   max?: number;
   step?: number;
   className?: string;
   label?: string;
   facetName?: string;
+  facet?: string;
+  size?: string;
+  showPercentage?: boolean;
+  showLabels?: boolean;
 }
 
 export const SpectrumSlider: React.FC<SpectrumSliderProps> = ({
   value,
   onChange,
+  onValueChange,
   min = 0,
   max = 100,
   step = 1,
   className,
   label,
-  facetName
+  facetName,
+  facet,
+  size,
+  showPercentage,
+  showLabels
 }) => {
   const percentage = ((value - min) / (max - min)) * 100;
   
-  // Use ROYGBIV spectrum colors
-  const spectrumColors = Object.values(FACET_COLORS);
+  // Use dynamic LCH ROYGBIV spectrum colors for vivid gradient
+  const spectrumColors = getROYGBIVSpectrum(0.8); // Use high score for vivid colors
   const gradientBackground = `linear-gradient(to right, ${spectrumColors.join(', ')})`;
 
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    onChange(Number(event.target.value));
+    const newValue = Number(event.target.value);
+    if (onChange) onChange(newValue);
+    if (onValueChange) onValueChange(newValue);
   };
 
   return (

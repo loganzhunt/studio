@@ -39,6 +39,16 @@ import {
   User,
   LogOut,
   Loader2,
+  ArrowLeft,
+  ArrowRight,
+  Lightbulb,
+  Atom,
+  Brain,
+  Heart,
+  BookOpen,
+  Globe,
+  Target,
+  Zap,
 } from 'lucide-react';
 
 export type Icon = LucideIcon;
@@ -100,4 +110,15 @@ export const Icons = {
   logout: LogOut,
   loader: Loader2, 
   info: LucideInfo, // Use aliased import
+  arrowLeft: ArrowLeft,
+  arrowRight: ArrowRight,
+  bookmark: Bookmark,
+  lightbulb: Lightbulb,
+  atom: Atom,
+  brain: Brain,
+  heart: Heart,
+  bookOpen: BookOpen,
+  globe: Globe,
+  target: Target,
+  zap: Zap,
 };

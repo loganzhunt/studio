@@ -256,15 +256,15 @@ export const BUTTON_STYLES = {
  */
 export const CHIP_STYLES = {
   solid: (facet: FacetKey) => `${getFacetClass(facet, 'bg')} text-white px-3 py-1 rounded-full text-sm font-medium`,
-  soft: (facet: FacetKey) => `${getFacetClass(facet, 'bg', '100')} ${getFacetClass(facet, 'text', '800')} px-3 py-1 rounded-full text-sm font-medium`,
-  outline: (facet: FacetKey) => `border ${getFacetClass(facet, 'border', '300')} ${getFacetClass(facet, 'text', '700')} px-3 py-1 rounded-full text-sm font-medium`,
+  soft: (facet: FacetKey) => `${getFacetClass(facet, 'bg', 100)} ${getFacetClass(facet, 'text', 800)} px-3 py-1 rounded-full text-sm font-medium`,
+  outline: (facet: FacetKey) => `border ${getFacetClass(facet, 'border', 300)} ${getFacetClass(facet, 'text', 700)} px-3 py-1 rounded-full text-sm font-medium`,
 };
 
 /**
  * Card style presets for each facet
  */
 export const CARD_STYLES = {
-  subtle: (facet: FacetKey) => `bg-gradient-to-br from-facet-${facet}-50 to-facet-${facet}-100 border ${getFacetClass(facet, 'border', '200')}`,
+  subtle: (facet: FacetKey) => `bg-gradient-to-br from-facet-${facet}-50 to-facet-${facet}-100 border ${getFacetClass(facet, 'border', 200)}`,
   accent: (facet: FacetKey) => `border-l-4 ${getFacetClass(facet, 'border')} pl-4`,
   header: (facet: FacetKey) => `bg-gradient-to-r from-facet-${facet}-500 to-facet-${facet}-600`,
 };
@@ -286,11 +286,11 @@ export const STATUS_STYLE = (facet: FacetKey) =>
  */
 export const ACCESSIBLE_COMBINATIONS = {
   // White text on colored background (WCAG AA compliant)
-  whiteOnColor: (facet: FacetKey) => `${getFacetClass(facet, 'bg', '600')} text-white`,
+  whiteOnColor: (facet: FacetKey) => `${getFacetClass(facet, 'bg', 600)} text-white`,
   // Dark text on light background
-  darkOnLight: (facet: FacetKey) => `${getFacetClass(facet, 'bg', '50')} ${getFacetClass(facet, 'text', '900')}`,
+  darkOnLight: (facet: FacetKey) => `${getFacetClass(facet, 'bg', 50)} ${getFacetClass(facet, 'text', 900)}`,
   // Colored text on white (good contrast)
-  colorOnWhite: (facet: FacetKey) => `${getFacetClass(facet, 'text', '700')}`,
+  colorOnWhite: (facet: FacetKey) => `${getFacetClass(facet, 'text', 700)}`,
 };
 
 /**
@@ -301,20 +301,20 @@ export function generateFacetClasses(facet: FacetKey) {
     // Text colors
     text: {
       primary: getFacetClass(facet, 'text'),
-      secondary: getFacetClass(facet, 'text', '600'),
-      muted: getFacetClass(facet, 'text', '500'),
+      secondary: getFacetClass(facet, 'text', 600),
+      muted: getFacetClass(facet, 'text', 500),
     },
     // Background colors  
     bg: {
       primary: getFacetClass(facet, 'bg'),
-      light: getFacetClass(facet, 'bg', '100'),
-      subtle: getFacetClass(facet, 'bg', '50'),
+      light: getFacetClass(facet, 'bg', 100),
+      subtle: getFacetClass(facet, 'bg', 50),
     },
     // Border colors
     border: {
       primary: getFacetClass(facet, 'border'),
-      light: getFacetClass(facet, 'border', '200'),
-      subtle: getFacetClass(facet, 'border', '100'),
+      light: getFacetClass(facet, 'border', 200),
+      subtle: getFacetClass(facet, 'border', 100),
     },
     // Buttons
     buttons: {
