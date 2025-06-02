@@ -7,8 +7,8 @@ const nextConfig: NextConfig = {
   ...(isDev && {
     experimental: {
       turbo: {
-        loaders: {
-          '.svg': ['@svgr/webpack'],
+        rules: {
+          '*.svg': ['@svgr/webpack'],
         },
       },
       optimizeCss: false, // Disable CSS optimization in dev for speed
@@ -20,7 +20,7 @@ const nextConfig: NextConfig = {
     eslint: {
       ignoreDuringBuilds: true,
     },
-    swcMinify: false, // Disable minification in dev
+    // Remove deprecated swcMinify option
   }),
   
   // Production optimizations

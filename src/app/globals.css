@@ -39,13 +39,13 @@
     --chart-3: hsl(var(--domain-praxeology));
     --chart-4: hsl(var(--domain-axiology));
     --chart-5: hsl(var(--domain-mythology));
-    
+
     /* Layout Variables */
     --header-height: 4rem;
     --content-max-width: 1400px;
     --section-padding-x: 1rem;
     --section-padding-y: 3rem;
-    
+
     /* Glass morphism variables */
     --glass-bg: rgba(255, 255, 255, 0.05);
     --glass-border: rgba(255, 255, 255, 0.1);
@@ -83,11 +83,13 @@
   html {
     scroll-behavior: smooth;
   }
-  
+
   body {
     background-color: hsl(var(--background));
     color: hsl(var(--foreground));
-    font-family: var(--font-geist-sans), 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    font-family: var(--font-geist-sans), "Inter", system-ui, -apple-system,
+      BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial,
+      sans-serif;
     font-size: 16px;
     line-height: 1.6;
     overflow-x: hidden;
@@ -96,7 +98,12 @@
   }
 
   /* Typography */
-  h1, h2, h3, h4, h5, h6 {
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
     font-weight: 700;
     letter-spacing: -0.025em;
     color: hsl(var(--foreground));
@@ -104,58 +111,82 @@
     line-height: 1.2;
   }
 
-  h1 { 
+  h1 {
     font-size: 2.25rem;
     font-weight: 800;
     letter-spacing: -0.04em;
   }
-  
-  h2 { 
+
+  h2 {
     font-size: 1.875rem;
     font-weight: 700;
     letter-spacing: -0.03em;
   }
-  
-  h3 { 
+
+  h3 {
     font-size: 1.5rem;
     font-weight: 600;
     letter-spacing: -0.025em;
   }
-  
-  h4 { 
+
+  h4 {
     font-size: 1.25rem;
     font-weight: 600;
     letter-spacing: -0.02em;
   }
-  
-  h5 { 
+
+  h5 {
     font-size: 1.125rem;
     font-weight: 500;
     letter-spacing: -0.015em;
   }
-  
-  h6 { 
+
+  h6 {
     font-size: 1rem;
     font-weight: 500;
     letter-spacing: -0.01em;
   }
 
   @media (min-width: 768px) {
-    h1 { font-size: 3rem; }
-    h2 { font-size: 2.25rem; }
-    h3 { font-size: 1.875rem; }
-    h4 { font-size: 1.5rem; }
-    h5 { font-size: 1.25rem; }
-    h6 { font-size: 1.125rem; }
+    h1 {
+      font-size: 3rem;
+    }
+    h2 {
+      font-size: 2.25rem;
+    }
+    h3 {
+      font-size: 1.875rem;
+    }
+    h4 {
+      font-size: 1.5rem;
+    }
+    h5 {
+      font-size: 1.25rem;
+    }
+    h6 {
+      font-size: 1.125rem;
+    }
   }
 
   @media (min-width: 1024px) {
-    h1 { font-size: 3.75rem; }
-    h2 { font-size: 3rem; }
-    h3 { font-size: 2.25rem; }
-    h4 { font-size: 1.875rem; }
-    h5 { font-size: 1.5rem; }
-    h6 { font-size: 1.25rem; }
+    h1 {
+      font-size: 3.75rem;
+    }
+    h2 {
+      font-size: 3rem;
+    }
+    h3 {
+      font-size: 2.25rem;
+    }
+    h4 {
+      font-size: 1.875rem;
+    }
+    h5 {
+      font-size: 1.5rem;
+    }
+    h6 {
+      font-size: 1.25rem;
+    }
   }
 
   /* Body text */
@@ -178,18 +209,20 @@
     color: hsl(var(--primary));
     transition: color 0.2s ease;
   }
-  
+
   a:hover {
     color: hsl(var(--primary) / 0.8);
   }
 
   /* Lists */
-  ul, ol {
+  ul,
+  ol {
     color: hsl(var(--muted-foreground));
     padding-left: 1.5em;
   }
 
-  ul > li, ol > li {
+  ul > li,
+  ol > li {
     margin-bottom: 0.5rem;
   }
 
@@ -225,33 +258,35 @@
    * Uses design tokens for consistent styling
    * =========================================== */
   .glass-card-alive {
-    background: theme('colors.glass.light');
-    backdrop-filter: blur(theme('backdropBlur.glass'));
-    -webkit-backdrop-filter: blur(theme('backdropBlur.glass'));
-    border: 1px solid theme('colors.glass.border-light');
-    border-radius: theme('borderRadius.glass');
-    box-shadow: theme('boxShadow.glass');
+    background: theme("colors.glass.light");
+    backdrop-filter: blur(theme("backdropBlur.glass"));
+    -webkit-backdrop-filter: blur(theme("backdropBlur.glass"));
+    border: 1px solid theme("colors.glass.border-light");
+    border-radius: theme("borderRadius.glass");
+    box-shadow: theme("boxShadow.glass");
     transition: all 0.3s ease-in-out;
   }
 
   .glass-card-alive:hover {
-    background: theme('colors.glass.light-md');
-    border-color: theme('colors.glass.border-medium');
-    box-shadow: theme('boxShadow.beautiful');
+    background: theme("colors.glass.light-md");
+    border-color: theme("colors.glass.border-medium");
+    box-shadow: theme("boxShadow.beautiful");
     transform: translateY(-2px);
   }
 
   .glass-card-alive.active {
     border: 2px solid;
-    border-image: linear-gradient(45deg, 
-      theme('colors.ontology.DEFAULT'), 
-      theme('colors.epistemology.DEFAULT'), 
-      theme('colors.praxeology.DEFAULT'), 
-      theme('colors.axiology.DEFAULT'), 
-      theme('colors.mythology.DEFAULT'), 
-      theme('colors.cosmology.DEFAULT'), 
-      theme('colors.teleology.DEFAULT')
-    ) 1;
+    border-image: linear-gradient(
+        45deg,
+        theme("colors.ontology.DEFAULT"),
+        theme("colors.epistemology.DEFAULT"),
+        theme("colors.praxeology.DEFAULT"),
+        theme("colors.axiology.DEFAULT"),
+        theme("colors.mythology.DEFAULT"),
+        theme("colors.cosmology.DEFAULT"),
+        theme("colors.teleology.DEFAULT")
+      )
+      1;
   }
 
   /* ===========================================
@@ -259,15 +294,19 @@
    * Enhanced with microinteractions and accessibility
    * =========================================== */
   .btn-prism {
-    padding: theme('spacing.prism-sm') theme('spacing.prism-lg');
-    border-radius: theme('borderRadius.prism');
+    padding: theme("spacing.prism-sm") theme("spacing.prism-lg");
+    border-radius: theme("borderRadius.prism");
     font-weight: 500;
-    backdrop-filter: blur(theme('backdropBlur.glass'));
-    -webkit-backdrop-filter: blur(theme('backdropBlur.glass'));
-    background: linear-gradient(45deg, hsl(var(--primary)), theme('colors.ontology.DEFAULT'));
+    backdrop-filter: blur(theme("backdropBlur.glass"));
+    -webkit-backdrop-filter: blur(theme("backdropBlur.glass"));
+    background: linear-gradient(
+      45deg,
+      hsl(var(--primary)),
+      theme("colors.ontology.DEFAULT")
+    );
     background-size: 200% 200%;
     color: white;
-    box-shadow: theme('boxShadow.beautiful');
+    box-shadow: theme("boxShadow.beautiful");
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     position: relative;
     overflow: hidden;
@@ -277,19 +316,19 @@
   }
 
   .btn-prism::before {
-    content: '';
+    content: "";
     position: absolute;
     top: 0;
     left: -100%;
     width: 100%;
     height: 100%;
-    background: theme('backgroundImage.shimmer-light');
+    background: theme("backgroundImage.shimmer-light");
     transition: left 0.5s ease-in-out;
     z-index: 1;
   }
 
   .btn-prism::after {
-    content: '';
+    content: "";
     position: absolute;
     inset: 0;
     background: inherit;
@@ -301,7 +340,7 @@
 
   /* Hover microinteractions */
   .btn-prism:hover {
-    box-shadow: theme('boxShadow.prism');
+    box-shadow: theme("boxShadow.prism");
     transform: translateY(-2px) scale(1.02);
     animation: gradient-breathe 2s ease-in-out infinite;
   }
@@ -323,7 +362,8 @@
   /* Focus state for keyboard accessibility */
   .btn-prism:focus-visible {
     outline: none;
-    animation: focus-spectrum 3s linear infinite, button-focus-pulse 2s ease-in-out infinite;
+    animation: focus-spectrum 3s linear infinite,
+      button-focus-pulse 2s ease-in-out infinite;
     z-index: 10;
   }
 
@@ -351,11 +391,11 @@
    * Enhanced with microinteractions and icon animations
    * =========================================== */
   .selector-prism {
-    backdrop-filter: blur(theme('backdropBlur.glass'));
-    -webkit-backdrop-filter: blur(theme('backdropBlur.glass'));
-    background: theme('colors.glass.light');
-    border: 1px solid theme('colors.glass.border-light');
-    border-radius: theme('borderRadius.orb');
+    backdrop-filter: blur(theme("backdropBlur.glass"));
+    -webkit-backdrop-filter: blur(theme("backdropBlur.glass"));
+    background: theme("colors.glass.light");
+    border: 1px solid theme("colors.glass.border-light");
+    border-radius: theme("borderRadius.orb");
     width: 3rem;
     height: 3rem;
     display: flex;
@@ -368,11 +408,16 @@
   }
 
   .selector-prism::after {
-    content: '';
+    content: "";
     position: absolute;
     inset: -2px;
     border-radius: inherit;
-    background: linear-gradient(45deg, transparent, theme('colors.ontology.DEFAULT'), transparent);
+    background: linear-gradient(
+      45deg,
+      transparent,
+      theme("colors.ontology.DEFAULT"),
+      transparent
+    );
     opacity: 0;
     transition: opacity 0.3s ease;
     z-index: -1;
@@ -380,10 +425,10 @@
 
   /* Hover microinteractions */
   .selector-prism:hover {
-    background: theme('colors.glass.light-md');
-    border-color: theme('colors.glass.border-medium');
+    background: theme("colors.glass.light-md");
+    border-color: theme("colors.glass.border-medium");
     transform: scale(1.05) translateY(-1px);
-    box-shadow: theme('boxShadow.glass-md');
+    box-shadow: theme("boxShadow.glass-md");
   }
 
   .selector-prism:hover::after {
@@ -397,20 +442,25 @@
 
   /* Active/selected state */
   .selector-prism.active {
-    background: linear-gradient(135deg, theme('colors.ontology.500'), theme('colors.epistemology.500'));
-    border-color: theme('colors.ontology.300');
+    background: linear-gradient(
+      135deg,
+      theme("colors.ontology.500"),
+      theme("colors.epistemology.500")
+    );
+    border-color: theme("colors.ontology.300");
     transform: scale(1.1);
-    box-shadow: theme('boxShadow.glow-ontology');
+    box-shadow: theme("boxShadow.glow-ontology");
     animation: glow-pulse 2s ease-in-out infinite;
   }
 
   .selector-prism.active::after {
     opacity: 0.6;
-    background: linear-gradient(45deg, 
-      theme('colors.ontology.DEFAULT'), 
-      theme('colors.epistemology.DEFAULT'), 
-      theme('colors.praxeology.DEFAULT'),
-      theme('colors.ontology.DEFAULT')
+    background: linear-gradient(
+      45deg,
+      theme("colors.ontology.DEFAULT"),
+      theme("colors.epistemology.DEFAULT"),
+      theme("colors.praxeology.DEFAULT"),
+      theme("colors.ontology.DEFAULT")
     );
     animation: gradient-shift 3s linear infinite;
   }
@@ -442,7 +492,7 @@
 
   .selector-prism:focus,
   .selector-prism.active {
-    box-shadow: theme('boxShadow.spectrum');
+    box-shadow: theme("boxShadow.spectrum");
   }
 
   /* ===========================================
@@ -450,12 +500,12 @@
    * Uses glass design tokens for consistency
    * =========================================== */
   .input-glass {
-    backdrop-filter: blur(theme('backdropBlur.glass'));
-    -webkit-backdrop-filter: blur(theme('backdropBlur.glass'));
-    background: theme('colors.glass.light-xs');
-    border: 1px solid theme('colors.glass.border-light');
-    border-radius: theme('borderRadius.glass');
-    padding: theme('spacing.prism-sm') theme('spacing.prism-md');
+    backdrop-filter: blur(theme("backdropBlur.glass"));
+    -webkit-backdrop-filter: blur(theme("backdropBlur.glass"));
+    background: theme("colors.glass.light-xs");
+    border: 1px solid theme("colors.glass.border-light");
+    border-radius: theme("borderRadius.glass");
+    padding: theme("spacing.prism-sm") theme("spacing.prism-md");
     color: hsl(var(--foreground));
     transition: all 0.3s ease-in-out;
     width: 100%;
@@ -467,9 +517,9 @@
 
   .input-glass:focus {
     outline: none;
-    background: theme('colors.glass.light');
-    border: 2px solid theme('colors.ontology.DEFAULT/50%');
-    box-shadow: 0 0 0 1px theme('colors.ontology.DEFAULT/30%');
+    background: theme("colors.glass.light");
+    border: 2px solid theme("colors.ontology.DEFAULT/50%");
+    box-shadow: 0 0 0 1px theme("colors.ontology.DEFAULT/30%");
   }
 
   /* ===========================================
@@ -477,28 +527,28 @@
    * Uses enhanced blur and glass tokens
    * =========================================== */
   .modal-glass {
-    backdrop-filter: blur(theme('backdropBlur.prism'));
-    -webkit-backdrop-filter: blur(theme('backdropBlur.prism'));
-    background: theme('colors.glass.dark-lg');
+    backdrop-filter: blur(theme("backdropBlur.prism"));
+    -webkit-backdrop-filter: blur(theme("backdropBlur.prism"));
+    background: theme("colors.glass.dark-lg");
     position: fixed;
     inset: 0;
-    z-index: theme('zIndex.modal');
+    z-index: theme("zIndex.modal");
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: theme('spacing.prism-md');
+    padding: theme("spacing.prism-md");
   }
 
   .modal-content {
-    backdrop-filter: blur(theme('backdropBlur.crystal'));
-    -webkit-backdrop-filter: blur(theme('backdropBlur.crystal'));
-    background: theme('colors.card') / 0.8;
-    border: 1px solid theme('colors.glass.border-light');
-    border-radius: theme('borderRadius.glass-lg');
-    box-shadow: theme('boxShadow.glass-lg');
+    backdrop-filter: blur(theme("backdropBlur.crystal"));
+    -webkit-backdrop-filter: blur(theme("backdropBlur.crystal"));
+    background: theme("colors.card.DEFAULT") / 0.8;
+    border: 1px solid theme("colors.glass.border-light");
+    border-radius: theme("borderRadius.glass-lg");
+    box-shadow: theme("boxShadow.glass-lg");
     max-width: 32rem;
     width: 100%;
-    padding: theme('spacing.glass-lg');
+    padding: theme("spacing.glass-lg");
   }
 
   /* ===========================================
@@ -510,7 +560,7 @@
   }
 
   .icon-spectrum:hover {
-    animation: theme('animation.spectrum-shift');
+    animation: theme("animation.spectrum-shift");
   }
 
   /* ===========================================
@@ -518,15 +568,15 @@
    * Uses glass design tokens consistently
    * =========================================== */
   .glass-panel {
-    backdrop-filter: blur(theme('backdropBlur.glass'));
-    -webkit-backdrop-filter: blur(theme('backdropBlur.glass'));
-    background: theme('colors.glass.light-xs');
-    border-radius: theme('borderRadius.glass');
-    padding: theme('spacing.glass-lg');
+    backdrop-filter: blur(theme("backdropBlur.glass"));
+    -webkit-backdrop-filter: blur(theme("backdropBlur.glass"));
+    background: theme("colors.glass.light-xs");
+    border-radius: theme("borderRadius.glass");
+    padding: theme("spacing.glass-lg");
   }
 
   .glass-panel.with-border {
-    border: 1px solid theme('colors.glass.border-light');
+    border: 1px solid theme("colors.glass.border-light");
   }
 
   /* ===========================================
@@ -536,18 +586,19 @@
   .spectrum-bar {
     height: 0.25rem;
     width: 100%;
-    background: linear-gradient(to right, 
-      theme('colors.ontology.DEFAULT'), 
-      theme('colors.epistemology.DEFAULT'), 
-      theme('colors.praxeology.DEFAULT'), 
-      theme('colors.axiology.DEFAULT'), 
-      theme('colors.mythology.DEFAULT'), 
-      theme('colors.cosmology.DEFAULT'), 
-      theme('colors.teleology.DEFAULT')
+    background: linear-gradient(
+      to right,
+      theme("colors.ontology.DEFAULT"),
+      theme("colors.epistemology.DEFAULT"),
+      theme("colors.praxeology.DEFAULT"),
+      theme("colors.axiology.DEFAULT"),
+      theme("colors.mythology.DEFAULT"),
+      theme("colors.cosmology.DEFAULT"),
+      theme("colors.teleology.DEFAULT")
     );
-    border-radius: theme('borderRadius.pill');
+    border-radius: theme("borderRadius.pill");
     background-size: 200% 100%;
-    animation: theme('animation.spectrum-flow');
+    animation: theme("animation.spectrum-shift");
   }
 
   /* ===========================================
@@ -555,9 +606,9 @@
    * Uses shimmer animation tokens
    * =========================================== */
   .hero-shimmer {
-    background: theme('backgroundImage.shimmer-light');
+    background: theme("backgroundImage.shimmer-light");
     background-size: 200% 100%;
-    animation: theme('animation.shimmer');
+    animation: theme("animation.glass-shimmer");
   }
 
   /* ===========================================
@@ -565,35 +616,35 @@
    * Uses facet colors with glass effects
    * =========================================== */
   .feature-card {
-    backdrop-filter: blur(theme('backdropBlur.glass'));
-    -webkit-backdrop-filter: blur(theme('backdropBlur.glass'));
-    background: theme('colors.glass.light-xs');
-    border: 1px solid theme('colors.glass.border-light');
-    border-radius: theme('borderRadius.glass');
-    padding: theme('spacing.glass-lg');
+    backdrop-filter: blur(theme("backdropBlur.glass"));
+    -webkit-backdrop-filter: blur(theme("backdropBlur.glass"));
+    background: theme("colors.glass.light-xs");
+    border: 1px solid theme("colors.glass.border-light");
+    border-radius: theme("borderRadius.glass");
+    padding: theme("spacing.glass-lg");
     transition: all 0.3s ease-in-out;
   }
 
   .feature-card.facet-accent {
-    background: var(--facet-gradient, theme('colors.glass.light-xs'));
+    background: var(--facet-gradient, theme("colors.glass.light-xs"));
   }
 
   .feature-card:hover {
-    background: theme('colors.glass.light');
-    border-color: theme('colors.glass.border-medium');
+    background: theme("colors.glass.light");
+    border-color: theme("colors.glass.border-medium");
     transform: translateY(-2px);
-    box-shadow: theme('boxShadow.glass');
+    box-shadow: theme("boxShadow.glass");
   }
 
   /* ===========================================
    * SECONDARY & GHOST BUTTON VARIANTS
    * Enhanced with microinteractions matching primary buttons
    * =========================================== */
-  
+
   /* Secondary Button Microinteractions */
   .btn-prism.bg-gradient-to-r:hover {
     transform: translateY(-2px) scale(1.02);
-    box-shadow: theme('boxShadow.glass-lg');
+    box-shadow: theme("boxShadow.glass-lg");
     animation: gradient-shift 2s ease-in-out infinite;
   }
 
@@ -615,10 +666,15 @@
   }
 
   .backdrop-blur-glass.bg-glass-light::before {
-    content: '';
+    content: "";
     position: absolute;
     inset: 0;
-    background: linear-gradient(45deg, transparent, theme('colors.glass.light-md'), transparent);
+    background: linear-gradient(
+      45deg,
+      transparent,
+      theme("colors.glass.light-md"),
+      transparent
+    );
     opacity: 0;
     transition: opacity 0.3s ease;
     z-index: -1;
@@ -635,8 +691,8 @@
 
   .backdrop-blur-glass.bg-glass-light:focus-visible {
     outline: none;
-    border-color: theme('colors.ontology.DEFAULT');
-    box-shadow: 0 0 0 2px theme('colors.ontology.DEFAULT/30%');
+    border-color: theme("colors.ontology.DEFAULT");
+    box-shadow: 0 0 0 2px theme("colors.ontology.DEFAULT/30%");
     animation: focus-spectrum 3s linear infinite;
   }
 
@@ -666,53 +722,56 @@
 
 /* Keyframes */
 @keyframes spectrum-shift {
-  0% { 
+  0% {
     filter: hue-rotate(0deg);
   }
-  50% { 
+  50% {
     filter: hue-rotate(180deg);
   }
-  100% { 
+  100% {
     filter: hue-rotate(360deg);
   }
 }
 
 @keyframes shimmer {
-  0%, 100% { 
-    transform: translateX(-100%); 
+  0%,
+  100% {
+    transform: translateX(-100%);
   }
-  50% { 
-    transform: translateX(100%); 
+  50% {
+    transform: translateX(100%);
   }
 }
 
 @keyframes spectrum-flow {
-  0% { 
-    background-position: 0% 50%; 
+  0% {
+    background-position: 0% 50%;
   }
-  50% { 
-    background-position: 100% 50%; 
+  50% {
+    background-position: 100% 50%;
   }
-  100% { 
-    background-position: 0% 50%; 
+  100% {
+    background-position: 0% 50%;
   }
 }
 
 @keyframes glow-pulse {
-  0%, 100% { 
-    box-shadow: 0 0 20px rgba(139, 92, 246, 0.3); 
+  0%,
+  100% {
+    box-shadow: 0 0 20px rgba(139, 92, 246, 0.3);
   }
-  50% { 
-    box-shadow: 0 0 40px rgba(139, 92, 246, 0.5); 
+  50% {
+    box-shadow: 0 0 40px rgba(139, 92, 246, 0.5);
   }
 }
 
 @keyframes float-gentle {
-  0%, 100% { 
-    transform: translateY(0px); 
+  0%,
+  100% {
+    transform: translateY(0px);
   }
-  50% { 
-    transform: translateY(-8px); 
+  50% {
+    transform: translateY(-8px);
   }
 }
 
@@ -723,19 +782,20 @@
 }
 
 .roygbiv-gradient-underline::after {
-  content: '';
+  content: "";
   position: absolute;
   left: 0;
   bottom: 0;
   width: 100%;
   height: 3px;
-  background: linear-gradient(to right, 
-    hsl(var(--domain-ontology)), 
-    hsl(var(--domain-epistemology)), 
-    hsl(var(--domain-praxeology)), 
-    hsl(var(--domain-axiology)), 
-    hsl(var(--domain-mythology)), 
-    hsl(var(--domain-cosmology)), 
+  background: linear-gradient(
+    to right,
+    hsl(var(--domain-ontology)),
+    hsl(var(--domain-epistemology)),
+    hsl(var(--domain-praxeology)),
+    hsl(var(--domain-axiology)),
+    hsl(var(--domain-mythology)),
+    hsl(var(--domain-cosmology)),
     hsl(var(--domain-teleology))
   );
 }
