@@ -419,7 +419,7 @@ export default function CodexPage() {
                       variant={
                         savedWorldviews.some((p) => p.id === selectedEntry.id)
                           ? "default"
-                          : "outline"
+                          : "secondary"
                       }
                       size="sm"
                       className="w-full text-xs"
@@ -559,7 +559,7 @@ export default function CodexPage() {
                       variant={
                         savedWorldviews.some((p) => p.id === selectedEntry.id)
                           ? "default"
-                          : "outline"
+                          : "secondary"
                       }
                       size="sm"
                       className="w-full text-xs"

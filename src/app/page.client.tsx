@@ -41,6 +41,7 @@ import {
   PrismButton,
   HeroShimmer,
   SpectrumBar,
+  GlassAccordionItem,
 } from "@/components/glass-components";
 import { FacetClassForcer } from "@/components/force-facet-classes";
 import { Sparkles, ArrowRight } from "lucide-react";
@@ -222,8 +223,8 @@ export default function HomePage() {
 
               <Link href="/assessment">
                 <PrismButton
+                  className="h-12 px-8 text-sm sm:text-base font-semibold shadow-[0_4px_20px_rgba(0,0,0,0.2)] group transition-all duration-300 hover:scale-105 hover:shadow-[0_6px_25px_rgba(0,0,0,0.3)]"
                   size="lg"
-                  className="h-12 px-8 text-sm sm:text-base font-semibold shadow-lg group"
                 >
                   <Sparkles className="mr-2 h-5 w-5 transition-transform group-hover:scale-110" />
                   Begin Your Journey
@@ -272,11 +273,11 @@ export default function HomePage() {
                 const facetKey = stepFacets[index];
 
                 return (
-                  <Card
+                  <GlassCard
                     key={index}
-                    className={`text-center p-8 hover:shadow-lg transition-all duration-300 ease-in-out glassmorphic-card border-transparent
-                      hover:${getFacetClass("border", facetKey, "200")} 
-                      hover:${getFacetClass("bg", facetKey, "50")}`}
+                    animated
+                    className={`text-center p-8 transition-all duration-300 ease-in-out border-transparent
+                      hover:${getFacetClass("border", facetKey, "200")}`}
                   >
                     <div className="mb-8">
                       <div
@@ -305,7 +306,7 @@ export default function HomePage() {
                       {step.title}
                     </h3>
                     <p className="text-muted-foreground">{step.description}</p>
-                  </Card>
+                  </GlassCard>
                 );
               })}
             </div>
@@ -350,7 +351,10 @@ export default function HomePage() {
                         className="pl-4 sm:basis-1/2 lg:basis-1/3 xl:basis-1/4"
                       >
                         <div className="p-1 h-full">
-                          <Card className="flex flex-col h-full overflow-hidden hover:shadow-lg transition-shadow duration-300 ease-in-out glassmorphic-card">
+                          <GlassCard
+                            className="flex flex-col h-full overflow-hidden transition-all duration-300 ease-in-out"
+                            animated
+                          >
                             <CardHeader className="p-6 text-center">
                               <div className="flex items-center justify-center gap-2 mb-1">
                                 {entry?.icon && (
@@ -388,9 +392,9 @@ export default function HomePage() {
                               />
                             </CardContent>
                             <CardFooter className="p-3 border-t border-border/30 mt-auto">
-                              <Button
-                                variant="outline"
-                                size="sm"
+                              <PrismButton
+                                variant="secondary"
+                                size="small"
                                 className="w-full text-xs"
                                 asChild
                               >
@@ -398,25 +402,33 @@ export default function HomePage() {
                                   Explore{" "}
                                   <Icons.chevronRight className="ml-1 h-4 w-4" />
                                 </Link>
-                              </Button>
+                              </PrismButton>
                             </CardFooter>
-                          </Card>
+                          </GlassCard>
                         </div>
                       </CarouselItem>
                     );
                   })}
                 </CarouselContent>
-                <CarouselPrevious className="hidden sm:flex absolute left-[-50px] top-1/2 -translate-y-1/2" />
-                <CarouselNext className="hidden sm:flex absolute right-[-50px] top-1/2 -translate-y-1/2" />
+                <CarouselPrevious className="hidden sm:flex absolute left-[-50px] top-1/2 -translate-y-1/2">
+                  <GlassCard className="p-2 rounded-full shadow-md bg-card/80 backdrop-blur-md border border-border/30">
+                    <Icons.chevronLeft className="h-5 w-5 text-primary" />
+                  </GlassCard>
+                </CarouselPrevious>
+                <CarouselNext className="hidden sm:flex absolute right-[-50px] top-1/2 -translate-y-1/2">
+                  <GlassCard className="p-2 rounded-full shadow-md bg-card/80 backdrop-blur-md border border-border/30">
+                    <Icons.chevronRight className="h-5 w-5 text-primary" />
+                  </GlassCard>
+                </CarouselNext>
               </Carousel>
             </div>
             <div className="text-center mt-12">
-              <Button size="lg" variant="outline" asChild>
+              <PrismButton size="lg" variant="secondary" asChild>
                 <Link href="/codex">
                   Explore the Full Codex{" "}
                   <Icons.chevronRight className="ml-2 h-5 w-5" />
                 </Link>
-              </Button>
+              </PrismButton>
             </div>
           </div>
         </section>
@@ -456,10 +468,10 @@ export default function HomePage() {
                     const facetInfo = FACET_INFO[facetKey];
 
                     return (
-                      <AccordionItem
+                      <GlassAccordionItem
                         value={facet.name}
                         key={facet.name}
-                        className="glassmorphic-card mb-3 last:mb-0 overflow-hidden hover:shadow-primary/20 transition-all duration-300 ease-in-out"
+                        animated
                       >
                         <AccordionTrigger className="p-6 text-lg hover:no-underline group">
                           <div className="flex items-center gap-4">
@@ -514,9 +526,9 @@ export default function HomePage() {
                               </p>
                             )}
                           </div>
-                          <Button
-                            variant="outline"
-                            size="sm"
+                          <PrismButton
+                            variant="secondary"
+                            size="small"
                             className={`${getFacetClass(
                               "border",
                               facetKey,
@@ -530,11 +542,11 @@ export default function HomePage() {
                           >
                             <Link href={`/facet/${facet.name.toLowerCase()}`}>
                               Deep Dive into {facet.name}{" "}
-                              <Icons.chevronRight className="ml-2 h-4 w-4" />
+                              <Icons.ArrowRight className="ml-2 h-4 w-4" />
                             </Link>
-                          </Button>
+                          </PrismButton>
                         </AccordionContent>
-                      </AccordionItem>
+                      </GlassAccordionItem>
                     );
                   })
                 : null}

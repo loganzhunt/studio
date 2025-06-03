@@ -77,7 +77,7 @@ export default function CodexWorldviewClientPage({
       )}
 
       <div className="flex justify-center gap-4 mt-6">
-        <Button variant="outline" size="sm" asChild>
+        <Button variant="secondary" size="sm" asChild>
           <Link href="/codex">
             <Icons.arrowLeft className="mr-2 h-4 w-4" />
             Back to Codex

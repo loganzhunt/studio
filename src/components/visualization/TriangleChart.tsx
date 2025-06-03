@@ -119,66 +119,18 @@ export default function TriangleChart({
               // S-curve enhancement + pow(2.0) scoring + ±4 lightness band variation ensures ULTIMATE visual differences
               // Each band now displays MAXIMUM ROYGBIV impact with crystal-clear differentiation
 
-              // Calculate dynamic stroke properties for additional separation
-              const strokeWidth = isHovered ? "2" : "1";
-              const strokeOpacity =
-                score > 0.7 ? 0.3 : score > 0.4 ? 0.2 : 0.15;
-
               return (
                 <g key={facetName}>
                   <path
                     d={getBandPath(index)}
                     fill={bandColor}
-                    stroke="hsl(var(--card-foreground))"
-                    strokeWidth={strokeWidth}
-                    strokeOpacity={strokeOpacity}
+                    stroke="none"
                     className={cn(
                       "transition-all duration-300 ease-in-out",
-                      interactive && "cursor-pointer group outline-none",
-                      interactive &&
-                        "hover:stroke-[hsl(var(--card-foreground)_/_0.7)] hover:stroke-[1.5px] focus-visible:stroke-[hsl(var(--card-foreground)_/_0.7)] focus-visible:stroke-[1.5px]",
+                      interactive && "cursor-pointer group",
                       isHovered && "drop-shadow-lg"
                     )}
-                    onClick={
-                      interactive && onLayerClick
-                        ? () => onLayerClick(facetName)
-                        : undefined
-                    }
-                    onMouseEnter={() =>
-                      interactive && setHoveredBand(facetName)
-                    }
-                    onMouseLeave={() => interactive && setHoveredBand(null)}
-                    tabIndex={interactive ? 0 : -1}
-                    aria-label={`${facetName}: Score ${Math.round(
-                      score * 100
-                    )}% (LCH: L${Math.round(colorInfo.lch.l)}, C${Math.round(
-                      colorInfo.lch.c
-                    )}, H${Math.round(colorInfo.lch.h)})`}
-                    onKeyDown={
-                      interactive && onLayerClick
-                        ? (e: React.KeyboardEvent) => {
-                            if (e.key === "Enter" || e.key === " ") {
-                              e.preventDefault();
-                              onLayerClick(facetName);
-                            }
-                          }
-                        : undefined
-                    }
-                  >
-                    <title>
-                      {`${
-                        worldviewName ? `${worldviewName} - ` : ""
-                      }${facetName}: Score ${Math.round(score * 100)}%${
-                        interactive
-                          ? ` (LCH: L${Math.round(
-                              colorInfo.lch.l
-                            )}, C${Math.round(colorInfo.lch.c)}, H${Math.round(
-                              colorInfo.lch.h
-                            )})`
-                          : ""
-                      }`}
-                    </title>
-                  </path>
+                  />
                 </g>
               );
             })}

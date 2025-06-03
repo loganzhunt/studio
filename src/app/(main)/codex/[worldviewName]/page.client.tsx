@@ -73,7 +73,7 @@ export default function CodexDeepDivePage() {
           The worldview "{worldviewNameFromParam}" could not be found in our
           codex.
         </p>
-        <Button asChild variant="outline">
+        <Button variant="secondary" size="sm" asChild>
           <Link href="/codex">View All Worldviews</Link>
         </Button>
       </div>
@@ -142,7 +142,7 @@ export default function CodexDeepDivePage() {
             <Icons.bookmark className="mr-2 h-4 w-4" />
             {isSaved ? "Saved" : "Save Worldview"}
           </Button>
-          <Button variant="outline" size="sm" asChild>
+          <Button variant="secondary" size="sm" asChild>
             <Link href="/codex">
               <Icons.arrowLeft className="mr-2 h-4 w-4" />
               Back to Codex
