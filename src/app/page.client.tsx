@@ -411,12 +411,12 @@ export default function HomePage() {
                   })}
                 </CarouselContent>
                 <CarouselPrevious className="hidden sm:flex absolute left-[-50px] top-1/2 -translate-y-1/2">
-                  <GlassCard className="p-2 rounded-full shadow-md bg-card/80 backdrop-blur-md border border-border/30">
+                  <GlassCard className="p-2 rounded-full shadow-md bg-card/80 border border-border/30">
                     <Icons.chevronLeft className="h-5 w-5 text-primary" />
                   </GlassCard>
                 </CarouselPrevious>
                 <CarouselNext className="hidden sm:flex absolute right-[-50px] top-1/2 -translate-y-1/2">
-                  <GlassCard className="p-2 rounded-full shadow-md bg-card/80 backdrop-blur-md border border-border/30">
+                  <GlassCard className="p-2 rounded-full shadow-md bg-card/80 border border-border/30">
                     <Icons.chevronRight className="h-5 w-5 text-primary" />
                   </GlassCard>
                 </CarouselNext>

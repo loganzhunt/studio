@@ -209,7 +209,7 @@ export default function CodexPage() {
     const dominantFacet = getDominantFacet(entry.domainScores);
 
     return (
-      <Card className="flex flex-col overflow-hidden glassmorphic-card hover:shadow-primary/20 transition-all duration-300 ease-in-out h-full hover:scale-[1.02] hover:shadow-[0_4px_20px_rgba(0,0,0,0.2)] hover:border-white/30 hover:bg-white/15 group">
+      <Card className="flex flex-col overflow-hidden glassmorphic-card hover:shadow-primary/20 transition-all duration-300 ease-in-out h-full hover:scale-[1.02] hover:shadow-[0_4px_20px_rgba(0,0,0,0.2)] hover:border-white/30 group">
         <CardHeader className="p-6 text-center">
           <div className="flex items-center justify-center gap-2 mb-2">
             {entry.icon && (
@@ -319,7 +319,7 @@ export default function CodexPage() {
             {allCategories.map((cat) => (
               <Button
                 key={cat}
-                variant={activeCategory === cat ? "default" : "outline"}
+                variant={activeCategory === cat ? "default" : "secondary"}
                 size="sm"
                 onClick={() =>
                   setActiveCategory(cat as CodexEntry["category"] | "all")
@@ -363,7 +363,7 @@ export default function CodexPage() {
       {selectedEntry && (
         <Sheet open={isDrawerOpen} onOpenChange={setIsDrawerOpen}>
           <SheetContent
-            className="w-full max-w-md sm:max-w-lg md:max-w-xl lg:max-w-2xl p-0 glassmorphic-card !bg-card/80 backdrop-blur-xl border-white/30"
+            className="w-full max-w-md sm:max-w-lg md:max-w-xl lg:max-w-2xl p-0 glassmorphic-card !bg-card/80 border-white/30"
             side="right"
           >
             <ScrollArea className="h-full">
@@ -442,7 +442,7 @@ export default function CodexPage() {
                       <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent shimmer-animation" />
                     </Button>
                     <Button
-                      variant="outline"
+                      variant="secondary"
                       asChild
                       className="w-full text-xs relative overflow-hidden transition-all duration-200 transform hover:translate-y-[-2px] hover:shadow-[0_3px_10px_rgba(139,92,246,0.15)] active:translate-y-[0px] active:scale-[0.98] group"
                     >

@@ -30,7 +30,7 @@ export const GlassCard: React.FC<GlassCardProps> = ({
       className={cn(
         variants[variant],
         animated &&
-          "transition-all duration-300 hover:scale-[1.02] hover:shadow-[0_4px_20px_rgba(0,0,0,0.2)] hover:border-white/30 hover:bg-white/15",
+          "transition-all duration-300 hover:scale-[1.02] hover:shadow-[0_4px_20px_rgba(0,0,0,0.2)] hover:border-white/30",
         className
       )}
       {...props}
@@ -59,7 +59,7 @@ export const PrismButton: React.FC<PrismButtonProps> = ({
   const variants = {
     primary: "bg-purple-500 text-white hover:bg-purple-600 relative overflow-hidden",
     secondary:
-      "bg-white/10 backdrop-blur-sm border border-white/20 text-white hover:bg-white/20 relative overflow-hidden",
+      "bg-white/10 border border-white/20 text-white hover:bg-white/20 relative overflow-hidden",
     ghost: "bg-transparent text-white hover:bg-white/10 relative overflow-hidden",
   };
 
@@ -144,7 +144,7 @@ export const PrismSelector: React.FC<PrismSelectorProps> = ({
             "px-3 py-2 rounded-lg transition-all duration-200 text-sm font-medium",
             selectedIndices.includes(index)
               ? "bg-purple-500 text-white"
-              : "bg-white/10 backdrop-blur-sm border border-white/20 text-white hover:bg-white/20"
+              : "bg-white/10 border border-white/20 text-white hover:bg-white/20"
           )}
         >
           {option}
@@ -214,9 +214,9 @@ export const GlassPanel: React.FC<GlassPanelProps> = ({
   ...props
 }) => {
   const variants = {
-    default: "bg-white/10 backdrop-blur-sm border border-white/20",
-    elevated: "bg-white/20 backdrop-blur-md border border-white/30 shadow-xl",
-    subtle: "bg-white/5 backdrop-blur-sm border border-white/10",
+    default: "bg-white/10 border border-white/20",
+    elevated: "bg-white/20 border border-white/30 shadow-xl",
+    subtle: "bg-white/5 border border-white/10",
   };
 
   return (
@@ -301,7 +301,7 @@ export const GlassModal: React.FC<GlassModalProps> = ({
         className="absolute inset-0 bg-black/50 backdrop-blur-sm"
         onClick={onClose}
       />
-      <div className="relative bg-white/10 backdrop-blur-md border border-white/20 rounded-lg p-6 max-w-lg w-full">
+      <div className="relative bg-white/10 backdrop-blur-md border border-white/20 rounded-lg p-6 max-w-lg w-full hover:bg-white/10">
         {title && (
           <h2 className="text-xl font-semibold text-white mb-4">{title}</h2>
         )}
@@ -361,7 +361,7 @@ export const GlassAccordionItem: React.FC<GlassAccordionItemProps> = ({
       className={cn(
         "glassmorphic-card bg-white/10 backdrop-blur-sm border border-white/20 mb-3 last:mb-0 overflow-hidden rounded-lg",
         animated &&
-          "transition-all duration-300 hover:scale-[1.01] hover:shadow-[0_4px_20px_rgba(0,0,0,0.2)] hover:border-white/30 hover:bg-white/15",
+          "transition-all duration-300 hover:scale-[1.01] hover:shadow-[0_4px_20px_rgba(0,0,0,0.2)] hover:border-white/30",
         className
       )}
       {...props}
