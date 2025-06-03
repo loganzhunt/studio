@@ -17,7 +17,6 @@ import type { CodexEntry, FacetName } from "@/types";
 import { FACETS, FACET_NAMES } from "@/config/facets";
 import Link from "next/link";
 import { useWorldview } from "@/hooks/use-worldview";
-import { useToast } from "@/hooks/use-toast";
 import React, { useState, useEffect, useMemo } from "react";
 import { Textarea } from "@/components/ui/textarea";
 import { Separator } from "@/components/ui/separator";
@@ -38,11 +37,9 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 
-// Import all codex data - needed to find the specific entry
-import { BASE_CODEX_DATA } from "@/data/codex/base-codex-data";
-import { LATEST_CODEX_UPDATE_BATCH } from "@/data/codex/latest-codex-update-batch";
-import { ADDITIONAL_CODEX_DATA } from "@/data/codex/additional-codex-data";
-import { mapRawDataToCodexEntries } from "@/app/(main)/codex/page"; // Import the mapper
+// Import the utilities for codex data and worldview management
+import { getCodexEntryBySlug } from "@/lib/codex-utils";
+import { useWorldviewManagement } from "@/hooks/use-worldview-management";
 
 const SECTION_IDS = {
   SUMMARY: "summary",
@@ -58,73 +55,14 @@ export default function CodexDeepDivePage() {
   const router = useRouter();
   const worldviewNameFromParam = params.worldviewName as string;
 
-  const { savedWorldviews, addSavedWorldview } = useWorldview();
-  const { toast } = useToast();
-  const [isSaved, setIsSaved] = useState(false);
+  // Get the worldview data using our utility
+  const worldview = useMemo(
+    () => getCodexEntryBySlug(worldviewNameFromParam),
+    [worldviewNameFromParam]
+  );
 
-  const allCodexEntries = useMemo(() => {
-    try {
-      const combinedRawData = [
-        ...LATEST_CODEX_UPDATE_BATCH,
-        ...ADDITIONAL_CODEX_DATA,
-        ...BASE_CODEX_DATA,
-      ];
-      return mapRawDataToCodexEntries(combinedRawData);
-    } catch (error) {
-      console.error("Error mapping codex data:", error);
-      return [];
-    }
-  }, []);
-
-  // Get the worldview data from our codex entries
-  const worldview = useMemo(() => {
-    return allCodexEntries.find((entry) => {
-      const entryId =
-        entry.id ||
-        (entry.title || "")
-          .toLowerCase()
-          .replace(/\s+/g, "_")
-          .replace(/[^a-z0-9_]/g, "");
-      return entryId === worldviewNameFromParam;
-    });
-  }, [allCodexEntries, worldviewNameFromParam]);
-
-  // Check if this worldview is already saved
-  useEffect(() => {
-    if (worldview) {
-      const isAlreadySaved = savedWorldviews.some(
-        (saved) => saved.id === worldview.id
-      );
-      setIsSaved(isAlreadySaved);
-    }
-  }, [savedWorldviews, worldview]);
-
-  // Handle saving the worldview
-  const handleSaveWorldview = () => {
-    if (!worldview) return;
-
-    // Convert CodexEntry to WorldviewProfile format
-    addSavedWorldview({
-      id: worldview.id,
-      title: worldview.title,
-      type: "codex",
-      createdAt: new Date().toISOString(),
-      domainScores: Array.isArray(worldview.domainScores)
-        ? worldview.domainScores
-        : Object.entries(worldview.scores || {}).map(([key, value]) => ({
-            facetName: key as FacetName,
-            score: value as number,
-          })),
-      summary: worldview.summary || worldview.description,
-      icon: worldview.icon,
-    });
-
-    setIsSaved(true);
-    toast({
-      title: "Worldview Saved",
-      description: `${worldview.title} has been added to your saved worldviews.`,
-    });
-  };
+  // Use our custom hook for worldview management
+  const { isSaved, handleSaveWorldview } = useWorldviewManagement(worldview);
 
   if (!worldview) {
     return (
