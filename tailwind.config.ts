@@ -6,6 +6,12 @@ export default {
     "./src/pages/**/*.{js,ts,jsx,tsx,mdx}",
     "./src/components/**/*.{js,ts,jsx,tsx,mdx}",
     "./src/app/**/*.{js,ts,jsx,tsx,mdx}",
+    "./src/lib/**/*.{js,ts,jsx,tsx}",
+    "./src/hooks/**/*.{js,ts,jsx,tsx}",
+    "./src/contexts/**/*.{js,ts,jsx,tsx}",
+    "./components/**/*.{js,ts,jsx,tsx}",
+    "./examples/**/*.{js,ts,jsx,tsx}",
+    "./scripts/**/*.{js,ts}",
   ],
   // Performance optimizations
   corePlugins: {
@@ -562,7 +568,6 @@ export default {
         glass: "16px",
         "glass-lg": "24px",
         "glass-xl": "32px",
-        // Missing border radius values from globals.css
         prism: "12px",
         orb: "50%",
         pill: "9999px",

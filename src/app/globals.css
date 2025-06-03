@@ -258,33 +258,34 @@
    * Uses design tokens for consistent styling
    * =========================================== */
   .glass-card-alive {
-    background: theme("colors.glass.light");
-    backdrop-filter: blur(theme("backdropBlur.glass"));
-    -webkit-backdrop-filter: blur(theme("backdropBlur.glass"));
-    border: 1px solid theme("colors.glass.border-light");
-    border-radius: theme("borderRadius.glass");
-    box-shadow: theme("boxShadow.glass");
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 16px;
+    box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
     transition: all 0.3s ease-in-out;
   }
 
   .glass-card-alive:hover {
-    background: theme("colors.glass.light-md");
-    border-color: theme("colors.glass.border-medium");
-    box-shadow: theme("boxShadow.beautiful");
-    transform: translateY(-2px);
+    background: rgba(255, 255, 255, 0.12);
+    border-color: rgba(255, 255, 255, 0.2);
+    box-shadow: 0 10px 25px rgba(139, 92, 246, 0.15),
+      0 4px 10px rgba(0, 0, 0, 0.1);
+    transform: translateY(-2px) scale(1.02);
   }
 
-  .glass-card-alive.active {
+  .glass-card-alive.is-active {
     border: 2px solid;
     border-image: linear-gradient(
         45deg,
-        theme("colors.ontology.DEFAULT"),
-        theme("colors.epistemology.DEFAULT"),
-        theme("colors.praxeology.DEFAULT"),
-        theme("colors.axiology.DEFAULT"),
-        theme("colors.mythology.DEFAULT"),
-        theme("colors.cosmology.DEFAULT"),
-        theme("colors.teleology.DEFAULT")
+        #8b5cf6,
+        #6366f1,
+        #3b82f6,
+        #10b981,
+        #eab308,
+        #f97316,
+        #ef4444
       )
       1;
   }
@@ -294,19 +295,16 @@
    * Enhanced with microinteractions and accessibility
    * =========================================== */
   .btn-prism {
-    padding: theme("spacing.prism-sm") theme("spacing.prism-lg");
-    border-radius: theme("borderRadius.prism");
+    padding: 0.5rem 1.5rem;
+    border-radius: 12px;
     font-weight: 500;
-    backdrop-filter: blur(theme("backdropBlur.glass"));
-    -webkit-backdrop-filter: blur(theme("backdropBlur.glass"));
-    background: linear-gradient(
-      45deg,
-      hsl(var(--primary)),
-      theme("colors.ontology.DEFAULT")
-    );
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    background: linear-gradient(45deg, hsl(var(--primary)), #8b5cf6);
     background-size: 200% 200%;
     color: white;
-    box-shadow: theme("boxShadow.beautiful");
+    box-shadow: 0 10px 25px rgba(139, 92, 246, 0.15),
+      0 4px 10px rgba(0, 0, 0, 0.1);
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     position: relative;
     overflow: hidden;
@@ -391,11 +389,11 @@
    * Enhanced with microinteractions and icon animations
    * =========================================== */
   .selector-prism {
-    backdrop-filter: blur(theme("backdropBlur.glass"));
-    -webkit-backdrop-filter: blur(theme("backdropBlur.glass"));
-    background: theme("colors.glass.light");
-    border: 1px solid theme("colors.glass.border-light");
-    border-radius: theme("borderRadius.orb");
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 50%;
     width: 3rem;
     height: 3rem;
     display: flex;
@@ -412,12 +410,7 @@
     position: absolute;
     inset: -2px;
     border-radius: inherit;
-    background: linear-gradient(
-      45deg,
-      transparent,
-      theme("colors.ontology.DEFAULT"),
-      transparent
-    );
+    background: linear-gradient(45deg, transparent, #8b5cf6, transparent);
     opacity: 0;
     transition: opacity 0.3s ease;
     z-index: -1;
@@ -425,10 +418,10 @@
 
   /* Hover microinteractions */
   .selector-prism:hover {
-    background: theme("colors.glass.light-md");
-    border-color: theme("colors.glass.border-medium");
+    background: rgba(255, 255, 255, 0.12);
+    border-color: rgba(255, 255, 255, 0.2);
     transform: scale(1.05) translateY(-1px);
-    box-shadow: theme("boxShadow.glass-md");
+    box-shadow: 0 12px 24px 0 rgba(31, 38, 135, 0.35);
   }
 
   .selector-prism:hover::after {
@@ -441,27 +434,17 @@
   }
 
   /* Active/selected state */
-  .selector-prism.active {
-    background: linear-gradient(
-      135deg,
-      theme("colors.ontology.500"),
-      theme("colors.epistemology.500")
-    );
-    border-color: theme("colors.ontology.300");
+  .selector-prism.is-active {
+    background: #8b5cf6;
+    border-color: #a78bfa;
     transform: scale(1.1);
-    box-shadow: theme("boxShadow.glow-ontology");
+    box-shadow: 0 0 30px rgba(139, 92, 246, 0.4);
     animation: glow-pulse 2s ease-in-out infinite;
   }
 
-  .selector-prism.active::after {
+  .selector-prism.is-active::after {
     opacity: 0.6;
-    background: linear-gradient(
-      45deg,
-      theme("colors.ontology.DEFAULT"),
-      theme("colors.epistemology.DEFAULT"),
-      theme("colors.praxeology.DEFAULT"),
-      theme("colors.ontology.DEFAULT")
-    );
+    background: linear-gradient(45deg, #8b5cf6, #6366f1, #3b82f6, #8b5cf6);
     animation: gradient-shift 3s linear infinite;
   }
 
@@ -473,7 +456,7 @@
   }
 
   /* Icon pulse animation when selected */
-  .selector-prism.active [data-icon] {
+  .selector-prism.is-active [data-icon] {
     animation: icon-pulse 2s ease-in-out infinite;
     color: white;
   }
@@ -485,13 +468,13 @@
   }
 
   .selector-prism:hover::after,
-  .selector-prism.active::after {
+  .selector-prism.is-active::after {
     opacity: 1;
     animation: pulse 2s ease-in-out infinite;
   }
 
   .selector-prism:focus,
-  .selector-prism.active {
+  .selector-prism.is-active {
     box-shadow: theme("boxShadow.spectrum");
   }
 
@@ -500,12 +483,12 @@
    * Uses glass design tokens for consistency
    * =========================================== */
   .input-glass {
-    backdrop-filter: blur(theme("backdropBlur.glass"));
-    -webkit-backdrop-filter: blur(theme("backdropBlur.glass"));
-    background: theme("colors.glass.light-xs");
-    border: 1px solid theme("colors.glass.border-light");
-    border-radius: theme("borderRadius.glass");
-    padding: theme("spacing.prism-sm") theme("spacing.prism-md");
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 16px;
+    padding: 0.5rem 1rem;
     color: hsl(var(--foreground));
     transition: all 0.3s ease-in-out;
     width: 100%;
@@ -517,9 +500,9 @@
 
   .input-glass:focus {
     outline: none;
-    background: theme("colors.glass.light");
-    border: 2px solid theme("colors.ontology.DEFAULT/50%");
-    box-shadow: 0 0 0 1px theme("colors.ontology.DEFAULT/30%");
+    background: rgba(255, 255, 255, 0.05);
+    border: 2px solid rgba(139, 92, 246, 0.5);
+    box-shadow: 0 0 0 1px rgba(139, 92, 246, 0.3);
   }
 
   /* ===========================================
@@ -527,28 +510,28 @@
    * Uses enhanced blur and glass tokens
    * =========================================== */
   .modal-glass {
-    backdrop-filter: blur(theme("backdropBlur.prism"));
-    -webkit-backdrop-filter: blur(theme("backdropBlur.prism"));
-    background: theme("colors.glass.dark-lg");
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    background: rgba(0, 0, 0, 0.2);
     position: fixed;
     inset: 0;
-    z-index: theme("zIndex.modal");
+    z-index: 1050;
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: theme("spacing.prism-md");
+    padding: 1rem;
   }
 
   .modal-content {
-    backdrop-filter: blur(theme("backdropBlur.crystal"));
-    -webkit-backdrop-filter: blur(theme("backdropBlur.crystal"));
-    background: theme("colors.card.DEFAULT") / 0.8;
-    border: 1px solid theme("colors.glass.border-light");
-    border-radius: theme("borderRadius.glass-lg");
-    box-shadow: theme("boxShadow.glass-lg");
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    background: hsl(var(--card)) / 0.8;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 24px;
+    box-shadow: 0 20px 40px 0 rgba(31, 38, 135, 0.4);
     max-width: 32rem;
     width: 100%;
-    padding: theme("spacing.glass-lg");
+    padding: 1.5rem;
   }
 
   /* ===========================================
@@ -567,48 +550,53 @@
    * GLASS PANEL - Layout Glass Panels
    * Uses glass design tokens consistently
    * =========================================== */
-  .glass-panel {
-    backdrop-filter: blur(theme("backdropBlur.glass"));
-    -webkit-backdrop-filter: blur(theme("backdropBlur.glass"));
-    background: theme("colors.glass.light-xs");
-    border-radius: theme("borderRadius.glass");
-    padding: theme("spacing.glass-lg");
+  .glass-panel-container {
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: 16px;
+    padding: 1.5rem;
   }
 
-  .glass-panel.with-border {
-    border: 1px solid theme("colors.glass.border-light");
+  .glass-panel-container.with-border {
+    border: 1px solid rgba(255, 255, 255, 0.1);
   }
 
   /* ===========================================
    * SPECTRUM BAR - Animated Progress Indicator
    * Uses facet colors and animation tokens
    * =========================================== */
-  .spectrum-bar {
+  .spectrum-progress {
     height: 0.25rem;
     width: 100%;
     background: linear-gradient(
       to right,
-      theme("colors.ontology.DEFAULT"),
-      theme("colors.epistemology.DEFAULT"),
-      theme("colors.praxeology.DEFAULT"),
-      theme("colors.axiology.DEFAULT"),
-      theme("colors.mythology.DEFAULT"),
-      theme("colors.cosmology.DEFAULT"),
-      theme("colors.teleology.DEFAULT")
+      #8b5cf6,
+      #6366f1,
+      #3b82f6,
+      #10b981,
+      #eab308,
+      #f97316,
+      #ef4444
     );
-    border-radius: theme("borderRadius.pill");
+    border-radius: 9999px;
     background-size: 200% 100%;
-    animation: theme("animation.spectrum-shift");
+    animation: spectrum-shift 8s ease-in-out infinite;
   }
 
   /* ===========================================
    * HERO SHIMMER - Shimmer Loading Effect
    * Uses shimmer animation tokens
    * =========================================== */
-  .hero-shimmer {
-    background: theme("backgroundImage.shimmer-light");
+  .hero-shimmer-effect {
+    background: linear-gradient(
+      90deg,
+      transparent,
+      rgba(255, 255, 255, 0.2),
+      transparent
+    );
     background-size: 200% 100%;
-    animation: theme("animation.glass-shimmer");
+    animation: glass-shimmer 2s ease-in-out infinite;
   }
 
   /* ===========================================
@@ -616,24 +604,24 @@
    * Uses facet colors with glass effects
    * =========================================== */
   .feature-card {
-    backdrop-filter: blur(theme("backdropBlur.glass"));
-    -webkit-backdrop-filter: blur(theme("backdropBlur.glass"));
-    background: theme("colors.glass.light-xs");
-    border: 1px solid theme("colors.glass.border-light");
-    border-radius: theme("borderRadius.glass");
-    padding: theme("spacing.glass-lg");
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 16px;
+    padding: 1.5rem;
     transition: all 0.3s ease-in-out;
   }
 
   .feature-card.facet-accent {
-    background: var(--facet-gradient, theme("colors.glass.light-xs"));
+    background: var(--facet-gradient, rgba(255, 255, 255, 0.03));
   }
 
   .feature-card:hover {
-    background: theme("colors.glass.light");
-    border-color: theme("colors.glass.border-medium");
+    background: rgba(255, 255, 255, 0.05);
+    border-color: rgba(255, 255, 255, 0.2);
     transform: translateY(-2px);
-    box-shadow: theme("boxShadow.glass");
+    box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
   }
 
   /* ===========================================
@@ -644,7 +632,7 @@
   /* Secondary Button Microinteractions */
   .btn-prism.bg-gradient-to-r:hover {
     transform: translateY(-2px) scale(1.02);
-    box-shadow: theme("boxShadow.glass-lg");
+    box-shadow: 0 20px 40px 0 rgba(31, 38, 135, 0.4);
     animation: gradient-shift 2s ease-in-out infinite;
   }
 
@@ -672,7 +660,7 @@
     background: linear-gradient(
       45deg,
       transparent,
-      theme("colors.glass.light-md"),
+      rgba(255, 255, 255, 0.12),
       transparent
     );
     opacity: 0;
@@ -691,8 +679,8 @@
 
   .backdrop-blur-glass.bg-glass-light:focus-visible {
     outline: none;
-    border-color: theme("colors.ontology.DEFAULT");
-    box-shadow: 0 0 0 2px theme("colors.ontology.DEFAULT/30%");
+    border-color: #8b5cf6;
+    box-shadow: 0 0 0 2px rgba(139, 92, 246, 0.3);
     animation: focus-spectrum 3s linear infinite;
   }
 
