@@ -1,7 +1,7 @@
 "use client";
 
 import { useContext } from "react";
-import { WorldviewContext }from "@/contexts/worldview-context";
+import { WorldviewContext } from "@/contexts/worldview-context-optimized-fixed";
 import type { WorldviewContextType } from "@/types";
 
 export const useWorldview = (): WorldviewContextType => {

@@ -8,7 +8,14 @@ import type {
   FacetName,
   LocalUser,
 } from "@/types";
-import React, { createContext, useState, useEffect, useCallback } from "react";
+import React, {
+  createContext,
+  useState,
+  useEffect,
+  useCallback,
+  useMemo,
+  useReducer,
+} from "react";
 import { FACETS, FACET_NAMES } from "@/config/facets";
 import { calculateAllDomainScores } from "@/lib/scoring";
 import { auth, googleProvider } from "@/lib/firebase";
@@ -23,6 +30,96 @@ import {
   type User as FirebaseUser,
 } from "firebase/auth";
 import { useToast } from "@/hooks/use-toast";
+import { ErrorBoundary } from "@/components/error-boundary";
+
+// Enhanced state management with reducer pattern
+interface WorldviewState {
+  currentUser: LocalUser | null;
+  activeProfile: WorldviewProfile | null;
+  assessmentAnswers: AssessmentAnswers;
+  domainScores: DomainScore[];
+  hasAssessmentBeenRun: boolean;
+  isAuthModalOpen: boolean;
+  loading: boolean;
+  error: string | null;
+  savedWorldviews: WorldviewProfile[];
+  facetSelections: { [K_FacetName in FacetName]?: string };
+}
+
+type WorldviewAction =
+  | { type: "SET_USER"; payload: LocalUser | null }
+  | { type: "SET_ACTIVE_PROFILE"; payload: WorldviewProfile | null }
+  | { type: "SET_ASSESSMENT_ANSWERS"; payload: AssessmentAnswers }
+  | {
+      type: "UPDATE_ASSESSMENT_ANSWER";
+      payload: { facetName: FacetName; answer: number };
+    }
+  | { type: "SET_DOMAIN_SCORES"; payload: DomainScore[] }
+  | { type: "SET_ASSESSMENT_RUN"; payload: boolean }
+  | { type: "SET_AUTH_MODAL"; payload: boolean }
+  | { type: "SET_LOADING"; payload: boolean }
+  | { type: "SET_ERROR"; payload: string | null }
+  | { type: "SET_SAVED_WORLVIEWS"; payload: WorldviewProfile[] }
+  | { type: "SET_SAVED_WORLVIEW"; payload: WorldviewProfile[] }
+  | {
+      type: "SET_FACET_SELECTIONS";
+      payload: { [K_FacetName in FacetName]?: string };
+    };
+
+const worldviewReducer = (
+  state: WorldviewState,
+  action: WorldviewAction
+): WorldviewState => {
+  switch (action.type) {
+    case "SET_USER":
+      return { ...state, currentUser: action.payload, loading: false };
+    case "SET_ACTIVE_PROFILE":
+      return { ...state, activeProfile: action.payload };
+    case "SET_ASSESSMENT_ANSWERS":
+      return { ...state, assessmentAnswers: action.payload };
+    case "UPDATE_ASSESSMENT_ANSWER":
+      return {
+        ...state,
+        assessmentAnswers: {
+          ...state.assessmentAnswers,
+          [action.payload.facetName]: action.payload.answer,
+        },
+      };
+    case "SET_DOMAIN_SCORES":
+      return { ...state, domainScores: action.payload };
+    case "SET_ASSESSMENT_RUN":
+      return { ...state, hasAssessmentBeenRun: action.payload };
+    case "SET_AUTH_MODAL":
+      return { ...state, isAuthModalOpen: action.payload };
+    case "SET_LOADING":
+      return { ...state, loading: action.payload };
+    case "SET_ERROR":
+      return { ...state, error: action.payload, loading: false };
+    case "SET_SAVED_WORLVIEWS":
+    case "SET_SAVED_WORLVIEW":
+      return { ...state, savedWorldviews: action.payload };
+    case "SET_FACET_SELECTIONS":
+      return { ...state, facetSelections: action.payload };
+    default:
+      return state;
+  }
+};
+
+const initialState: WorldviewState = {
+  currentUser: null,
+  activeProfile: null,
+  assessmentAnswers: {},
+  domainScores:
+    Array.isArray(FACET_NAMES) && FACET_NAMES.length > 0
+      ? FACET_NAMES.map((name) => ({ facetName: name, score: 0 }))
+      : [],
+  hasAssessmentBeenRun: false,
+  isAuthModalOpen: false,
+  loading: true,
+  error: null,
+  savedWorldviews: [],
+  facetSelections: {},
+};
 
 const defaultWorldviewContext: WorldviewContextType = {
   currentUser: null,
@@ -61,6 +158,8 @@ const defaultWorldviewContext: WorldviewContextType = {
   selectWorldviewForFacet: () => {},
   clearFacetSelection: () => {},
   loadStateFromLocalStorage: () => {},
+  isLoading: false,
+  error: null,
 };
 
 export const WorldviewContext = createContext<WorldviewContextType>(
@@ -72,28 +171,13 @@ export const WorldviewProvider = ({
 }: {
   children: React.ReactNode;
 }) => {
-  const [currentUser, setCurrentUser] = useState<LocalUser>(null);
-  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
-  const [activeProfile, setActiveProfile] = useState<WorldviewProfile | null>(
-    null
-  );
-  const [assessmentAnswers, setAssessmentAnswers] = useState<AssessmentAnswers>(
-    {}
-  );
-  const [domainScores, setDomainScores] = useState<DomainScore[]>(
-    defaultWorldviewContext.domainScores
-  );
-  const [savedWorldviews, setSavedWorldviews] = useState<WorldviewProfile[]>(
-    []
-  );
-  const [facetSelections, setFacetSelections] = useState<{
-    [K_FacetName in FacetName]?: string;
-  }>({});
-  const [isLoaded, setIsLoaded] = useState(false);
+  const [state, dispatch] = useReducer(worldviewReducer, initialState);
   const { toast } = useToast();
 
-  const openAuthModal = () => setIsAuthModalOpen(true);
-  const closeAuthModal = () => setIsAuthModalOpen(false);
+  const openAuthModal = () =>
+    dispatch({ type: "SET_AUTH_MODAL", payload: true });
+  const closeAuthModal = () =>
+    dispatch({ type: "SET_AUTH_MODAL", payload: false });
 
   // Convert Firebase user to LocalUser format
   const firebaseUserToLocalUser = (firebaseUser: FirebaseUser): LocalUser => {
@@ -129,7 +213,7 @@ export const WorldviewProvider = ({
       });
 
       const localUser = firebaseUserToLocalUser(userCredential.user);
-      setCurrentUser(localUser);
+      dispatch({ type: "SET_USER", payload: localUser });
 
       toast({
         title: "Account Created!",
@@ -164,7 +248,7 @@ export const WorldviewProvider = ({
         password
       );
       const localUser = firebaseUserToLocalUser(userCredential.user);
-      setCurrentUser(localUser);
+      dispatch({ type: "SET_USER", payload: localUser });
 
       toast({
         title: "Welcome back!",
@@ -197,7 +281,7 @@ export const WorldviewProvider = ({
     try {
       const result = await signInWithPopup(auth, googleProvider);
       const localUser = firebaseUserToLocalUser(result.user);
-      setCurrentUser(localUser);
+      dispatch({ type: "SET_USER", payload: localUser });
 
       toast({
         title: "Welcome!",
@@ -257,7 +341,7 @@ export const WorldviewProvider = ({
   const signOutUser = () => {
     signOut(auth)
       .then(() => {
-        setCurrentUser(null);
+        dispatch({ type: "SET_USER", payload: null });
         toast({
           title: "Signed Out",
           description: "You have been signed out successfully.",
@@ -274,28 +358,29 @@ export const WorldviewProvider = ({
   };
 
   const persistState = useCallback(() => {
-    if (!isLoaded || !currentUser?.uid) return;
+    if (state.loading || !state.currentUser?.uid) return;
 
     // Use requestIdleCallback for non-blocking persistence
     if (typeof window !== "undefined" && "requestIdleCallback" in window) {
       window.requestIdleCallback(() => {
         try {
-          const userKey = currentUser.uid;
+          const userKey = state.currentUser?.uid;
+          if (!userKey) return;
           localStorage.setItem(
             `metaPrismAssessmentAnswers_${userKey}`,
-            JSON.stringify(assessmentAnswers)
+            JSON.stringify(state.assessmentAnswers)
           );
           localStorage.setItem(
             `metaPrismDomainScores_${userKey}`,
-            JSON.stringify(domainScores)
+            JSON.stringify(state.domainScores)
           );
           localStorage.setItem(
             `metaPrismSavedWorldviews_${userKey}`,
-            JSON.stringify(savedWorldviews)
+            JSON.stringify(state.savedWorldviews)
           );
           localStorage.setItem(
             `metaPrismFacetSelections_${userKey}`,
-            JSON.stringify(facetSelections)
+            JSON.stringify(state.facetSelections)
           );
         } catch (error) {
           console.error("Error saving app state to localStorage:", error);
@@ -305,22 +390,23 @@ export const WorldviewProvider = ({
       // Fallback for browsers without requestIdleCallback
       setTimeout(() => {
         try {
-          const userKey = currentUser.uid;
+          const userKey = state.currentUser?.uid;
+          if (!userKey) return;
           localStorage.setItem(
             `metaPrismAssessmentAnswers_${userKey}`,
-            JSON.stringify(assessmentAnswers)
+            JSON.stringify(state.assessmentAnswers)
           );
           localStorage.setItem(
             `metaPrismDomainScores_${userKey}`,
-            JSON.stringify(domainScores)
+            JSON.stringify(state.domainScores)
           );
           localStorage.setItem(
             `metaPrismSavedWorldviews_${userKey}`,
-            JSON.stringify(savedWorldviews)
+            JSON.stringify(state.savedWorldviews)
           );
           localStorage.setItem(
             `metaPrismFacetSelections_${userKey}`,
-            JSON.stringify(facetSelections)
+            JSON.stringify(state.facetSelections)
           );
         } catch (error) {
           console.error("Error saving app state to localStorage:", error);
@@ -328,23 +414,23 @@ export const WorldviewProvider = ({
       }, 0);
     }
   }, [
-    assessmentAnswers,
-    domainScores,
-    savedWorldviews,
-    facetSelections,
-    isLoaded,
-    currentUser?.uid,
+    state.assessmentAnswers,
+    state.domainScores,
+    state.savedWorldviews,
+    state.facetSelections,
+    state.loading,
+    state.currentUser?.uid,
   ]);
 
   const loadStateFromLocalStorage = useCallback(() => {
     // Set isLoaded immediately to prevent blocking
-    setIsLoaded(true);
+    dispatch({ type: "SET_LOADING", payload: false });
 
     // Load data asynchronously
     setTimeout(() => {
       try {
-        if (currentUser?.uid) {
-          const userKey = currentUser.uid;
+        if (state.currentUser?.uid) {
+          const userKey = state.currentUser.uid;
 
           const storedAnswers = localStorage.getItem(
             `metaPrismAssessmentAnswers_${userKey}`
@@ -359,20 +445,33 @@ export const WorldviewProvider = ({
             `metaPrismFacetSelections_${userKey}`
           );
 
-          if (storedAnswers) setAssessmentAnswers(JSON.parse(storedAnswers));
+          if (storedAnswers)
+            dispatch({
+              type: "SET_ASSESSMENT_ANSWERS",
+              payload: JSON.parse(storedAnswers),
+            });
           if (storedScores) {
-            setDomainScores(JSON.parse(storedScores));
+            dispatch({
+              type: "SET_DOMAIN_SCORES",
+              payload: JSON.parse(storedScores),
+            });
           }
           if (storedSavedWorldviews)
-            setSavedWorldviews(JSON.parse(storedSavedWorldviews));
+            dispatch({
+              type: "SET_SAVED_WORLVIEWS",
+              payload: JSON.parse(storedSavedWorldviews),
+            });
           if (storedFacetSelections)
-            setFacetSelections(JSON.parse(storedFacetSelections));
+            dispatch({
+              type: "SET_FACET_SELECTIONS",
+              payload: JSON.parse(storedFacetSelections),
+            });
         }
       } catch (error) {
         console.error("Error loading state from localStorage:", error);
       }
     }, 0);
-  }, [currentUser?.uid]);
+  }, [state.currentUser?.uid]);
 
   useEffect(() => {
     // Set up Firebase auth state listener - make it non-blocking
@@ -384,10 +483,10 @@ export const WorldviewProvider = ({
         if (firebaseUser) {
           // User is signed in with Firebase
           const localUser = firebaseUserToLocalUser(firebaseUser);
-          setCurrentUser(localUser);
+          dispatch({ type: "SET_USER", payload: localUser });
         } else {
           // User is signed out
-          setCurrentUser(null);
+          dispatch({ type: "SET_USER", payload: null });
         }
       });
     }, 0);
@@ -399,26 +498,29 @@ export const WorldviewProvider = ({
   }, []);
 
   useEffect(() => {
-    if (currentUser) {
+    if (state.currentUser) {
       loadStateFromLocalStorage();
     }
-  }, [currentUser, loadStateFromLocalStorage]);
+  }, [state.currentUser, loadStateFromLocalStorage]);
 
   useEffect(() => {
-    if (isLoaded) {
+    if (state.loading) {
       persistState();
     }
-  }, [persistState, isLoaded]);
+  }, [persistState, state.loading]);
 
   const updateAssessmentAnswer = (questionId: string, value: number) => {
-    setAssessmentAnswers((prev) => ({ ...prev, [questionId]: value }));
+    dispatch({
+      type: "UPDATE_ASSESSMENT_ANSWER",
+      payload: { facetName: questionId as FacetName, answer: value },
+    });
   };
 
   const calculateDomainScores = useCallback(() => {
-    const newScores = calculateAllDomainScores(assessmentAnswers, FACETS);
-    setDomainScores(newScores);
+    const newScores = calculateAllDomainScores(state.assessmentAnswers, FACETS);
+    dispatch({ type: "SET_DOMAIN_SCORES", payload: newScores });
     return newScores;
-  }, [assessmentAnswers]);
+  }, [state.assessmentAnswers]);
 
   const addSavedWorldview = (profile: WorldviewProfile) => {
     const newId = profile.id || `profile_${Date.now()}`;
@@ -427,7 +529,10 @@ export const WorldviewProvider = ({
       id: newId,
       createdAt: new Date().toISOString(),
     };
-    setSavedWorldviews((prev) => [...prev, profileWithId]);
+    dispatch({
+      type: "SET_SAVED_WORLVIEW",
+      payload: [...state.savedWorldviews, profileWithId],
+    });
     toast({
       title: "Profile Saved",
       description: `"${profile.title}" has been saved.`,
@@ -435,9 +540,12 @@ export const WorldviewProvider = ({
   };
 
   const updateSavedWorldview = (profile: WorldviewProfile) => {
-    setSavedWorldviews((prev) =>
-      prev.map((p) => (p.id === profile.id ? profile : p))
-    );
+    dispatch({
+      type: "SET_SAVED_WORLVIEW",
+      payload: state.savedWorldviews.map((p) =>
+        p.id === profile.id ? profile : p
+      ),
+    });
     toast({
       title: "Profile Updated",
       description: `"${profile.title}" has been updated.`,
@@ -445,15 +553,9 @@ export const WorldviewProvider = ({
   };
 
   const deleteSavedWorldview = (profileId: string) => {
-    setSavedWorldviews((prev) => {
-      const profileToDelete = prev.find((p) => p.id === profileId);
-      if (profileToDelete) {
-        toast({
-          title: "Profile Deleted",
-          description: `"${profileToDelete.title}" has been removed.`,
-        });
-      }
-      return prev.filter((p) => p.id !== profileId);
+    dispatch({
+      type: "SET_SAVED_WORLVIEW",
+      payload: state.savedWorldviews.filter((p) => p.id !== profileId),
     });
   };
 
@@ -461,60 +563,86 @@ export const WorldviewProvider = ({
     facetName: FacetName,
     worldviewId: string
   ) => {
-    setFacetSelections((prev) => ({ ...prev, [facetName]: worldviewId }));
+    dispatch({
+      type: "SET_FACET_SELECTIONS",
+      payload: { ...state.facetSelections, [facetName]: worldviewId },
+    });
   };
 
   const clearFacetSelection = (facetName: FacetName) => {
-    setFacetSelections((prev) => {
-      const newState = { ...prev };
-      delete newState[facetName];
-      return newState;
+    dispatch({
+      type: "SET_FACET_SELECTIONS",
+      payload: { ...state.facetSelections, [facetName]: undefined },
     });
   };
 
   // Calculate if assessment has been run based on whether we have valid answers
   const hasAssessmentBeenRun =
-    Object.keys(assessmentAnswers).length > 0 &&
+    Object.keys(state.assessmentAnswers).length > 0 &&
     FACET_NAMES.some((facetName) =>
-      Object.keys(assessmentAnswers).some((key) =>
+      Object.keys(state.assessmentAnswers).some((key) =>
         key.toLowerCase().startsWith(facetName.toLowerCase())
       )
     );
 
   // Provide userDomainScores as an alias for domainScores for backward compatibility
-  const userDomainScores = domainScores;
+  const userDomainScores = state.domainScores;
+
+  const value = useMemo(
+    () => ({
+      currentUser: state.currentUser,
+      signInWithEmail,
+      signUpWithEmail,
+      signInWithGoogle,
+      signOutUser,
+      sendPasswordReset,
+      isAuthModalOpen: state.isAuthModalOpen,
+      openAuthModal,
+      closeAuthModal,
+      activeProfile: state.activeProfile,
+      setActiveProfile: (profile: WorldviewProfile | null) =>
+        dispatch({ type: "SET_ACTIVE_PROFILE", payload: profile }),
+      assessmentAnswers: state.assessmentAnswers,
+      setAssessmentAnswers: (answers: AssessmentAnswers) =>
+        dispatch({ type: "SET_ASSESSMENT_ANSWERS", payload: answers }),
+      updateAssessmentAnswer,
+      domainScores: state.domainScores,
+      calculateDomainScores,
+      hasAssessmentBeenRun,
+      userDomainScores,
+      savedWorldviews: state.savedWorldviews,
+      addSavedWorldview,
+      updateSavedWorldview,
+      deleteSavedWorldview,
+      facetSelections: state.facetSelections,
+      selectWorldviewForFacet,
+      clearFacetSelection,
+      loadStateFromLocalStorage,
+      isLoading: state.loading,
+      error: state.error,
+    }),
+    [
+      state,
+      signInWithEmail,
+      signUpWithEmail,
+      signInWithGoogle,
+      signOutUser,
+      sendPasswordReset,
+      closeAuthModal,
+      openAuthModal,
+      updateAssessmentAnswer,
+      calculateDomainScores,
+      addSavedWorldview,
+      updateSavedWorldview,
+      deleteSavedWorldview,
+      selectWorldviewForFacet,
+      clearFacetSelection,
+      loadStateFromLocalStorage,
+    ]
+  );
 
   return (
-    <WorldviewContext.Provider
-      value={{
-        currentUser,
-        signInWithEmail,
-        signUpWithEmail,
-        signInWithGoogle,
-        signOutUser,
-        sendPasswordReset,
-        isAuthModalOpen,
-        openAuthModal,
-        closeAuthModal,
-        activeProfile,
-        setActiveProfile,
-        assessmentAnswers,
-        setAssessmentAnswers,
-        updateAssessmentAnswer,
-        domainScores,
-        calculateDomainScores,
-        hasAssessmentBeenRun,
-        userDomainScores,
-        savedWorldviews,
-        addSavedWorldview,
-        updateSavedWorldview,
-        deleteSavedWorldview,
-        facetSelections,
-        selectWorldviewForFacet,
-        clearFacetSelection,
-        loadStateFromLocalStorage,
-      }}
-    >
+    <WorldviewContext.Provider value={value}>
       {children}
     </WorldviewContext.Provider>
   );
