@@ -15,7 +15,7 @@ export const GlassCard: React.FC<GlassCardProps> = ({
   children,
   className,
   variant = "default",
-  animated = false,
+  animated = true, // Changed default to true for consistency
   ...props
 }) => {
   const variants = {
@@ -30,7 +30,7 @@ export const GlassCard: React.FC<GlassCardProps> = ({
       className={cn(
         variants[variant],
         animated &&
-          "transition-all duration-300 hover:scale-[1.02] hover:shadow-[0_4px_20px_rgba(0,0,0,0.2)]",
+          "transition-all duration-300 hover:scale-[1.02] hover:shadow-[0_4px_20px_rgba(0,0,0,0.2)] hover:border-white/30 hover:bg-white/15",
         className
       )}
       {...props}
@@ -57,10 +57,10 @@ export const PrismButton: React.FC<PrismButtonProps> = ({
   ...props
 }) => {
   const variants = {
-    primary: "bg-purple-500 text-white hover:bg-purple-600",
+    primary: "bg-purple-500 text-white hover:bg-purple-600 relative overflow-hidden",
     secondary:
-      "bg-white/10 backdrop-blur-sm border border-white/20 text-white hover:bg-white/20",
-    ghost: "bg-transparent text-white hover:bg-white/10",
+      "bg-white/10 backdrop-blur-sm border border-white/20 text-white hover:bg-white/20 relative overflow-hidden",
+    ghost: "bg-transparent text-white hover:bg-white/10 relative overflow-hidden",
   };
 
   const sizes = {
@@ -71,15 +71,22 @@ export const PrismButton: React.FC<PrismButtonProps> = ({
     large: "px-6 py-3 text-lg", // Alias for lg
   };
 
+  const buttonClasses = cn(
+    "prism-button btn-prism transition-all duration-200 transform hover:translate-y-[-2px] hover:scale-[1.02] active:translate-y-[0px] active:scale-[0.98]",
+    "shadow-sm hover:shadow-[0_5px_15px_rgba(139,92,246,0.15)]",
+    "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-500 focus-visible:ring-opacity-50",
+    variants[variant],
+    sizes[size],
+    className
+  );
+
   // If asChild is true, render as a span that can wrap other elements
   if (asChild) {
     return (
       <span
         className={cn(
-          "prism-button transition-all duration-200 inline-flex items-center justify-center",
-          variants[variant],
-          sizes[size],
-          className
+          buttonClasses,
+          "inline-flex items-center justify-center"
         )}
         {...(props as any)}
       >
@@ -90,15 +97,13 @@ export const PrismButton: React.FC<PrismButtonProps> = ({
 
   return (
     <Button
-      className={cn(
-        "prism-button transition-all duration-200",
-        variants[variant],
-        sizes[size],
-        className
-      )}
+      className={buttonClasses}
       {...props}
     >
-      {children}
+      <>
+        {children}
+        <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent shimmer-animation" />
+      </>
     </Button>
   );
 };
@@ -348,7 +353,7 @@ interface GlassAccordionItemProps
 export const GlassAccordionItem: React.FC<GlassAccordionItemProps> = ({
   children,
   className,
-  animated = false,
+  animated = true, // Changed default to true for consistency
   ...props
 }) => {
   return (
@@ -356,7 +361,7 @@ export const GlassAccordionItem: React.FC<GlassAccordionItemProps> = ({
       className={cn(
         "glassmorphic-card bg-white/10 backdrop-blur-sm border border-white/20 mb-3 last:mb-0 overflow-hidden rounded-lg",
         animated &&
-          "transition-all duration-300 hover:scale-[1.01] hover:shadow-[0_4px_20px_rgba(0,0,0,0.2)]",
+          "transition-all duration-300 hover:scale-[1.01] hover:shadow-[0_4px_20px_rgba(0,0,0,0.2)] hover:border-white/30 hover:bg-white/15",
         className
       )}
       {...props}

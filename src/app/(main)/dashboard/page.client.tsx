@@ -578,8 +578,9 @@ export default function DashboardPage() {
               <p className="text-muted-foreground mt-1">
                 Sign in or take the assessment to explore your worldview.
               </p>
-              <PrismButton onClick={openAuthModal} className="mt-4">
-                <Icons.user className="mr-2 h-4 w-4" /> Sign In
+              <PrismButton onClick={openAuthModal} className="mt-4 relative overflow-hidden transition-all duration-200 transform hover:translate-y-[-2px] hover:shadow-[0_3px_10px_rgba(139,92,246,0.15)] active:translate-y-[0px] active:scale-[0.98] group">
+                <Icons.user className="mr-2 h-4 w-4 group-hover:animate-[icon-pulse_0.6s_ease-in-out]" /> Sign In
+                <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent shimmer-animation" />
               </PrismButton>
             </>
           )}
@@ -611,10 +612,11 @@ export default function DashboardPage() {
               <p className="text-sm text-muted-foreground text-center">
                 Your results will appear here once you complete the assessment.
               </p>
-              <PrismButton asChild>
+              <PrismButton asChild className="relative overflow-hidden transition-all duration-200 transform hover:translate-y-[-2px] hover:shadow-[0_3px_10px_rgba(139,92,246,0.15)] active:translate-y-[0px] active:scale-[0.98] group">
                 <Link href="/assessment">
-                  <Icons.assessment className="mr-2 h-4 w-4" />
+                  <Icons.assessment className="mr-2 h-4 w-4 group-hover:animate-[icon-pulse_0.6s_ease-in-out]" />
                   Begin Assessment
+                  <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent shimmer-animation" />
                 </Link>
               </PrismButton>
             </div>
@@ -736,17 +738,18 @@ export default function DashboardPage() {
                 <p className="mt-4 text-muted-foreground">
                   Take the Assessment to Discover Your Archetypal Matches.
                 </p>
-                <PrismButton asChild className="mt-4">
+                <PrismButton asChild className="mt-4 relative overflow-hidden transition-all duration-200 transform hover:translate-y-[-2px] hover:shadow-[0_3px_10px_rgba(139,92,246,0.15)] active:translate-y-[0px] active:scale-[0.98] group">
                   <Link href="/assessment">
-                    <Icons.assessment className="mr-2 h-4 w-4" />
+                    <Icons.assessment className="mr-2 h-4 w-4 group-hover:animate-[icon-pulse_0.6s_ease-in-out]" />
                     Begin Assessment
+                    <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent shimmer-animation" />
                   </Link>
                 </PrismButton>
               </div>
             ) : topThreeMatches.length > 0 ? (
               <div className="space-y-6">
                 {topThreeMatches[0] && topThreeMatches[0].domainScores && (
-                  <GlassCard className="border-primary/30 shadow-spectrum">
+                  <GlassCard className="border-primary/30 shadow-spectrum hover:scale-[1.02] hover:shadow-[0_4px_20px_rgba(0,0,0,0.25)] hover:border-white/30 transition-all duration-300 ease-in-out">
                     <div className="flex justify-between items-start mb-4">
                       <div>
                         <h3
@@ -771,8 +774,10 @@ export default function DashboardPage() {
                         onClick={() =>
                           handleOpenArchetypeDrawer(topThreeMatches[0])
                         }
+                        className="relative overflow-hidden group"
                       >
-                        Details
+                        <span className="group-hover:animate-[icon-pulse_0.6s_ease-in-out]">Details</span>
+                        <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent shimmer-animation" />
                       </PrismButton>
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-center">
@@ -782,6 +787,7 @@ export default function DashboardPage() {
                           worldviewName={topThreeMatches[0].title}
                           width={180}
                           height={156}
+                          className="transition-transform duration-300 hover:scale-[1.05]"
                         />
                       </div>
                       <p className="md:col-span-2 text-sm text-muted-foreground line-clamp-4">
@@ -796,7 +802,7 @@ export default function DashboardPage() {
                       (match) =>
                         match &&
                         match.domainScores && (
-                          <GlassCard key={match.id} className="bg-card/40">
+                          <GlassCard key={match.id} className="bg-card/40 hover:scale-[1.02] hover:shadow-[0_4px_20px_rgba(0,0,0,0.25)] hover:border-white/30 transition-all duration-300 ease-in-out group">
                             <div className="flex justify-between items-center mb-4">
                               <h4
                                 className={`text-lg font-semibold ${getFacetClass(
@@ -809,7 +815,7 @@ export default function DashboardPage() {
                               >
                                 {match.title}
                               </h4>
-                              <Badge variant="secondary">
+                              <Badge variant="secondary" className="transition-transform duration-300 group-hover:translate-y-[-2px] group-hover:shadow-md">
                                 {Math.round(match.similarity)}% Similar
                               </Badge>
                             </div>
@@ -819,15 +825,16 @@ export default function DashboardPage() {
                                 worldviewName={match.title}
                                 width={150}
                                 height={130}
-                                className="mb-4"
+                                className="mb-4 transition-transform duration-300 group-hover:scale-[1.05]"
                               />
                               <PrismButton
                                 size="small"
                                 variant="ghost"
-                                className="w-full mt-2"
+                                className="w-full mt-2 relative overflow-hidden transition-all duration-200 transform hover:translate-y-[-2px] hover:shadow-[0_3px_10px_rgba(139,92,246,0.15)] active:translate-y-[0px] active:scale-[0.98] group"
                                 onClick={() => handleOpenArchetypeDrawer(match)}
                               >
-                                View Details
+                                <span className="group-hover:animate-[icon-pulse_0.6s_ease-in-out]">View Details</span>
+                                <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent shimmer-animation" />
                               </PrismButton>
                             </div>
                           </GlassCard>
@@ -836,13 +843,13 @@ export default function DashboardPage() {
                   </div>
                 )}
                 <div className="text-center mt-8 max-w-xs mx-auto">
-                  <PrismButton asChild variant="secondary" className="relative">
+                  <PrismButton asChild variant="secondary" className="relative overflow-hidden transition-all duration-200 transform hover:translate-y-[-2px] hover:shadow-[0_3px_10px_rgba(139,92,246,0.15)] active:translate-y-[0px] active:scale-[0.98] group">
                     <Link
                       href="/archetypes"
                       className="inline-flex items-center justify-center"
                     >
                       Explore All Archetypes
-                      <Icons.chevronRight className="ml-1 h-4 w-4" />
+                      <Icons.chevronRight className="ml-1 h-4 w-4 group-hover:animate-[icon-bounce_0.6s_ease-in-out]" />
                     </Link>
                   </PrismButton>
                 </div>
@@ -1126,12 +1133,13 @@ export default function DashboardPage() {
                         </GlassCard>
                       )}
 
-                    <PrismButton variant="secondary" asChild className="w-full">
+                    <PrismButton variant="secondary" asChild className="w-full relative overflow-hidden transition-all duration-200 transform hover:translate-y-[-2px] hover:shadow-[0_3px_10px_rgba(139,92,246,0.15)] active:translate-y-[0px] active:scale-[0.98] group">
                       <Link
                         href={`/facet/${currentSelectedFacetData.name.toLowerCase()}`}
                       >
                         Deep Dive into {currentSelectedFacetData.name}
-                        <Icons.chevronRight className="ml-2 h-4 w-4" />
+                        <Icons.chevronRight className="ml-2 h-4 w-4 group-hover:animate-[icon-bounce_0.6s_ease-in-out]" />
+                        <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent shimmer-animation" />
                       </Link>
                     </PrismButton>
                   </div>
@@ -1151,14 +1159,14 @@ export default function DashboardPage() {
                 <div
                   key={index}
                   className={cn(
-                    "flex flex-col p-6 rounded-2xl shadow-lg transition-all duration-300 ease-in-out bg-card/50 hover:bg-card/70 border",
+                    "flex flex-col p-6 rounded-2xl shadow-lg transition-all duration-300 ease-in-out bg-card/50 hover:bg-card/70 hover:scale-[1.02] hover:shadow-[0_4px_20px_rgba(0,0,0,0.2)] hover:border-white/30 border group",
                     getFacetClass("border", facetKey, "400")
                   )}
                 >
                   <div className="flex items-center gap-3 mb-4">
                     <item.icon
                       className={cn(
-                        "h-7 w-7",
+                        "h-7 w-7 transition-transform duration-300 group-hover:scale-110",
                         getFacetClass("text", facetKey, "600")
                       )}
                     />
@@ -1180,7 +1188,10 @@ export default function DashboardPage() {
           </div>
         </section>
         <footer className="mt-16 pt-8 border-t border-border/30 text-center">
-          <Link href="/about" className="text-sm text-primary hover:underline">
+          <Link 
+            href="/about" 
+            className="text-sm text-primary hover:underline transition-all duration-200 transform hover:translate-y-[-2px] inline-block hover:text-primary/80"
+          >
             Learn More About the Meta-Prism Model
           </Link>
         </footer>

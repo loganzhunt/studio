@@ -409,7 +409,7 @@ export default function BuilderPage() {
                         >
                           <SelectTrigger
                             id={`${facetName}-select`}
-                            className="flex-grow bg-muted/80 border-border/60 hover:bg-muted/90"
+                            className="flex-grow bg-muted/80 border-border/60 hover:bg-muted/90 transition-all duration-200 hover:border-white/30 hover:shadow-[0_3px_10px_rgba(0,0,0,0.15)] hover:translate-y-[-1px]"
                           >
                             <SelectValue
                               placeholder={`Select a view for ${facetName}`}
@@ -434,11 +434,12 @@ export default function BuilderPage() {
                         <Button
                           variant="outline"
                           size="sm"
-                          className="bg-muted/60 border-border/60 hover:bg-muted/80 text-foreground/90 hover:text-foreground"
+                          className="bg-muted/60 border-border/60 hover:bg-muted/80 text-foreground/90 hover:text-foreground relative overflow-hidden transition-all duration-200 transform hover:translate-y-[-2px] hover:shadow-[0_3px_10px_rgba(139,92,246,0.15)] active:translate-y-[0px] active:scale-[0.98] group"
                           asChild
                         >
                           <Link href={`/facet/${facetName.toLowerCase()}`}>
-                            <Icons.search className="h-4 w-4 mr-1" /> Explore
+                            <Icons.search className="h-4 w-4 mr-1 group-hover:animate-[icon-pulse_0.6s_ease-in-out]" /> Explore
+                            <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent shimmer-animation" />
                           </Link>
                         </Button>
                       </div>
@@ -468,7 +469,7 @@ export default function BuilderPage() {
               <TriangleChart
                 scores={builderDomainScores}
                 worldviewName={worldviewTitle || "Custom Worldview"}
-                className="mx-auto mb-6 !p-0 !bg-transparent !shadow-none !backdrop-blur-none"
+                className="mx-auto mb-6 !p-0 !bg-transparent !shadow-none !backdrop-blur-none transition-transform duration-300 hover:scale-[1.03]"
                 width={250}
                 height={217}
               />
@@ -485,19 +486,26 @@ export default function BuilderPage() {
                   value={worldviewTitle}
                   onChange={(e) => setWorldviewTitle(e.target.value)}
                   placeholder="E.g., My Reflective Stance"
-                  className="w-full p-2 rounded-md border border-input bg-background/50 text-foreground focus:ring-primary focus:border-primary"
+                  className="w-full p-2 rounded-md border border-input bg-background/50 text-foreground focus:ring-primary focus:border-primary transition-all duration-200 hover:border-white/30 hover:bg-white/5 focus:hover:border-primary focus:translate-y-[-1px] focus:shadow-[0_3px_10px_rgba(139,92,246,0.15)]"
                 />
               </div>
               <div className="flex flex-col space-y-2">
                 <Button
                   onClick={handleSaveWorldview}
                   disabled={!worldviewTitle.trim()}
+                  className="relative overflow-hidden transition-all duration-200 transform hover:translate-y-[-2px] hover:shadow-[0_3px_10px_rgba(139,92,246,0.15)] active:translate-y-[0px] active:scale-[0.98] group"
                 >
-                  <Icons.saved className="mr-2 h-4 w-4" /> Save Worldview to
+                  <Icons.saved className="mr-2 h-4 w-4 group-hover:animate-[icon-pulse_0.6s_ease-in-out]" /> Save Worldview to
                   Library
+                  <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent shimmer-animation" />
                 </Button>
-                <Button variant="outline" onClick={handleClearSelections}>
-                  <Icons.delete className="mr-2 h-4 w-4" /> Clear All Selections
+                <Button 
+                  variant="outline" 
+                  onClick={handleClearSelections}
+                  className="relative overflow-hidden transition-all duration-200 transform hover:translate-y-[-2px] hover:shadow-[0_3px_10px_rgba(139,92,246,0.15)] active:translate-y-[0px] active:scale-[0.98] group"
+                >
+                  <Icons.delete className="mr-2 h-4 w-4 group-hover:animate-[icon-pulse_0.6s_ease-in-out]" /> Clear All Selections
+                  <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent shimmer-animation" />
                 </Button>
               </div>
             </CardContent>

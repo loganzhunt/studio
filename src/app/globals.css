@@ -793,6 +793,80 @@
   }
 }
 
+/* Additional microinteraction animations */
+@keyframes gradient-breathe {
+  0%, 100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+}
+
+@keyframes focus-spectrum {
+  0% {
+    box-shadow: 0 0 0 2px rgba(139, 92, 246, 0.5);
+  }
+  14% {
+    box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.5);
+  }
+  28% {
+    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.5);
+  }
+  43% {
+    box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.5);
+  }
+  57% {
+    box-shadow: 0 0 0 2px rgba(234, 179, 8, 0.5);
+  }
+  71% {
+    box-shadow: 0 0 0 2px rgba(249, 115, 22, 0.5);
+  }
+  85% {
+    box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.5);
+  }
+  100% {
+    box-shadow: 0 0 0 2px rgba(139, 92, 246, 0.5);
+  }
+}
+
+@keyframes button-focus-pulse {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.03);
+  }
+}
+
+@keyframes icon-bounce {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-4px);
+  }
+}
+
+@keyframes icon-pulse {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.2);
+  }
+}
+
+.shimmer-animation {
+  animation: shimmer 2.5s infinite;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+*:hover > .shimmer-animation {
+  opacity: 1;
+}
+
 /* Legacy gradient underline */
 .roygbiv-gradient-underline {
   position: relative;

@@ -209,7 +209,7 @@ export default function CodexPage() {
     const dominantFacet = getDominantFacet(entry.domainScores);
 
     return (
-      <Card className="flex flex-col overflow-hidden glassmorphic-card hover:shadow-primary/20 transition-shadow duration-300 ease-in-out h-full">
+      <Card className="flex flex-col overflow-hidden glassmorphic-card hover:shadow-primary/20 transition-all duration-300 ease-in-out h-full hover:scale-[1.02] hover:shadow-[0_4px_20px_rgba(0,0,0,0.2)] hover:border-white/30 hover:bg-white/15 group">
         <CardHeader className="p-6 text-center">
           <div className="flex items-center justify-center gap-2 mb-2">
             {entry.icon && (
@@ -218,7 +218,7 @@ export default function CodexPage() {
                   "text",
                   dominantFacet.toLowerCase() as any,
                   "600"
-                )}`}
+                )} transition-transform duration-300 group-hover:scale-110`}
               >
                 {entry.icon}
               </span>
@@ -243,17 +243,18 @@ export default function CodexPage() {
             worldviewName={entry.title}
             width={180}
             height={156}
-            className="!p-0 !bg-transparent !shadow-none !backdrop-blur-none mb-4"
+            className="!p-0 !bg-transparent !shadow-none !backdrop-blur-none mb-4 transition-transform duration-300 group-hover:scale-[1.05]"
           />
         </CardContent>
         <CardFooter className="p-4 border-t border-border/30 mt-auto">
           <Button
             variant="outline"
             size="sm"
-            className="w-full text-xs"
+            className="w-full text-xs transition-all duration-200 transform hover:translate-y-[-2px] hover:shadow-[0_3px_10px_rgba(139,92,246,0.15)] active:translate-y-[0px] active:scale-[0.98] relative overflow-hidden"
             onClick={() => handleOpenDrawer(entry)}
           >
-            View Details <Icons.chevronRight className="ml-1 h-3 w-3" />
+            View Details <Icons.chevronRight className="ml-1 h-3 w-3 group-hover:animate-[icon-bounce_0.6s_ease-in-out]" />
+            <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent shimmer-animation" />
           </Button>
         </CardFooter>
       </Card>
@@ -323,7 +324,7 @@ export default function CodexPage() {
                 onClick={() =>
                   setActiveCategory(cat as CodexEntry["category"] | "all")
                 }
-                className="capitalize text-xs"
+                className="capitalize text-xs transition-all duration-200 hover:translate-y-[-1px] hover:shadow-[0_3px_10px_rgba(139,92,246,0.1)] active:translate-y-[0px] active:scale-[0.98]"
               >
                 {cat}
               </Button>
@@ -362,7 +363,7 @@ export default function CodexPage() {
       {selectedEntry && (
         <Sheet open={isDrawerOpen} onOpenChange={setIsDrawerOpen}>
           <SheetContent
-            className="w-full max-w-md sm:max-w-lg md:max-w-xl lg:max-w-2xl p-0 glassmorphic-card !bg-card/80 backdrop-blur-xl"
+            className="w-full max-w-md sm:max-w-lg md:max-w-xl lg:max-w-2xl p-0 glassmorphic-card !bg-card/80 backdrop-blur-xl border-white/30"
             side="right"
           >
             <ScrollArea className="h-full">
@@ -422,7 +423,7 @@ export default function CodexPage() {
                           : "secondary"
                       }
                       size="sm"
-                      className="w-full text-xs"
+                      className="w-full text-xs relative overflow-hidden transition-all duration-200 transform hover:translate-y-[-2px] hover:shadow-[0_3px_10px_rgba(139,92,246,0.15)] active:translate-y-[0px] active:scale-[0.98] group"
                       onClick={() => handleSaveCodexEntry(selectedEntry)}
                       disabled={savedWorldviews.some(
                         (p) => p.id === selectedEntry.id
@@ -433,20 +434,22 @@ export default function CodexPage() {
                       ) ? (
                         <Icons.check className="mr-1 h-3 w-3" />
                       ) : (
-                        <Icons.saved className="mr-1 h-3 w-3" />
+                        <Icons.saved className="mr-1 h-3 w-3 group-hover:animate-[icon-pulse_0.6s_ease-in-out]" />
                       )}
                       {savedWorldviews.some((p) => p.id === selectedEntry.id)
                         ? "Saved to Library"
                         : "Save to Library"}
+                      <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent shimmer-animation" />
                     </Button>
                     <Button
                       variant="outline"
                       asChild
-                      className="w-full text-xs"
+                      className="w-full text-xs relative overflow-hidden transition-all duration-200 transform hover:translate-y-[-2px] hover:shadow-[0_3px_10px_rgba(139,92,246,0.15)] active:translate-y-[0px] active:scale-[0.98] group"
                     >
                       <Link href={`/codex/${selectedEntry.id}`}>
                         View Full Deep-Dive Page{" "}
-                        <Icons.chevronRight className="ml-1 h-4 w-4" />
+                        <Icons.chevronRight className="ml-1 h-4 w-4 group-hover:animate-[icon-bounce_0.6s_ease-in-out]" />
+                        <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent shimmer-animation" />
                       </Link>
                     </Button>
                   </div>

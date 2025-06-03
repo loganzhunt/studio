@@ -138,14 +138,17 @@ export default function CodexDeepDivePage() {
             size="sm"
             onClick={handleSaveWorldview}
             disabled={isSaved}
+            className="relative overflow-hidden transition-all duration-200 transform hover:translate-y-[-2px] hover:shadow-[0_3px_10px_rgba(139,92,246,0.15)] active:translate-y-[0px] active:scale-[0.98] group"
           >
-            <Icons.bookmark className="mr-2 h-4 w-4" />
+            <Icons.bookmark className="mr-2 h-4 w-4 group-hover:animate-[icon-pulse_0.6s_ease-in-out]" />
             {isSaved ? "Saved" : "Save Worldview"}
+            {!isSaved && <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent shimmer-animation" />}
           </Button>
-          <Button variant="secondary" size="sm" asChild>
+          <Button variant="secondary" size="sm" asChild className="relative overflow-hidden transition-all duration-200 transform hover:translate-y-[-2px] hover:shadow-[0_3px_10px_rgba(139,92,246,0.15)] active:translate-y-[0px] active:scale-[0.98] group">
             <Link href="/codex">
-              <Icons.arrowLeft className="mr-2 h-4 w-4" />
+              <Icons.arrowLeft className="mr-2 h-4 w-4 group-hover:animate-[icon-bounce_0.6s_ease-in-out]" />
               Back to Codex
+              <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent shimmer-animation" />
             </Link>
           </Button>
         </div>
@@ -161,6 +164,7 @@ export default function CodexDeepDivePage() {
                 variant="ghost"
                 size="sm"
                 onClick={() => handleScrollToSection(SECTION_IDS.SUMMARY)}
+                className="transition-all duration-200 transform hover:translate-y-[-2px] hover:bg-white/15 active:translate-y-[0px] active:scale-[0.98]"
               >
                 Summary
               </Button>
@@ -168,6 +172,7 @@ export default function CodexDeepDivePage() {
                 variant="ghost"
                 size="sm"
                 onClick={() => handleScrollToSection(SECTION_IDS.FACETS)}
+                className="transition-all duration-200 transform hover:translate-y-[-2px] hover:bg-white/15 active:translate-y-[0px] active:scale-[0.98]"
               >
                 Facets
               </Button>
@@ -175,6 +180,7 @@ export default function CodexDeepDivePage() {
                 variant="ghost"
                 size="sm"
                 onClick={() => handleScrollToSection(SECTION_IDS.ORIGINS)}
+                className="transition-all duration-200 transform hover:translate-y-[-2px] hover:bg-white/15 active:translate-y-[0px] active:scale-[0.98]"
               >
                 Origins
               </Button>
@@ -182,6 +188,7 @@ export default function CodexDeepDivePage() {
                 variant="ghost"
                 size="sm"
                 onClick={() => handleScrollToSection(SECTION_IDS.BELIEFS)}
+                className="transition-all duration-200 transform hover:translate-y-[-2px] hover:bg-white/15 active:translate-y-[0px] active:scale-[0.98]"
               >
                 Beliefs
               </Button>
@@ -189,6 +196,7 @@ export default function CodexDeepDivePage() {
                 variant="ghost"
                 size="sm"
                 onClick={() => handleScrollToSection(SECTION_IDS.REFLECTION)}
+                className="transition-all duration-200 transform hover:translate-y-[-2px] hover:bg-white/15 active:translate-y-[0px] active:scale-[0.98]"
               >
                 Reflect
               </Button>
@@ -198,6 +206,7 @@ export default function CodexDeepDivePage() {
                     variant="ghost"
                     size="sm"
                     onClick={() => handleScrollToSection(SECTION_IDS.RESOURCES)}
+                    className="transition-all duration-200 transform hover:translate-y-[-2px] hover:bg-white/15 active:translate-y-[0px] active:scale-[0.98]"
                   >
                     Resources
                   </Button>
@@ -236,9 +245,9 @@ export default function CodexDeepDivePage() {
                         (figure: any, idx: number) => (
                           <div
                             key={idx}
-                            className="flex border border-border/30 rounded-md overflow-hidden bg-background/30"
+                            className="flex border border-border/30 rounded-md overflow-hidden bg-background/30 transition-all duration-300 hover:border-white/30 hover:bg-white/10 hover:shadow-[0_4px_16px_rgba(0,0,0,0.2)] hover:translate-y-[-2px]"
                           >
-                            <div className="flex flex-col p-3">
+                            <div className="flex flex-col p-3 w-full">
                               <span className="font-semibold">
                                 {figure.name}
                               </span>
@@ -270,7 +279,7 @@ export default function CodexDeepDivePage() {
                     (principle: any, idx: number) => (
                       <div
                         key={idx}
-                        className="p-3 border border-border/30 rounded-md bg-background/30"
+                        className="p-3 border border-border/30 rounded-md bg-background/30 transition-all duration-300 hover:border-white/30 hover:bg-white/10 hover:shadow-[0_4px_16px_rgba(0,0,0,0.15)] hover:translate-y-[-2px]"
                       >
                         <h3 className="font-semibold mb-1">
                           {principle.title}
@@ -329,7 +338,7 @@ export default function CodexDeepDivePage() {
                       (resource: any, idx: number) => (
                         <div
                           key={idx}
-                          className="p-3 border border-border/30 rounded-md bg-background/30"
+                          className="p-3 border border-border/30 rounded-md bg-background/30 transition-all duration-300 hover:border-white/30 hover:bg-white/10 hover:shadow-[0_4px_16px_rgba(0,0,0,0.15)] hover:translate-y-[-2px]"
                         >
                           <h3 className="font-semibold">{resource.title}</h3>
                           <p className="text-sm text-muted-foreground mb-2">
@@ -348,15 +357,16 @@ export default function CodexDeepDivePage() {
         {/* Sidebar - Right Column (1/3) */}
         <div className="space-y-8">
           {/* Worldview Visualization Card */}
-          <Card className="glassmorphic-card">
+          <Card className="glassmorphic-card hover:scale-[1.02] hover:shadow-[0_4px_20px_rgba(0,0,0,0.25)] hover:border-white/30 transition-all duration-300 ease-in-out">
             <CardHeader>
               <CardTitle>Worldview Visualization</CardTitle>
             </CardHeader>
             <CardContent className="flex justify-center">
-              <div className="w-full max-w-[280px]">
+              <div className="w-full max-w-[280px] transition-transform duration-300 hover:scale-[1.03]">
                 <TriangleChart
                   scores={worldview.domainScores}
                   worldviewName={worldview.title}
+                  className="transition-opacity duration-300 hover:opacity-95"
                 />
               </div>
             </CardContent>
@@ -383,13 +393,13 @@ export default function CodexDeepDivePage() {
                     return (
                       <div
                         key={facetName}
-                        className="border border-border/30 rounded-lg overflow-hidden"
+                        className="border border-border/30 rounded-lg overflow-hidden transition-all duration-300 hover:border-white/30 hover:shadow-[0_4px_16px_rgba(0,0,0,0.2)] group"
                       >
-                        <div className="flex items-center justify-between p-3 border-b border-border/30 bg-background/30">
+                        <div className="flex items-center justify-between p-3 border-b border-border/30 bg-background/30 transition-colors duration-300 group-hover:bg-white/10">
                           <div className="flex items-center gap-2">
                             <FacetIcon
                               facetName={facetName}
-                              className="h-5 w-5"
+                              className="h-5 w-5 transition-transform duration-300 group-hover:scale-110"
                             />
                             <span className="font-semibold">{facetName}</span>
                           </div>
@@ -397,6 +407,7 @@ export default function CodexDeepDivePage() {
                             <Tooltip>
                               <TooltipTrigger asChild>
                                 <Badge
+                                  className="transition-transform duration-300 group-hover:translate-y-[-2px] group-hover:shadow-md"
                                   style={{
                                     backgroundColor: spectrum.color,
                                     color: getTextColor(spectrum.color),
@@ -415,7 +426,7 @@ export default function CodexDeepDivePage() {
                             </Tooltip>
                           </TooltipProvider>
                         </div>
-                        <div className="p-3">
+                        <div className="p-3 transition-all duration-300 group-hover:bg-white/5">
                           <p className="text-sm text-muted-foreground">
                             {(worldview as any).facet_descriptions?.[
                               facetName.toLowerCase()
@@ -424,12 +435,13 @@ export default function CodexDeepDivePage() {
                           <Button
                             variant="ghost"
                             size="sm"
-                            className="mt-2"
+                            className="mt-2 transition-all duration-200 relative overflow-hidden transform hover:translate-y-[-2px] hover:shadow-[0_3px_10px_rgba(139,92,246,0.15)] active:translate-y-[0px] active:scale-[0.98] group"
                             asChild
                           >
                             <Link href={`/facet/${facetName.toLowerCase()}`}>
-                              <Icons.arrowRight className="mr-1 h-3 w-3" />
+                              <Icons.arrowRight className="mr-1 h-3 w-3 group-hover:animate-[icon-bounce_0.6s_ease-in-out]" />
                               Explore {facetName}
+                              <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent shimmer-animation" />
                             </Link>
                           </Button>
                         </div>
