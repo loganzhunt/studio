@@ -4,10 +4,11 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 import { AccordionItem } from "@/components/ui/accordion";
+import { ParallaxGradientText } from "@/components/ParallaxGradient";
 
 interface GlassCardProps extends React.HTMLAttributes<HTMLDivElement> {
   children: React.ReactNode;
-  variant?: "default" | "elevated" | "subtle" | "large";
+  variant?: "default" | "elevated" | "subtle" | "large" | "transparent";
   animated?: boolean;
 }
 
@@ -19,10 +20,16 @@ export const GlassCard: React.FC<GlassCardProps> = ({
   ...props
 }) => {
   const variants = {
-    default: "bg-white/10 backdrop-blur-sm border border-white/20",
-    elevated: "bg-white/20 backdrop-blur-md border border-white/30 shadow-xl",
-    subtle: "bg-white/5 backdrop-blur-sm border border-white/10",
-    large: "bg-white/15 backdrop-blur-md border border-white/25 shadow-lg p-6",
+    default:
+      "bg-white/10 backdrop-blur-sm border border-white/20 shadow-[0_4px_20px_rgba(0,0,0,0.15)]",
+    elevated:
+      "bg-white/20 backdrop-blur-md border border-white/30 shadow-[0_8px_32px_rgba(0,0,0,0.25)]",
+    subtle:
+      "bg-white/5 backdrop-blur-sm border border-white/10 shadow-[0_2px_10px_rgba(0,0,0,0.1)]",
+    large:
+      "bg-white/15 backdrop-blur-md border border-white/25 shadow-[0_10px_40px_rgba(0,0,0,0.25)] p-6",
+    transparent:
+      "bg-card/50 border border-white/20 shadow-[0_4px_20px_rgba(0,0,0,0.15)]", // Added subtle shadow
   };
 
   return (
@@ -30,7 +37,7 @@ export const GlassCard: React.FC<GlassCardProps> = ({
       className={cn(
         variants[variant],
         animated &&
-          "transition-all duration-300 hover:scale-[1.02] hover:shadow-[0_4px_20px_rgba(0,0,0,0.2)] hover:border-white/30",
+          "transition-all duration-300 hover:scale-[1.02] hover:shadow-[0_8px_30px_rgba(0,0,0,0.3)] hover:border-white/30",
         className
       )}
       {...props}
@@ -57,10 +64,12 @@ export const PrismButton: React.FC<PrismButtonProps> = ({
   ...props
 }) => {
   const variants = {
-    primary: "bg-purple-500 text-white hover:bg-purple-600 relative overflow-hidden",
+    primary:
+      "bg-purple-500 text-white hover:bg-purple-600 relative overflow-hidden",
     secondary:
-      "bg-white/10 border border-white/20 text-white hover:bg-white/20 relative overflow-hidden",
-    ghost: "bg-transparent text-white hover:bg-white/10 relative overflow-hidden",
+      "bg-white/15 border border-white/30 text-white hover:bg-white/25 relative overflow-hidden font-medium",
+    ghost:
+      "bg-transparent text-white hover:bg-white/10 relative overflow-hidden",
   };
 
   const sizes = {
@@ -72,8 +81,10 @@ export const PrismButton: React.FC<PrismButtonProps> = ({
   };
 
   const buttonClasses = cn(
-    "prism-button btn-prism transition-all duration-200 transform hover:translate-y-[-2px] hover:scale-[1.02] active:translate-y-[0px] active:scale-[0.98]",
-    "shadow-sm hover:shadow-[0_5px_15px_rgba(139,92,246,0.15)]",
+    "prism-button btn-prism transition-all duration-200 transform hover:translate-y-[-2px] hover:scale-[1.02] active:translate-y-[0px] active:scale-[0.98] group",
+    variant === "primary"
+      ? "shadow-[0_4px_15px_rgba(139,92,246,0.25)] hover:shadow-[0_6px_25px_rgba(139,92,246,0.35)]"
+      : "shadow-[0_4px_15px_rgba(0,0,0,0.2)] hover:shadow-[0_6px_20px_rgba(0,0,0,0.3)]",
     "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-500 focus-visible:ring-opacity-50",
     variants[variant],
     sizes[size],
@@ -86,23 +97,21 @@ export const PrismButton: React.FC<PrismButtonProps> = ({
       <span
         className={cn(
           buttonClasses,
-          "inline-flex items-center justify-center"
+          "inline-flex items-center justify-center relative"
         )}
         {...(props as any)}
       >
-        {children}
+        <span className="relative z-20">{children}</span>
+        <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent shimmer-animation pointer-events-none z-10" />
       </span>
     );
   }
 
   return (
-    <Button
-      className={buttonClasses}
-      {...props}
-    >
+    <Button className={buttonClasses} {...props}>
       <>
-        {children}
-        <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent shimmer-animation" />
+        <span className="relative z-20">{children}</span>
+        <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent shimmer-animation pointer-events-none z-10" />
       </>
     </Button>
   );
@@ -239,14 +248,28 @@ interface HeroShimmerProps {
 
 export const HeroShimmer: React.FC<HeroShimmerProps> = ({ className }) => {
   return (
-    <div
-      className={cn("hero-shimmer-effect relative overflow-hidden", className)}
-    >
-      <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent animate-pulse" />
-      <div className="relative z-10 p-8 text-center">
-        <div className="h-8 bg-white/20 rounded mb-4 animate-pulse" />
-        <div className="h-4 bg-white/10 rounded mb-2 animate-pulse" />
-        <div className="h-4 bg-white/10 rounded w-3/4 mx-auto animate-pulse" />
+    <div className={cn("hero-shimmer-effect py-8 px-6 relative", className)}>
+      <div className="text-center">
+        <ParallaxGradientText
+          fontSize="text-lg md:text-xl lg:text-2xl"
+          fontWeight="font-bold"
+          speed={0.7}
+          className="animate-in fade-in duration-500 ease-in-out max-w-3xl mx-auto"
+          colors={[
+            "#ff0045", // Red
+            "#ff9315", // Orange
+            "#f1e800", // Yellow
+            "#2df36c", // Green
+            "#00b8ff", // Light Blue
+            "#0082ff", // Blue
+            "#8e6bf7", // Purple
+          ]}
+        >
+          Unlock a symbolic mirror of your worldview. Take our interactive
+          self-assessment to reveal the hidden prisms through which you see
+          existence—and discover how to consciously redesign your beliefs,
+          values, and sense of purpose.
+        </ParallaxGradientText>
       </div>
     </div>
   );

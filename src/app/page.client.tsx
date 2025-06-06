@@ -40,11 +40,14 @@ import {
   GlassCard,
   PrismButton,
   HeroShimmer,
-  SpectrumBar,
   GlassAccordionItem,
 } from "@/components/glass-components";
 import { FacetClassForcer } from "@/components/force-facet-classes";
 import { Sparkles, ArrowRight } from "lucide-react";
+import ParallaxGradient, {
+  HeroParallaxGradient,
+  ParallaxGradientText,
+} from "@/components/ParallaxGradient";
 
 // Data for Featured Worldviews
 const featuredWorldviewsData: Array<{
@@ -198,7 +201,10 @@ export default function HomePage() {
             data-ai-hint="subtle geometric texture"
           />
           <div className="container mx-auto relative z-10">
-            <GlassCard className="p-6 sm:p-10 md:p-16 max-w-4xl mx-auto animate-in fade-in duration-700 ease-out">
+            <GlassCard
+              variant="elevated"
+              className="p-6 sm:p-10 md:p-16 max-w-4xl mx-auto animate-in fade-in duration-700 ease-out shadow-[0_10px_50px_rgba(0,0,0,0.3)]"
+            >
               <div className="mx-auto mb-6 md:mb-8 flex justify-center">
                 {/* Responsive Logo Size - Now Shows User's Custom Triangle After Assessment */}
                 <div className="w-28 md:w-36">
@@ -210,20 +216,26 @@ export default function HomePage() {
                 The Meta-Prism
               </h1>
 
-              <p className="mt-3 md:mt-4 mb-6 md:mb-8 text-lg sm:text-xl md:text-2xl font-medium tracking-wider bg-clip-text text-transparent bg-gradient-facet-spectrum px-2">
-                Illuminate the Patterns Shaping Your Reality
-              </p>
+              <div className="mt-3 md:mt-4 mb-6 md:mb-8">
+                <ParallaxGradientText
+                  fontSize="text-lg sm:text-xl md:text-2xl"
+                  fontWeight="font-medium"
+                  speed={0.8}
+                  className="tracking-wider"
+                >
+                  Illuminate the Patterns Shaping Your Reality
+                </ParallaxGradientText>
+              </div>
 
               <p className="max-w-2xl mx-auto text-md sm:text-lg md:text-xl text-muted-foreground/90 leading-relaxed mb-8 md:mb-10">
-                Unlock a symbolic mirror of your worldview. Take our interactive
-                self-assessment to reveal the hidden prisms through which you
-                see existence—and discover how to consciously redesign your
-                beliefs, values, and sense of purpose.
+                Discover the fundamental patterns that shape your perception of
+                reality.
               </p>
 
               <Link href="/assessment">
                 <PrismButton
-                  className="h-12 px-8 text-sm sm:text-base font-semibold shadow-[0_4px_20px_rgba(0,0,0,0.2)] group transition-all duration-300 hover:scale-105 hover:shadow-[0_6px_25px_rgba(0,0,0,0.3)]"
+                  variant="secondary"
+                  className="h-12 px-8 text-sm sm:text-base font-semibold group transition-all duration-300 hover:scale-105"
                   size="lg"
                 >
                   <Sparkles className="mr-2 h-5 w-5 transition-transform group-hover:scale-110" />
@@ -233,7 +245,12 @@ export default function HomePage() {
               </Link>
 
               <div className="mt-8">
-                <SpectrumBar />
+                <ParallaxGradient
+                  height="8px"
+                  speed={0.3}
+                  opacity={0.8}
+                  className="rounded-full"
+                />
               </div>
             </GlassCard>
           </div>
@@ -249,18 +266,56 @@ export default function HomePage() {
 
         {/* Shimmering Text Box Below Hero Section */}
         <div className="container mx-auto px-4 py-8">
-          <HeroShimmer className="max-w-2xl mx-auto" />
+          <div className="relative max-w-2xl mx-auto rounded-2xl shadow-[0_10px_30px_rgba(0,0,0,0.2)] backdrop-blur-sm bg-white/5 p-6">
+            {/* Apply the parallax gradient effect directly to the text instead of using a box */}
+            <ParallaxGradientText
+              fontSize="text-lg md:text-xl lg:text-2xl"
+              fontWeight="font-bold"
+              speed={0.7}
+              className="animate-in fade-in duration-500 ease-in-out max-w-3xl mx-auto text-center py-6 px-4"
+              colors={[
+                "#ff0045", // Red
+                "#ff9315", // Orange
+                "#f1e800", // Yellow
+                "#2df36c", // Green
+                "#00b8ff", // Light Blue
+                "#0082ff", // Blue
+                "#8e6bf7", // Purple
+              ]}
+            >
+              Unlock a symbolic mirror of your worldview. Take our interactive
+              self-assessment to reveal the hidden prisms through which you see
+              existence—and discover how to consciously redesign your beliefs,
+              values, and sense of purpose.
+            </ParallaxGradientText>
+          </div>
         </div>
 
-        {/* Animated Section Divider */}
-        <div className="h-1 w-full bg-gradient-facet-spectrum opacity-30 my-16 md:my-20 rounded-full"></div>
+        {/* Animated Section Divider with Parallax Effect */}
+        <div className="my-16 md:my-20">
+          <ParallaxGradient
+            height="8px"
+            speed={0.8}
+            opacity={0.6}
+            className="rounded-full"
+            // Added will-change property for better performance
+          />
+        </div>
 
         {/* How Meta-Prism Works Section */}
         <section className="py-16 md:py-24">
           <div className="container mx-auto">
             <h2 className="text-3xl md:text-4xl font-bold text-center mb-16">
               How Meta-Prism Works
-              <div className="mt-3 h-1 w-24 bg-gradient-praxeology-axiology mx-auto rounded-full"></div>
+              <div className="mt-3 w-24 mx-auto">
+                <ParallaxGradient
+                  height="4px"
+                  speed={0.25}
+                  opacity={0.8}
+                  className="rounded-full"
+                  colors={["#00b8ff", "#2df36c", "#8e6bf7"]}
+                />
+              </div>
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
               {howItWorksSteps.map((step, index) => {
@@ -314,7 +369,14 @@ export default function HomePage() {
         </section>
 
         {/* Animated Section Divider */}
-        <div className="h-px w-full bg-gradient-facet-spectrum opacity-50 my-16 md:my-20"></div>
+        <div className="my-16 md:my-20">
+          <ParallaxGradient
+            height="1px"
+            speed={0.6}
+            opacity={0.7}
+            className="w-full rounded-full"
+          />
+        </div>
 
         {/* Featured Worldviews Section */}
         <section className="py-16 md:py-24 bg-card/30">
@@ -353,6 +415,7 @@ export default function HomePage() {
                         <div className="p-1 h-full">
                           <GlassCard
                             className="flex flex-col h-full overflow-hidden transition-all duration-300 ease-in-out"
+                            variant="transparent"
                             animated
                           >
                             <CardHeader className="p-6 text-center">
@@ -395,7 +458,7 @@ export default function HomePage() {
                               <PrismButton
                                 variant="secondary"
                                 size="small"
-                                className="w-full text-xs"
+                                className="w-full text-xs text-white font-medium"
                                 asChild
                               >
                                 <Link href={`/codex/${entry?.id || ""}`}>
@@ -423,10 +486,15 @@ export default function HomePage() {
               </Carousel>
             </div>
             <div className="text-center mt-12">
-              <PrismButton size="lg" variant="secondary" asChild>
+              <PrismButton
+                size="lg"
+                variant="secondary"
+                className="text-white font-medium group"
+                asChild
+              >
                 <Link href="/codex">
                   Explore the Full Codex{" "}
-                  <Icons.chevronRight className="ml-2 h-5 w-5" />
+                  <Icons.chevronRight className="ml-2 h-5 w-5 transition-transform group-hover:translate-x-1" />
                 </Link>
               </PrismButton>
             </div>
@@ -434,16 +502,34 @@ export default function HomePage() {
         </section>
 
         {/* Animated Section Divider */}
-        <div className="h-px w-full bg-gradient-facet-spectrum opacity-40 my-12 md:my-16"></div>
+        <div className="my-12 md:my-16">
+          <ParallaxGradient
+            height="1px"
+            speed={0.4}
+            opacity={0.6}
+            className="w-full rounded-full"
+          />
+        </div>
 
         {/* Facet Accordions Section */}
         <section className="py-16 md:py-24">
           <div className="container mx-auto">
             <h2 className="text-3xl md:text-4xl font-bold text-center mb-4">
-              <span className="bg-gradient-facet-spectrum bg-clip-text text-transparent">
+              <ParallaxGradientText
+                fontSize="text-3xl md:text-4xl"
+                fontWeight="font-bold"
+                speed={0.6}
+              >
                 The 7 Facets of Worldview
-              </span>
-              <div className="mt-2 h-1 w-32 bg-gradient-facet-spectrum mx-auto rounded-full"></div>
+              </ParallaxGradientText>
+              <div className="mt-2 w-32 mx-auto">
+                <ParallaxGradient
+                  height="4px"
+                  speed={0.35}
+                  opacity={0.9}
+                  className="rounded-full"
+                />
+              </div>
             </h2>
             <p className="text-center text-muted-foreground mb-12 max-w-2xl mx-auto">
               Meta-Prism explores your perspective through seven fundamental
@@ -451,9 +537,24 @@ export default function HomePage() {
               meaning, the cosmos, and purpose.
             </p>
 
-            {/* Spectrum visualization */}
+            {/* Spectrum visualization with parallax effect */}
             <div className="mb-8 flex justify-center">
-              <div className="bg-gradient-facet-spectrum h-4 w-full max-w-lg rounded-full shadow-lg opacity-80" />
+              <ParallaxGradient
+                height="2rem"
+                speed={1.2}
+                opacity={0.85}
+                className="w-full max-w-lg rounded-full shadow-[0_5px_25px_rgba(0,0,0,0.3)]"
+                colors={[
+                  "#ff0045", // Red
+                  "#ff9315", // Orange
+                  "#f1e800", // Yellow
+                  "#2df36c", // Green
+                  "#00b8ff", // Light Blue
+                  "#0082ff", // Blue
+                  "#8e6bf7", // Purple
+                  "#ff0045", // Red (repeated to create smooth loop)
+                ]}
+              />
             </div>
 
             <Accordion
