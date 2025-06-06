@@ -645,6 +645,7 @@ export default {
         "facet-glow": "facet-glow 3s ease-in-out infinite",
         "fade-in-up": "fade-in-up 0.6s ease-out",
         float: "float 3s ease-in-out infinite",
+        "subtle-float": "float 15s ease-in-out infinite",
       },
     },
   },

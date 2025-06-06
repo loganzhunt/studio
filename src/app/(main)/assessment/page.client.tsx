@@ -386,7 +386,9 @@ export default function AssessmentPage() {
                 onClick={() => handleFacetJump(index)}
                 className={cn(
                   "w-full text-left p-2 rounded-md transition-all duration-200 flex items-center",
-                  isCurrent ? "bg-white/20 shadow-inner" : "hover:bg-white/15 hover:transform hover:scale-[1.01]",
+                  isCurrent
+                    ? "bg-white/20 shadow-inner"
+                    : "hover:bg-white/15 hover:transform hover:scale-[1.01]",
                   completionStatus === "complete" &&
                     "border-l-4 border-green-500",
                   completionStatus === "in-progress" &&

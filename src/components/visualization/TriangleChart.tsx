@@ -5,7 +5,14 @@ import { FACET_NAMES, FACETS } from "@/config/facets";
 import { cn } from "@/lib/utils";
 import { getFacetScoreColor, generateTriangleColors } from "@/lib/colors";
 import { getFacetColorInfo } from "@/lib/lch-colors";
-import React, { useState, useEffect, useMemo } from "react";
+import React, {
+  useState,
+  useEffect,
+  useMemo,
+  useRef,
+  KeyboardEvent,
+} from "react";
+import { motion } from "framer-motion";
 
 interface TriangleChartProps {
   scores?: DomainScore[];
@@ -32,6 +39,9 @@ export default function TriangleChart({
 }: TriangleChartProps) {
   const [isVisible, setIsVisible] = useState(false);
   const [hoveredBand, setHoveredBand] = useState<FacetName | null>(null);
+  const [focusedBandIndex, setFocusedBandIndex] = useState<number | null>(null);
+
+  const bandRefs = useRef<(SVGPathElement | null)[]>([]);
 
   useEffect(() => {
     const timer = setTimeout(() => setIsVisible(true), 100);
@@ -93,17 +103,46 @@ export default function TriangleChart({
     return `M ${p1x},${y1} L ${p2x},${y1} L ${p3x},${y2} L ${p4x},${y2} Z`;
   };
 
+  // Handle keyboard navigation for accessibility
+  const handleKeyDown = (
+    e: KeyboardEvent<SVGPathElement>,
+    index: number,
+    facetName: FacetName
+  ) => {
+    if (e.key === "Enter" || e.key === " ") {
+      e.preventDefault();
+      if (onLayerClick) {
+        onLayerClick(facetName);
+      }
+    } else if (e.key === "ArrowUp" && index > 0) {
+      e.preventDefault();
+      bandRefs.current[index - 1]?.focus();
+    } else if (e.key === "ArrowDown" && index < NUM_BANDS - 1) {
+      e.preventDefault();
+      bandRefs.current[index + 1]?.focus();
+    } else if (e.key === "ArrowLeft" || e.key === "Home") {
+      e.preventDefault();
+      bandRefs.current[0]?.focus(); // Navigate to the first band
+    } else if (e.key === "ArrowRight" || e.key === "End") {
+      e.preventDefault();
+      bandRefs.current[NUM_BANDS - 1]?.focus(); // Navigate to the last band
+    }
+  };
+
   return (
     <div className={cn("p-0", className)}>
       <svg
         viewBox={`0 0 ${width} ${height}`}
         width={width}
         height={height}
-        aria-label="Triangle chart representing worldview facets"
+        aria-label={`Triangle chart representing ${
+          worldviewName || "worldview"
+        } facets`}
         className={cn(
           "overflow-visible transition-opacity duration-700 ease-in-out",
           isVisible ? "opacity-100" : "opacity-0"
         )}
+        role="img"
       >
         <g>
           {Array.isArray(FACET_NAMES) &&
@@ -113,6 +152,7 @@ export default function TriangleChart({
               const bandColor = triangleColors[facetName];
               const colorInfo = getFacetColorInfo(facetName, score);
               const isHovered = hoveredBand === facetName;
+              const isFocused = focusedBandIndex === index;
 
               // EXTREME CONTRAST ENHANCEMENT: Maximum band separation with multiple visual techniques
               // All bands are 100% opaque with ultra-vivid chroma values up to C=160
@@ -120,18 +160,54 @@ export default function TriangleChart({
               // Each band now displays MAXIMUM ROYGBIV impact with crystal-clear differentiation
 
               return (
-                <g key={facetName}>
-                  <path
+                <motion.g key={facetName}>
+                  <motion.path
+                    ref={(el) => (bandRefs.current[index] = el)}
                     d={getBandPath(index)}
                     fill={bandColor}
-                    stroke="none"
+                    stroke="white"
+                    strokeOpacity={isHovered || isFocused ? 0.2 : 0}
+                    strokeWidth={1.5}
                     className={cn(
-                      "transition-all duration-300 ease-in-out",
-                      interactive && "cursor-pointer group",
-                      isHovered && "drop-shadow-lg"
+                      "triangle-band transition-all duration-300 ease-in-out",
+                      interactive ? "cursor-pointer" : "",
+                      (isHovered || isFocused) && "filter drop-shadow-md"
                     )}
+                    onMouseEnter={() =>
+                      interactive && setHoveredBand(facetName)
+                    }
+                    onMouseLeave={() => interactive && setHoveredBand(null)}
+                    onClick={() =>
+                      interactive && onLayerClick && onLayerClick(facetName)
+                    }
+                    onFocus={() => interactive && setFocusedBandIndex(index)}
+                    onBlur={() => interactive && setFocusedBandIndex(null)}
+                    onKeyDown={(e) =>
+                      interactive && handleKeyDown(e, index, facetName)
+                    }
+                    tabIndex={interactive ? 0 : -1}
+                    role={interactive ? "button" : undefined}
+                    aria-label={
+                      interactive
+                        ? `${facetName} facet: ${Math.round(score * 100)}%`
+                        : undefined
+                    }
+                    initial={false}
+                    animate={{
+                      y: isHovered || isFocused ? -2 : 0,
+                      filter:
+                        isHovered || isFocused
+                          ? "drop-shadow(0 4px 8px rgba(0, 0, 0, 0.25))"
+                          : "drop-shadow(0 0 0 transparent)",
+                      scale: isHovered || isFocused ? 1.02 : 1,
+                    }}
+                    transition={{
+                      type: "spring",
+                      stiffness: 300,
+                      damping: 20,
+                    }}
                   />
-                </g>
+                </motion.g>
               );
             })}
         </g>

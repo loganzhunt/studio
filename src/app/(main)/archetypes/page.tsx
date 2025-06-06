@@ -38,59 +38,12 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 
-// Helper Functions
-const getDominantFacet = (scores: DomainScore[]): FacetName => {
-  if (!scores || scores.length === 0) return FACET_NAMES[0]; // Default
-  const validScores = scores.filter((s) => s && typeof s.score === "number");
-  if (validScores.length === 0) return FACET_NAMES[0];
-  return (
-    validScores.reduce((prev, current) =>
-      current.score > prev.score ? current : prev
-    ).facetName || FACET_NAMES[0]
-  );
-};
-
-// Using the centralized mapRawArchetypeToCodexEntry function from codex-utils.ts
-
-const calculateSimilarity = (
-  userScores: DomainScore[],
-  archetypeScores: DomainScore[]
-): number => {
-  if (
-    !userScores ||
-    userScores.length !== FACET_NAMES.length ||
-    !archetypeScores ||
-    archetypeScores.length !== FACET_NAMES.length
-  ) {
-    return 0;
-  }
-
-  const userMap = new Map(userScores.map((s) => [s.facetName, s.score]));
-  const archetypeMap = new Map(
-    archetypeScores.map((s) => [s.facetName, s.score])
-  );
-
-  let dotProduct = 0;
-  let userMagnitude = 0;
-  let archetypeMagnitude = 0;
-
-  for (const facetName of FACET_NAMES) {
-    const userScore = userMap.get(facetName) || 0;
-    const archetypeScore = archetypeMap.get(facetName) || 0;
-    dotProduct += userScore * archetypeScore;
-    userMagnitude += userScore * userScore;
-    archetypeMagnitude += archetypeScore * archetypeScore;
-  }
-
-  userMagnitude = Math.sqrt(userMagnitude);
-  archetypeMagnitude = Math.sqrt(archetypeMagnitude);
-
-  if (userMagnitude === 0 || archetypeMagnitude === 0) {
-    return 0;
-  }
-  const similarity = (dotProduct / (userMagnitude * archetypeMagnitude)) * 100;
-  return Math.max(0, Math.min(100, similarity));
-};
+/**
+ * Archetypes Page
+ *
+ * This page displays the 10 core archetypes that represent fundamental worldview patterns.
+ * Users can also create their own archetypes which will be saved to their library.
+ */
 
 export default function ArchetypesPage() {
   const {
@@ -102,7 +55,7 @@ export default function ArchetypesPage() {
     null
   );
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
-  const [codexEntries, setCodexEntries] = useState<CodexEntry[]>([]);
+  const [coreArchetypes, setCoreArchetypes] = useState<CodexEntry[]>([]);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -111,26 +64,24 @@ export default function ArchetypesPage() {
         const combinedRawData = getCombinedCodexData();
         const allEntries = mapRawDataToCodexEntries(combinedRawData);
 
-        // Filter and validate entries
-        const validEntries = allEntries.filter((entry) => {
-          if (!entry || !entry.title) {
-            console.error("Invalid entry detected:", entry);
-            return false;
-          }
-          return true;
+        // Filter only for the 10 core archetypes
+        const coreArchetypeEntries = allEntries.filter((entry) => {
+          if (!entry || !entry.title || !entry.category) return false;
+          return entry.category === "archetype - Core";
         });
 
-        const archetypeEntries = validEntries.map((entry) => {
+        // Map and ensure valid domain scores
+        const processedEntries = coreArchetypeEntries.map((entry) => {
           return {
             ...entry,
             domainScores: safeDomainScores(entry),
           };
         });
 
-        setCodexEntries(archetypeEntries);
+        setCoreArchetypes(processedEntries);
       } catch (error) {
-        console.error("Error loading codex data:", error);
-        setCodexEntries([]);
+        console.error("Error loading core archetype data:", error);
+        setCoreArchetypes([]);
       }
     };
 
@@ -144,9 +95,9 @@ export default function ArchetypesPage() {
     if (
       userDomainScores &&
       userDomainScores.length > 0 &&
-      Array.isArray(codexEntries)
+      Array.isArray(coreArchetypes)
     ) {
-      for (const archetype of codexEntries) {
+      for (const archetype of coreArchetypes) {
         if (!archetype || !archetype.domainScores) continue;
         const similarity = calculateSimilarity(
           userDomainScores,
@@ -159,7 +110,7 @@ export default function ArchetypesPage() {
       }
     }
     return { closestArchetype: closest, highestSimilarity: highestSim };
-  }, [userDomainScores, codexEntries]);
+  }, [userDomainScores, coreArchetypes]);
 
   const handleOpenDrawer = (archetype: CodexEntry) => {
     setSelectedArchetype(archetype);
@@ -227,7 +178,7 @@ export default function ArchetypesPage() {
       score: 0.5,
     })),
     facetSummaries: {},
-    category: "custom", // Updated to a valid category
+    category: "custom",
   };
 
   const ArchetypeCard = ({ archetype }: { archetype: CodexEntry }) => {
@@ -273,9 +224,10 @@ export default function ArchetypesPage() {
     <div className="flex flex-col gap-6">
       <div className="flex flex-col md:flex-row gap-4">
         <div className="flex-1">
-          <h2 className="text-2xl font-bold">Your Archetypes</h2>
+          <h2 className="text-2xl font-bold">Core Worldview Archetypes</h2>
           <p className="text-sm text-muted-foreground">
-            These are the archetypes that best match your worldview.
+            Explore these 10 fundamental worldview patterns that represent key
+            philosophical perspectives
           </p>
         </div>
         <div className="flex-none">
@@ -294,20 +246,24 @@ export default function ArchetypesPage() {
         </div>
       </div>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-        {codexEntries.length === 0 && (
+        {coreArchetypes.length === 0 && (
           <div className="col-span-full text-center py-10">
             <p className="text-sm text-muted-foreground">
-              No archetypes found. Please check back later.
+              Loading core archetypes...
             </p>
           </div>
         )}
-        {codexEntries.map((archetype) => (
+        {coreArchetypes.map((archetype) => (
           <ArchetypeCard key={archetype.id} archetype={archetype} />
         ))}
       </div>
-      {closestArchetype && (
+      {closestArchetype && userDomainScores && userDomainScores.length > 0 && (
         <div className="rounded-lg border border-border/30 p-4 bg-card">
-          <h3 className="text-lg font-semibold mb-2">Closest Archetype</h3>
+          <h3 className="text-lg font-semibold mb-2">Your Closest Archetype</h3>
+          <p className="text-sm text-muted-foreground mb-4">
+            Based on your worldview assessment, you most align with this core
+            archetype ({highestSimilarity.toFixed(0)}% similarity)
+          </p>
           <ArchetypeCard archetype={closestArchetype} />
         </div>
       )}
@@ -321,7 +277,7 @@ export default function ArchetypesPage() {
               {selectedArchetype?.summary || "No description available."}
             </SheetDescription>
           </SheetHeader>
-          <ScrollArea className="h-60 rounded-md border border-border/30">
+          <ScrollArea className="h-60 rounded-md border border-border/30 mt-4">
             <div className="p-4">
               {selectedArchetype?.domainScores?.length === 0 && (
                 <p className="text-sm text-muted-foreground text-center py-10">
@@ -361,6 +317,28 @@ export default function ArchetypesPage() {
                   </div>
                 );
               })}
+
+              {/* Show facet descriptions if available */}
+              {selectedArchetype?.facetSummaries &&
+                Object.keys(selectedArchetype.facetSummaries).length > 0 && (
+                  <div className="mt-6 space-y-4">
+                    <h3 className="font-medium">Facet Perspectives:</h3>
+                    {Object.entries(selectedArchetype.facetSummaries).map(
+                      ([facet, description]) => (
+                        <div key={facet} className="space-y-1">
+                          <h4 className="text-sm font-medium">
+                            {FACET_INFO[
+                              facet.toLowerCase() as keyof typeof FACET_INFO
+                            ]?.name || facet}
+                          </h4>
+                          <p className="text-xs text-muted-foreground">
+                            {description}
+                          </p>
+                        </div>
+                      )
+                    )}
+                  </div>
+                )}
             </div>
           </ScrollArea>
           <div className="flex flex-col gap-2 mt-4">
@@ -383,3 +361,55 @@ export default function ArchetypesPage() {
     </div>
   );
 }
+
+// Helper Functions
+const getDominantFacet = (scores: DomainScore[]): FacetName => {
+  if (!scores || scores.length === 0) return FACET_NAMES[0]; // Default
+  const validScores = scores.filter((s) => s && typeof s.score === "number");
+  if (validScores.length === 0) return FACET_NAMES[0];
+  return (
+    validScores.reduce((prev, current) =>
+      current.score > prev.score ? current : prev
+    ).facetName || FACET_NAMES[0]
+  );
+};
+
+const calculateSimilarity = (
+  userScores: DomainScore[],
+  archetypeScores: DomainScore[]
+): number => {
+  if (
+    !userScores ||
+    userScores.length !== FACET_NAMES.length ||
+    !archetypeScores ||
+    archetypeScores.length !== FACET_NAMES.length
+  ) {
+    return 0;
+  }
+
+  const userMap = new Map(userScores.map((s) => [s.facetName, s.score]));
+  const archetypeMap = new Map(
+    archetypeScores.map((s) => [s.facetName, s.score])
+  );
+
+  let dotProduct = 0;
+  let userMagnitude = 0;
+  let archetypeMagnitude = 0;
+
+  for (const facetName of FACET_NAMES) {
+    const userScore = userMap.get(facetName) || 0;
+    const archetypeScore = archetypeMap.get(facetName) || 0;
+    dotProduct += userScore * archetypeScore;
+    userMagnitude += userScore * userScore;
+    archetypeMagnitude += archetypeScore * archetypeScore;
+  }
+
+  userMagnitude = Math.sqrt(userMagnitude);
+  archetypeMagnitude = Math.sqrt(archetypeMagnitude);
+
+  if (userMagnitude === 0 || archetypeMagnitude === 0) {
+    return 0;
+  }
+  const similarity = (dotProduct / (userMagnitude * archetypeMagnitude)) * 100;
+  return Math.max(0, Math.min(100, similarity));
+};

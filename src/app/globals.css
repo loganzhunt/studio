@@ -736,6 +736,37 @@
   .float-gentle {
     animation: float-gentle 4s ease-in-out infinite;
   }
+
+  /* Beautiful Shadow Utilities */
+  .shadow-beautiful-sm {
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+  }
+
+  .shadow-beautiful-md {
+    box-shadow: 0 6px 25px rgba(0, 0, 0, 0.2);
+  }
+
+  .shadow-beautiful-lg {
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.25);
+  }
+
+  .shadow-beautiful-xl {
+    box-shadow: 0 15px 60px rgba(0, 0, 0, 0.3);
+  }
+
+  .shadow-beautiful-purple {
+    box-shadow: 0 8px 30px rgba(139, 92, 246, 0.25);
+  }
+
+  /* Hover Shadow Transitions */
+  .hover-shadow-beautiful {
+    transition: box-shadow 0.3s ease, transform 0.3s ease;
+  }
+
+  .hover-shadow-beautiful:hover {
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.25);
+    transform: translateY(-2px);
+  }
 }
 
 /* Keyframes */
@@ -752,12 +783,17 @@
 }
 
 @keyframes shimmer {
-  0%,
-  100% {
+  0% {
     transform: translateX(-100%);
+    opacity: 0.2;
   }
   50% {
+    transform: translateX(0%);
+    opacity: 0.7;
+  }
+  100% {
     transform: translateX(100%);
+    opacity: 0.2;
   }
 }
 
@@ -795,7 +831,8 @@
 
 /* Additional microinteraction animations */
 @keyframes gradient-breathe {
-  0%, 100% {
+  0%,
+  100% {
     background-position: 0% 50%;
   }
   50% {
@@ -831,7 +868,8 @@
 }
 
 @keyframes button-focus-pulse {
-  0%, 100% {
+  0%,
+  100% {
     transform: scale(1);
   }
   50% {
@@ -840,7 +878,8 @@
 }
 
 @keyframes icon-bounce {
-  0%, 100% {
+  0%,
+  100% {
     transform: translateY(0);
   }
   50% {
@@ -849,7 +888,8 @@
 }
 
 @keyframes icon-pulse {
-  0%, 100% {
+  0%,
+  100% {
     transform: scale(1);
   }
   50% {
@@ -860,11 +900,14 @@
 .shimmer-animation {
   animation: shimmer 2.5s infinite;
   opacity: 0;
-  transition: opacity 0.3s ease;
+  transition: opacity 0.3s ease, transform 0.3s ease;
 }
 
 *:hover > .shimmer-animation {
-  opacity: 1;
+  opacity: 0.6; /* Reduced opacity for better text visibility */
+  transform: translateY(
+    0
+  ); /* Ensure shimmer doesn't affect button positioning */
 }
 
 /* Legacy gradient underline */
@@ -890,4 +933,51 @@
     hsl(var(--domain-cosmology)),
     hsl(var(--domain-teleology))
   );
+}
+
+/* ===========================================
+ * TRIANGLE VISUALIZATION - Enhanced for individual band interactions
+ * Adds lift animations and focus states for each band
+ * =========================================== */
+.triangle-band {
+  transition: all 0.3s ease-in-out;
+}
+
+.triangle-band:hover,
+.triangle-band:focus-visible {
+  transform: translateY(-2px);
+  filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.25));
+}
+
+.triangle-band:focus-visible {
+  outline: none;
+  stroke: white;
+  stroke-opacity: 0.5;
+  stroke-width: 2px;
+}
+
+.triangle-band:active {
+  transform: translateY(0) scale(0.98);
+}
+
+/* Parallax Gradient Styles */
+@layer components {
+  .parallax-gradient {
+    position: relative;
+    overflow: hidden;
+    will-change: transform;
+  }
+
+  .parallax-gradient::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    pointer-events: none;
+    background: linear-gradient(to bottom, rgba(15, 23, 42, 0.05), transparent);
+    z-index: 1;
+    mix-blend-mode: overlay;
+  }
 }

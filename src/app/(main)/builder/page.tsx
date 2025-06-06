@@ -438,7 +438,8 @@ export default function BuilderPage() {
                           asChild
                         >
                           <Link href={`/facet/${facetName.toLowerCase()}`}>
-                            <Icons.search className="h-4 w-4 mr-1 group-hover:animate-[icon-pulse_0.6s_ease-in-out]" /> Explore
+                            <Icons.search className="h-4 w-4 mr-1 group-hover:animate-[icon-pulse_0.6s_ease-in-out]" />{" "}
+                            Explore
                             <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent shimmer-animation" />
                           </Link>
                         </Button>
@@ -495,16 +496,17 @@ export default function BuilderPage() {
                   disabled={!worldviewTitle.trim()}
                   className="relative overflow-hidden transition-all duration-200 transform hover:translate-y-[-2px] hover:shadow-[0_3px_10px_rgba(139,92,246,0.15)] active:translate-y-[0px] active:scale-[0.98] group"
                 >
-                  <Icons.saved className="mr-2 h-4 w-4 group-hover:animate-[icon-pulse_0.6s_ease-in-out]" /> Save Worldview to
-                  Library
+                  <Icons.saved className="mr-2 h-4 w-4 group-hover:animate-[icon-pulse_0.6s_ease-in-out]" />{" "}
+                  Save Worldview to Library
                   <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent shimmer-animation" />
                 </Button>
-                <Button 
-                  variant="outline" 
+                <Button
+                  variant="outline"
                   onClick={handleClearSelections}
                   className="relative overflow-hidden transition-all duration-200 transform hover:translate-y-[-2px] hover:shadow-[0_3px_10px_rgba(139,92,246,0.15)] active:translate-y-[0px] active:scale-[0.98] group"
                 >
-                  <Icons.delete className="mr-2 h-4 w-4 group-hover:animate-[icon-pulse_0.6s_ease-in-out]" /> Clear All Selections
+                  <Icons.delete className="mr-2 h-4 w-4 group-hover:animate-[icon-pulse_0.6s_ease-in-out]" />{" "}
+                  Clear All Selections
                   <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent shimmer-animation" />
                 </Button>
               </div>

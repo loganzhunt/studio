@@ -253,7 +253,8 @@ export default function CodexPage() {
             className="w-full text-xs transition-all duration-200 transform hover:translate-y-[-2px] hover:shadow-[0_3px_10px_rgba(139,92,246,0.15)] active:translate-y-[0px] active:scale-[0.98] relative overflow-hidden"
             onClick={() => handleOpenDrawer(entry)}
           >
-            View Details <Icons.chevronRight className="ml-1 h-3 w-3 group-hover:animate-[icon-bounce_0.6s_ease-in-out]" />
+            View Details{" "}
+            <Icons.chevronRight className="ml-1 h-3 w-3 group-hover:animate-[icon-bounce_0.6s_ease-in-out]" />
             <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent shimmer-animation" />
           </Button>
         </CardFooter>

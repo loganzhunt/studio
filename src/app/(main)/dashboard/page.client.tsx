@@ -578,8 +578,12 @@ export default function DashboardPage() {
               <p className="text-muted-foreground mt-1">
                 Sign in or take the assessment to explore your worldview.
               </p>
-              <PrismButton onClick={openAuthModal} className="mt-4 relative overflow-hidden transition-all duration-200 transform hover:translate-y-[-2px] hover:shadow-[0_3px_10px_rgba(139,92,246,0.15)] active:translate-y-[0px] active:scale-[0.98] group">
-                <Icons.user className="mr-2 h-4 w-4 group-hover:animate-[icon-pulse_0.6s_ease-in-out]" /> Sign In
+              <PrismButton
+                onClick={openAuthModal}
+                className="mt-4 relative overflow-hidden transition-all duration-200 transform hover:translate-y-[-2px] hover:shadow-[0_3px_10px_rgba(139,92,246,0.15)] active:translate-y-[0px] active:scale-[0.98] group"
+              >
+                <Icons.user className="mr-2 h-4 w-4 group-hover:animate-[icon-pulse_0.6s_ease-in-out]" />{" "}
+                Sign In
                 <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent shimmer-animation" />
               </PrismButton>
             </>
@@ -612,7 +616,10 @@ export default function DashboardPage() {
               <p className="text-sm text-muted-foreground text-center">
                 Your results will appear here once you complete the assessment.
               </p>
-              <PrismButton asChild className="relative overflow-hidden transition-all duration-200 transform hover:translate-y-[-2px] hover:shadow-[0_3px_10px_rgba(139,92,246,0.15)] active:translate-y-[0px] active:scale-[0.98] group">
+              <PrismButton
+                asChild
+                className="relative overflow-hidden transition-all duration-200 transform hover:translate-y-[-2px] hover:shadow-[0_3px_10px_rgba(139,92,246,0.15)] active:translate-y-[0px] active:scale-[0.98] group"
+              >
                 <Link href="/assessment">
                   <Icons.assessment className="mr-2 h-4 w-4 group-hover:animate-[icon-pulse_0.6s_ease-in-out]" />
                   Begin Assessment
@@ -738,7 +745,10 @@ export default function DashboardPage() {
                 <p className="mt-4 text-muted-foreground">
                   Take the Assessment to Discover Your Archetypal Matches.
                 </p>
-                <PrismButton asChild className="mt-4 relative overflow-hidden transition-all duration-200 transform hover:translate-y-[-2px] hover:shadow-[0_3px_10px_rgba(139,92,246,0.15)] active:translate-y-[0px] active:scale-[0.98] group">
+                <PrismButton
+                  asChild
+                  className="mt-4 relative overflow-hidden transition-all duration-200 transform hover:translate-y-[-2px] hover:shadow-[0_3px_10px_rgba(139,92,246,0.15)] active:translate-y-[0px] active:scale-[0.98] group"
+                >
                   <Link href="/assessment">
                     <Icons.assessment className="mr-2 h-4 w-4 group-hover:animate-[icon-pulse_0.6s_ease-in-out]" />
                     Begin Assessment
@@ -776,7 +786,9 @@ export default function DashboardPage() {
                         }
                         className="relative overflow-hidden group"
                       >
-                        <span className="group-hover:animate-[icon-pulse_0.6s_ease-in-out]">Details</span>
+                        <span className="group-hover:animate-[icon-pulse_0.6s_ease-in-out]">
+                          Details
+                        </span>
                         <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent shimmer-animation" />
                       </PrismButton>
                     </div>
@@ -802,7 +814,10 @@ export default function DashboardPage() {
                       (match) =>
                         match &&
                         match.domainScores && (
-                          <GlassCard key={match.id} className="bg-card/40 hover:scale-[1.02] hover:shadow-[0_4px_20px_rgba(0,0,0,0.25)] hover:border-white/30 transition-all duration-300 ease-in-out group">
+                          <GlassCard
+                            key={match.id}
+                            className="bg-card/40 hover:scale-[1.02] hover:shadow-[0_4px_20px_rgba(0,0,0,0.25)] hover:border-white/30 transition-all duration-300 ease-in-out group"
+                          >
                             <div className="flex justify-between items-center mb-4">
                               <h4
                                 className={`text-lg font-semibold ${getFacetClass(
@@ -815,7 +830,10 @@ export default function DashboardPage() {
                               >
                                 {match.title}
                               </h4>
-                              <Badge variant="secondary" className="transition-transform duration-300 group-hover:translate-y-[-2px] group-hover:shadow-md">
+                              <Badge
+                                variant="secondary"
+                                className="transition-transform duration-300 group-hover:translate-y-[-2px] group-hover:shadow-md"
+                              >
                                 {Math.round(match.similarity)}% Similar
                               </Badge>
                             </div>
@@ -833,7 +851,9 @@ export default function DashboardPage() {
                                 className="w-full mt-2 relative overflow-hidden transition-all duration-200 transform hover:translate-y-[-2px] hover:shadow-[0_3px_10px_rgba(139,92,246,0.15)] active:translate-y-[0px] active:scale-[0.98] group"
                                 onClick={() => handleOpenArchetypeDrawer(match)}
                               >
-                                <span className="group-hover:animate-[icon-pulse_0.6s_ease-in-out]">View Details</span>
+                                <span className="group-hover:animate-[icon-pulse_0.6s_ease-in-out]">
+                                  View Details
+                                </span>
                                 <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent shimmer-animation" />
                               </PrismButton>
                             </div>
@@ -843,7 +863,11 @@ export default function DashboardPage() {
                   </div>
                 )}
                 <div className="text-center mt-8 max-w-xs mx-auto">
-                  <PrismButton asChild variant="secondary" className="relative overflow-hidden transition-all duration-200 transform hover:translate-y-[-2px] hover:shadow-[0_3px_10px_rgba(139,92,246,0.15)] active:translate-y-[0px] active:scale-[0.98] group">
+                  <PrismButton
+                    asChild
+                    variant="secondary"
+                    className="relative overflow-hidden transition-all duration-200 transform hover:translate-y-[-2px] hover:shadow-[0_3px_10px_rgba(139,92,246,0.15)] active:translate-y-[0px] active:scale-[0.98] group"
+                  >
                     <Link
                       href="/archetypes"
                       className="inline-flex items-center justify-center"
@@ -1133,7 +1157,11 @@ export default function DashboardPage() {
                         </GlassCard>
                       )}
 
-                    <PrismButton variant="secondary" asChild className="w-full relative overflow-hidden transition-all duration-200 transform hover:translate-y-[-2px] hover:shadow-[0_3px_10px_rgba(139,92,246,0.15)] active:translate-y-[0px] active:scale-[0.98] group">
+                    <PrismButton
+                      variant="secondary"
+                      asChild
+                      className="w-full relative overflow-hidden transition-all duration-200 transform hover:translate-y-[-2px] hover:shadow-[0_3px_10px_rgba(139,92,246,0.15)] active:translate-y-[0px] active:scale-[0.98] group"
+                    >
                       <Link
                         href={`/facet/${currentSelectedFacetData.name.toLowerCase()}`}
                       >
@@ -1188,8 +1216,8 @@ export default function DashboardPage() {
           </div>
         </section>
         <footer className="mt-16 pt-8 border-t border-border/30 text-center">
-          <Link 
-            href="/about" 
+          <Link
+            href="/about"
             className="text-sm text-primary hover:underline transition-all duration-200 transform hover:translate-y-[-2px] inline-block hover:text-primary/80"
           >
             Learn More About the Meta-Prism Model

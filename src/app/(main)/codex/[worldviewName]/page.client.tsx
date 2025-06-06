@@ -142,9 +142,16 @@ export default function CodexDeepDivePage() {
           >
             <Icons.bookmark className="mr-2 h-4 w-4 group-hover:animate-[icon-pulse_0.6s_ease-in-out]" />
             {isSaved ? "Saved" : "Save Worldview"}
-            {!isSaved && <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent shimmer-animation" />}
+            {!isSaved && (
+              <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent shimmer-animation" />
+            )}
           </Button>
-          <Button variant="secondary" size="sm" asChild className="relative overflow-hidden transition-all duration-200 transform hover:translate-y-[-2px] hover:shadow-[0_3px_10px_rgba(139,92,246,0.15)] active:translate-y-[0px] active:scale-[0.98] group">
+          <Button
+            variant="secondary"
+            size="sm"
+            asChild
+            className="relative overflow-hidden transition-all duration-200 transform hover:translate-y-[-2px] hover:shadow-[0_3px_10px_rgba(139,92,246,0.15)] active:translate-y-[0px] active:scale-[0.98] group"
+          >
             <Link href="/codex">
               <Icons.arrowLeft className="mr-2 h-4 w-4 group-hover:animate-[icon-bounce_0.6s_ease-in-out]" />
               Back to Codex
