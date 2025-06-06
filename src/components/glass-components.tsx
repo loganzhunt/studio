@@ -57,7 +57,7 @@ interface PrismButtonProps
 
 export const PrismButton: React.FC<PrismButtonProps> = ({
   children,
-  variant = "primary",
+  variant = "secondary", // Changed default from "primary" to "secondary"
   size = "md",
   asChild = false,
   className,
