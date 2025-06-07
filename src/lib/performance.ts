@@ -109,12 +109,15 @@ export function trackCustomMetric(
     metadata: metadata || {},
   };
 
-  console.log("Custom Metric:", {
-    name: customMetric.name,
-    value: Math.round(customMetric.value),
-    timestamp: customMetric.timestamp,
-    metadata: customMetric.metadata,
-  });
+  // Only log in development
+  if (process.env.NODE_ENV === "development") {
+    console.log("Custom Metric:", {
+      name: customMetric.name,
+      value: Math.round(customMetric.value),
+      timestamp: customMetric.timestamp,
+      metadata: customMetric.metadata,
+    });
+  }
 
   // Store in window for testing/debugging
   if (typeof window !== "undefined") {
@@ -157,9 +160,12 @@ export class PerformanceTracker {
 
       const measure = performance.getEntriesByName(name, "measure")[0];
       if (measure) {
-        console.log(
-          `Performance: ${name} took ${Math.round(measure.duration)}ms`
-        );
+        // Only log in development
+        if (process.env.NODE_ENV === "development") {
+          console.log(
+            `Performance: ${name} took ${Math.round(measure.duration)}ms`
+          );
+        }
         return measure.duration;
       }
     } catch (error) {
@@ -191,8 +197,8 @@ export function usePerformanceTracking(componentName: string) {
 
     return () => {
       const duration = PerformanceTracker.getDuration(mountTime);
-      if (duration > 100) {
-        // Only log if component took longer than 100ms
+      if (duration > 100 && process.env.NODE_ENV === "development") {
+        // Only log if component took longer than 100ms and in development
         console.log(`${componentName} lifecycle: ${Math.round(duration)}ms`);
       }
     };

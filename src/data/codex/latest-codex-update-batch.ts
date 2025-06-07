@@ -20,18 +20,19 @@ export const LATEST_CODEX_UPDATE_BATCH: any[] = [
     },
     facetDescriptions: {
       ontology:
-        "Reality is objective, physical, and can be understood through observation.",
+        "Reality is objective, physical, and can be understood through systematic observation and testing.",
       epistemology:
-        "Knowledge comes from empirical evidence and rational analysis.",
+        "Knowledge comes from empirical evidence, rational analysis, and the scientific method.",
       praxeology:
-        "Actions should be pragmatic, evidence-based, and outcome-oriented.",
-      axiology: "Values clarity, intellectual honesty, and practical utility.",
+        "Actions should be pragmatic, evidence-based, and outcome-oriented with measurable results.",
+      axiology:
+        "Values clarity, intellectual honesty, logical consistency, and practical utility.",
       mythology:
-        "Skeptical of traditional myths; prefers historical accounts and scientific explanations.",
+        "Skeptical of traditional myths; prefers historical accounts, scientific explanations, and verifiable facts.",
       cosmology:
-        "Universe operates according to natural laws that can be discovered.",
+        "Universe operates according to natural laws that can be discovered and described mathematically.",
       teleology:
-        "Purpose is self-determined through reason and meaningful action.",
+        "Purpose is self-determined through reason, critical thinking, and meaningful action based on evidence.",
     },
   },
   {
@@ -51,19 +52,19 @@ export const LATEST_CODEX_UPDATE_BATCH: any[] = [
     },
     facetDescriptions: {
       ontology:
-        "Reality is multidimensional with physical, mental, and spiritual aspects.",
+        "Reality is multidimensional with physical, mental, social, and spiritual aspects existing in dynamic interrelationship.",
       epistemology:
-        "Knowledge comes from integrating empirical, logical, and intuitive ways of knowing.",
+        "Knowledge comes from integrating empirical observation, logical reasoning, cultural wisdom, and intuitive insight in complementary ways.",
       praxeology:
-        "Actions should balance individual development and collective evolution.",
+        "Actions should balance individual development with collective evolution and integrate theory with practice across all domains of life.",
       axiology:
-        "Values both autonomy and communion, development and transcendence.",
+        "Values both autonomy and communion, development and transcendence, with an appreciation for healthy expressions at all levels of consciousness.",
       mythology:
-        "Appreciates wisdom in diverse myths while contextualizing them developmentally.",
+        "Appreciates wisdom in diverse myths while contextualizing them developmentally and recognizing how they serve different psychological and cultural functions.",
       cosmology:
-        "Universe is a holarchy of evolving systems with emergent properties.",
+        "Universe is a holarchy of evolving systems with emergent properties, where each level transcends and includes previous levels in nested complexity.",
       teleology:
-        "Purpose involves conscious evolution toward greater complexity and compassion.",
+        "Purpose involves conscious evolution toward greater complexity, compassion, and integration of all aspects of being and knowing.",
     },
   },
   {
@@ -83,17 +84,19 @@ export const LATEST_CODEX_UPDATE_BATCH: any[] = [
     },
     facetDescriptions: {
       ontology:
-        "Ultimate reality is spiritual/consciousness; material world is manifestation.",
+        "Ultimate reality is spiritual/consciousness; the material world is a manifestation or expression of underlying divine essence.",
       epistemology:
-        "Direct experience and inner knowing transcend intellectual understanding.",
-      praxeology: "Contemplative practices and surrender to higher wisdom.",
-      axiology: "Values unity, transcendence, and spiritual development.",
+        "Direct experience, intuition, and inner knowing transcend intellectual understanding; truth is realized through contemplation and spiritual practice.",
+      praxeology:
+        "Contemplative practices, spiritual disciplines, and surrender to higher wisdom guide authentic action and being.",
+      axiology:
+        "Values unity, transcendence, spiritual development, and the dissolution of ego in service of higher consciousness.",
       mythology:
-        "Appreciates sacred stories as symbolic gateways to deeper truths.",
+        "Appreciates sacred stories, myths, and symbols as powerful gateways to deeper truths and archetypal dimensions beyond ordinary perception.",
       cosmology:
-        "Universe is an expression of consciousness or divine intelligence.",
+        "Universe is an expression of divine consciousness or intelligence, with multiple dimensions of reality beyond the physical realm.",
       teleology:
-        "Purpose is spiritual awakening and union with ultimate reality.",
+        "Purpose is spiritual awakening, enlightenment, and ultimate union with divine reality beyond all dualities and separations.",
     },
   },
   {
@@ -113,18 +116,19 @@ export const LATEST_CODEX_UPDATE_BATCH: any[] = [
     },
     facetDescriptions: {
       ontology:
-        "Reality is hierarchical with physical and spiritual dimensions.",
+        "Reality is hierarchically structured with distinct physical and spiritual dimensions; truth has an eternal, unchanging quality.",
       epistemology:
-        "Knowledge comes from tradition, authority, and revelation.",
+        "Knowledge comes from ancestral wisdom, religious tradition, respected authority, and divine revelation rather than individual discovery.",
       praxeology:
-        "Actions should align with established customs and moral codes.",
-      axiology: "Values duty, honor, piety, and community cohesion.",
+        "Actions should align with established customs, moral codes, and social roles that have stood the test of time and preserve social order.",
+      axiology:
+        "Values duty, honor, loyalty, piety, respect for elders, and community cohesion above individual expression.",
       mythology:
-        "Sacred narratives provide moral guidance and cultural identity.",
+        "Sacred narratives, founding stories, and traditional wisdom provide moral guidance, cultural identity, and connection to ancestors.",
       cosmology:
-        "Universe is divinely ordered with inherent purpose and meaning.",
+        "Universe is divinely ordered with inherent purpose, meaning, and moral structure that humans did not create but must discover.",
       teleology:
-        "Purpose is fulfilling one's proper role in the divine or natural order.",
+        "Purpose is fulfilling one's proper role in the divine or natural order, preserving traditions, and passing them to future generations.",
     },
   },
   {
@@ -144,18 +148,19 @@ export const LATEST_CODEX_UPDATE_BATCH: any[] = [
     },
     facetDescriptions: {
       ontology:
-        "Reality is neither purely material nor spiritual, but shaped by human experience.",
+        "Reality is neither purely material nor spiritual, but fundamentally shaped by human experience, consciousness, and social construction.",
       epistemology:
-        "Knowledge evolves through inquiry, collaboration, and multiple perspectives.",
+        "Knowledge evolves through open inquiry, collaborative research, intercultural dialogue, and the synthesis of multiple perspectives and disciplines.",
       praxeology:
-        "Actions should foster creative solutions that maximize human flourishing.",
+        "Actions should foster innovative solutions that maximize human flourishing, protect rights, and create conditions for all people to reach their potential.",
       axiology:
-        "Values freedom, equality, compassion, and creative expression.",
-      mythology: "Appreciates stories of human progress and transformation.",
+        "Values freedom, equality, diversity, compassion, creativity, and human dignity with an optimistic belief in our capacity for positive change.",
+      mythology:
+        "Appreciates stories of human progress, social transformation, liberation movements, and the triumph of innovation over limitation.",
       cosmology:
-        "Universe presents challenges and opportunities for human betterment.",
+        "Universe presents challenges and opportunities for human betterment; humans create meaning in an otherwise neutral cosmos.",
       teleology:
-        "Purpose involves creating more just, beautiful, and flourishing societies.",
+        "Purpose involves creating more just, beautiful, and flourishing societies where everyone can contribute their unique gifts to collective progress.",
     },
   },
   {
@@ -174,19 +179,20 @@ export const LATEST_CODEX_UPDATE_BATCH: any[] = [
       teleology: 0.7,
     },
     facetDescriptions: {
-      ontology: "Reality is an interconnected web of living systems.",
+      ontology:
+        "Reality is an interconnected, interdependent web of living systems where humans are participants rather than separate controllers.",
       epistemology:
-        "Knowledge comes from both scientific understanding and experiential connection with nature.",
+        "Knowledge comes from both scientific understanding and direct experiential connection with nature, including indigenous and traditional ecological wisdom.",
       praxeology:
-        "Actions should promote ecological health and sustainable relationships.",
+        "Actions should promote ecological health, regenerative practices, sustainable relationships, and respect the carrying capacity of natural systems.",
       axiology:
-        "Values balance, sustainability, biodiversity, and future generations.",
+        "Values ecological balance, sustainability, biodiversity, intergenerational equity, and the intrinsic worth of all living beings.",
       mythology:
-        "Relates to stories of connection with nature and environmental stewardship.",
+        "Relates to stories of deep connection with nature, indigenous wisdom traditions, and narratives of responsible environmental stewardship.",
       cosmology:
-        "Earth is a complex, self-regulating system that humans must respect.",
+        "Earth is a complex, self-regulating living system (Gaia) with delicate balances that humans must respect and protect.",
       teleology:
-        "Purpose involves living in harmony with natural systems and other species.",
+        "Purpose involves living in harmony with natural systems, other species, and future generations while healing humanity's relationship with the Earth.",
     },
   },
   {
@@ -206,19 +212,19 @@ export const LATEST_CODEX_UPDATE_BATCH: any[] = [
     },
     facetDescriptions: {
       ontology:
-        "Reality is what can be observed and verified through experience.",
+        "Reality is what can be observed, verified through experience, and has practical consequences; metaphysical questions without practical implications are avoided.",
       epistemology:
-        "Knowledge should be provisional, testable, and practically applicable.",
+        "Knowledge should be provisional, falsifiable, testable, and practically applicable; beliefs should be held with appropriate levels of confidence based on evidence.",
       praxeology:
-        "Actions should be judged by their consequences and usefulness.",
+        "Actions should be judged by their real-world consequences, practical usefulness, and ability to solve concrete problems rather than by rigid ideological principles.",
       axiology:
-        "Values intellectual honesty, problem-solving, and practical results.",
+        "Values intellectual honesty, critical thinking, evidence-based decision making, careful problem-solving, and measurable practical results over theoretical purity.",
       mythology:
-        "Skeptical of grand narratives; prefers stories of practical problem-solving.",
+        "Skeptical of grand narratives, ideological certainties, and unfalsifiable claims; prefers case studies of practical problem-solving and iterative improvement.",
       cosmology:
-        "Universe doesn't inherently favor humans; we must adapt to survive.",
+        "Universe doesn't inherently favor humans or contain intrinsic purpose; we must adapt to survive and create meaning through practical action.",
       teleology:
-        "Purpose is found in solving problems and improving conditions.",
+        "Purpose is found in solving real problems, improving conditions, and making incremental progress rather than pursuing utopian or transcendent aims.",
     },
   },
   {
@@ -238,18 +244,19 @@ export const LATEST_CODEX_UPDATE_BATCH: any[] = [
     },
     facetDescriptions: {
       ontology:
-        "Reality is partly discovered, partly created through perception and imagination.",
+        "Reality is partly discovered and partly created through perception, imagination, and creative engagement; the boundaries between objective and subjective are fluid.",
       epistemology:
-        "Knowledge comes from exploration, experimentation, and creative synthesis.",
+        "Knowledge comes from exploration, experimentation, play, intuition, creative synthesis, and a willingness to venture beyond established frameworks.",
       praxeology:
-        "Actions should be guided by curiosity, authenticity, and creative impulse.",
+        "Actions should be guided by curiosity, authenticity, creative impulse, and the courage to venture into uncharted territory without predetermined outcomes.",
       axiology:
-        "Values novelty, beauty, authentic expression, and meaningful experiences.",
+        "Values novelty, beauty, originality, authentic expression, spontaneity, wonder, and meaningful experiences that expand consciousness.",
       mythology:
-        "Drawn to stories of discovery, transformation, and creative breakthrough.",
-      cosmology: "Universe is a canvas for discovery and creative expression.",
+        "Drawn to stories of discovery, heroic journeys, transformation, artistic breakthroughs, and the archetypal creative process of order emerging from chaos.",
+      cosmology:
+        "Universe is an evolving canvas for discovery, creative expression, and emergent possibilities waiting to be explored and manifested.",
       teleology:
-        "Purpose involves creating meaning through authentic exploration.",
+        "Purpose involves creating meaning through authentic exploration, artistic expression, and the ongoing adventure of discovering and manifesting new potentials.",
     },
   },
   {
@@ -268,19 +275,20 @@ export const LATEST_CODEX_UPDATE_BATCH: any[] = [
       teleology: 0.7,
     },
     facetDescriptions: {
-      ontology: "Reality is relational; we exist in connection with others.",
+      ontology:
+        "Reality is fundamentally relational; we exist in connection with others and are shaped by our relationships and communal bonds.",
       epistemology:
-        "Knowledge comes from listening to diverse perspectives with empathy.",
+        "Knowledge comes from listening deeply to diverse perspectives with empathy, recognizing that truth emerges through compassionate dialogue rather than debate.",
       praxeology:
-        "Actions should foster understanding, healing, and peaceful resolution.",
+        "Actions should foster understanding, healing, reconciliation, and peaceful resolution of conflicts through nonviolent communication and restorative practices.",
       axiology:
-        "Values compassion, empathy, reconciliation, and peaceful coexistence.",
+        "Values compassion, empathy, forgiveness, inclusivity, reconciliation, and the peaceful coexistence of differences within a larger harmony.",
       mythology:
-        "Drawn to stories of healing, forgiveness, and restored relationships.",
+        "Drawn to stories of healing wounded relationships, forgiveness, reconciliation, and the restoration of broken communities across divisions.",
       cosmology:
-        "Universe ultimately tends toward harmony despite apparent conflicts.",
+        "Universe ultimately tends toward harmony and interconnection despite apparent conflicts and separations; polarities are complementary rather than opposed.",
       teleology:
-        "Purpose involves creating more understanding and harmony among diverse beings.",
+        "Purpose involves creating more understanding and harmony among diverse beings by building bridges, healing divides, and recognizing our essential unity.",
     },
   },
   {
@@ -299,16 +307,20 @@ export const LATEST_CODEX_UPDATE_BATCH: any[] = [
       teleology: 0.25,
     },
     facetDescriptions: {
-      ontology: "Reality is ambiguous; existence precedes essence.",
-      epistemology: "Knowledge is subjective and situated in lived experience.",
+      ontology:
+        "Reality is fundamentally ambiguous and uncertain; existence precedes essence, meaning humans have no predetermined nature but must define themselves.",
+      epistemology:
+        "Knowledge is subjective, situated in lived experience, and inseparable from one's unique perspective and choices in an absurd universe.",
       praxeology:
-        "Actions should express authentic choice and personal responsibility.",
-      axiology: "Values authenticity, freedom, honesty, and self-creation.",
+        "Actions should express authentic choice, personal responsibility, and honest confrontation with life's fundamental questions despite anxiety and uncertainty.",
+      axiology:
+        "Values radical authenticity, personal freedom, unflinching honesty about the human condition, and the courage of self-creation in the face of meaninglessness.",
       mythology:
-        "Drawn to stories of facing the absurd and finding personal meaning.",
-      cosmology: "Universe is indifferent; meaning is not given but created.",
+        "Drawn to stories of individuals facing the absurd, confronting existential dilemmas, and finding personal meaning through authentic struggle and commitment.",
+      cosmology:
+        "Universe is indifferent and lacks inherent meaning or purpose; it is a blank canvas upon which humans project significance.",
       teleology:
-        "Purpose is self-created through authentic choices and commitments.",
+        "Purpose is not discovered but self-created through authentic choices, commitments, and the acceptance of responsibility for one's life despite cosmic indifference.",
     },
   },
   {

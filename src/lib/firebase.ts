@@ -6,6 +6,7 @@ import { validateEnvVars } from "./validation";
 // Validate environment variables at startup
 const envValidation = validateEnvVars();
 if (!envValidation.success) {
+  // Always log Firebase configuration errors since they're critical
   console.error(
     "Firebase configuration validation failed:",
     envValidation.errors
@@ -73,8 +74,12 @@ try {
   googleProvider.addScope("email");
   googleProvider.addScope("profile");
 
-  console.log("✅ Firebase initialized successfully");
+  // Only log in development
+  if (process.env.NODE_ENV === "development") {
+    console.log("✅ Firebase initialized successfully");
+  }
 } catch (error) {
+  // Always log Firebase initialization errors since they're critical
   console.error("❌ Firebase initialization failed:", error);
   throw error;
 }

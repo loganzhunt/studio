@@ -50,17 +50,19 @@ interface PrismButtonProps
 
 export const PrismButton: React.FC<PrismButtonProps> = ({
   children,
-  variant = "primary",
+  variant = "secondary",
   size = "md",
   asChild = false,
   className,
   ...props
 }) => {
   const variants = {
-    primary: "bg-purple-500 text-white hover:bg-purple-600 relative overflow-hidden",
+    primary:
+      "bg-purple-500 text-white hover:bg-purple-600 relative overflow-hidden",
     secondary:
       "bg-white/10 border border-white/20 text-white hover:bg-white/20 relative overflow-hidden",
-    ghost: "bg-transparent text-white hover:bg-white/10 relative overflow-hidden",
+    ghost:
+      "bg-transparent text-white hover:bg-white/10 relative overflow-hidden",
   };
 
   const sizes = {
@@ -84,10 +86,7 @@ export const PrismButton: React.FC<PrismButtonProps> = ({
   if (asChild) {
     return (
       <span
-        className={cn(
-          buttonClasses,
-          "inline-flex items-center justify-center"
-        )}
+        className={cn(buttonClasses, "inline-flex items-center justify-center")}
         {...(props as any)}
       >
         {children}
@@ -96,10 +95,7 @@ export const PrismButton: React.FC<PrismButtonProps> = ({
   }
 
   return (
-    <Button
-      className={buttonClasses}
-      {...props}
-    >
+    <Button className={buttonClasses} {...props}>
       <>
         {children}
         <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent shimmer-animation" />
@@ -370,3 +366,81 @@ export const GlassAccordionItem: React.FC<GlassAccordionItemProps> = ({
     </AccordionItem>
   );
 };
+
+// Position-based spectrum bar for use in carousels and slideshows
+interface PositionSpectrumBarProps {
+  positions?: number;
+  activePosition?: number;
+  className?: string;
+}
+
+// Alternative API for SpectrumBar that works with positions (carousel items)
+export function SpectrumBar({
+  positions = 5,
+  activePosition = 0,
+  className,
+  value,
+  max,
+  colors = [
+    "#ff0045",
+    "#ff9315",
+    "#f1e800",
+    "#2df36c",
+    "#00b8ff",
+    "#0082ff",
+    "#8e6bf7",
+  ],
+  ...props
+}: SpectrumBarProps & PositionSpectrumBarProps) {
+  // If using the position-based API
+  if (positions && activePosition !== undefined) {
+    const percentage =
+      positions > 1 ? (activePosition / (positions - 1)) * 100 : 0;
+
+    return (
+      <div
+        className={cn(
+          "spectrum-progress relative w-full h-2 rounded-full overflow-hidden",
+          className
+        )}
+        {...props}
+      >
+        <div
+          className="absolute inset-0 rounded-full"
+          style={{
+            background: `linear-gradient(to right, ${colors.join(", ")})`,
+          }}
+        />
+        <div
+          className="absolute top-0 left-0 h-full bg-white/30 rounded-full transition-all duration-300"
+          style={{ width: `${percentage}%` }}
+        />
+      </div>
+    );
+  }
+
+  // Original value-based implementation
+  const percentage =
+    max && value !== undefined ? Math.min((value / max) * 100, 100) : 0;
+
+  return (
+    <div
+      className={cn(
+        "spectrum-progress relative w-full h-2 rounded-full overflow-hidden",
+        className
+      )}
+      {...props}
+    >
+      <div
+        className="absolute inset-0 rounded-full"
+        style={{
+          background: `linear-gradient(to right, ${colors.join(", ")})`,
+        }}
+      />
+      <div
+        className="absolute top-0 left-0 h-full bg-white/30 rounded-full transition-all duration-300"
+        style={{ width: `${percentage}%` }}
+      />
+    </div>
+  );
+}

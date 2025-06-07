@@ -40,6 +40,27 @@ const FACET_NAMES_CONST = [
 
 export const FACET_NAMES: FacetName[] = [...FACET_NAMES_CONST];
 
+/**
+ * Helper to safely use FACET_NAMES without repetitive type checks
+ * @returns True if FACET_NAMES is a valid, non-empty array
+ */
+export const isValidFacetNames = (): boolean => {
+  return Array.isArray(FACET_NAMES) && FACET_NAMES.length > 0;
+};
+
+/**
+ * Execute a callback only if FACET_NAMES is valid
+ * @param callback Function to execute with FACET_NAMES
+ * @param fallback Optional fallback value if FACET_NAMES is invalid
+ * @returns Result of callback or fallback
+ */
+export function withValidFacetNames<T>(
+  callback: (facetNames: FacetName[]) => T,
+  fallback?: T
+): T {
+  return isValidFacetNames() ? callback(FACET_NAMES) : (fallback as T);
+}
+
 export const FACETS: Record<FacetName, Facet> = {
   Ontology: {
     name: "Ontology",

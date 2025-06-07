@@ -14,11 +14,22 @@ import React, {
   useEffect,
   useCallback,
   useMemo,
-  useReducer,
-} from "react";
+  useReduc      } catch (error: unknown) {
+        console.error("Email sign-in error:", error);
+        let message = "Failed to sign in. Please check your credentials.";
+        if (isFirebaseAuthError(error)) {
+          if (
+            error.code === FirebaseAuthErrorCode.USER_NOT_FOUND ||
+            error.code === FirebaseAuthErrorCode.WRONG_PASSWORD
+          ) {
+            message = "Invalid email or password.";
+          }
+        }
+        dispatch({ type: "SET_ERROR", payload: message }); "react";
 import { FACETS, FACET_NAMES } from "@/config/facets";
 import { calculateAllDomainScores } from "@/lib/scoring";
 import { auth, googleProvider } from "@/lib/firebase";
+import { AppError, FirebaseAuthErrorCode, isFirebaseAuthError } from "@/types/errors";
 import {
   onAuthStateChanged,
   signInWithPopup,
@@ -210,13 +221,15 @@ export const WorldviewProvider: React.FC<{ children: React.ReactNode }> = ({
           title: "Account Created!",
           description: `Welcome to Meta-Prism, ${displayName}!`,
         });
-      } catch (error: any) {
+      } catch (error: unknown) {
         console.error("Email sign-up error:", error);
         let message = "Failed to create account.";
-        if (error.code === "auth/email-already-in-use") {
-          message = "An account with this email already exists.";
-        } else if (error.code === "auth/weak-password") {
-          message = "Password should be at least 6 characters.";
+        if (isFirebaseAuthError(error)) {
+          if (error.code === FirebaseAuthErrorCode.EMAIL_ALREADY_IN_USE) {
+            message = "An account with this email already exists.";
+          } else if (error.code === FirebaseAuthErrorCode.WEAK_PASSWORD) {
+            message = "Password should be at least 6 characters.";
+          }
         }
         dispatch({ type: "SET_ERROR", payload: message });
         toast({ title: "Error", description: message, variant: "destructive" });
@@ -242,14 +255,16 @@ export const WorldviewProvider: React.FC<{ children: React.ReactNode }> = ({
           title: "Welcome back!",
           description: "You have successfully signed in.",
         });
-      } catch (error: any) {
+      } catch (error: unknown) {
         console.error("Email sign-in error:", error);
         let message = "Failed to sign in.";
-        if (
-          error.code === "auth/user-not-found" ||
-          error.code === "auth/wrong-password"
-        ) {
-          message = "Invalid email or password.";
+        if (isFirebaseAuthError(error)) {
+          if (
+            error.code === FirebaseAuthErrorCode.USER_NOT_FOUND ||
+            error.code === FirebaseAuthErrorCode.WRONG_PASSWORD
+          ) {
+            message = "Invalid email or password.";
+          }
         }
         dispatch({ type: "SET_ERROR", payload: message });
         toast({ title: "Error", description: message, variant: "destructive" });
@@ -270,7 +285,7 @@ export const WorldviewProvider: React.FC<{ children: React.ReactNode }> = ({
         title: "Welcome!",
         description: "You have successfully signed in with Google.",
       });
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Google sign-in error:", error);
       const message = "Failed to sign in with Google.";
       dispatch({ type: "SET_ERROR", payload: message });
@@ -292,7 +307,7 @@ export const WorldviewProvider: React.FC<{ children: React.ReactNode }> = ({
           title: "Password reset sent",
           description: "Check your email for password reset instructions.",
         });
-      } catch (error: any) {
+      } catch (error: unknown) {
         console.error("Password reset error:", error);
         const message = "Failed to send password reset email.";
         toast({ title: "Error", description: message, variant: "destructive" });

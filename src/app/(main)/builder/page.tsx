@@ -1,7 +1,12 @@
 "use client";
 
 import { useState } from "react";
-import { FACETS, FACET_NAMES } from "@/config/facets";
+import {
+  FACETS,
+  FACET_NAMES,
+  isValidFacetNames,
+  withValidFacetNames,
+} from "@/config/facets";
 import type { FacetName, DomainScore } from "@/types";
 import { Button } from "@/components/ui/button";
 import {
@@ -21,217 +26,10 @@ import {
 import TriangleChart from "@/components/visualization/TriangleChart";
 import { Icons } from "@/components/icons";
 import { useWorldview } from "@/hooks/use-worldview";
+import { useToast } from "@/hooks/use-toast";
 import Link from "next/link";
 import { Input } from "@/components/ui/input";
-
-// Dummy Codex entries for selection
-// In a real app, these would come from a data source (e.g., the Codex entries themselves)
-// and would include actual scores for each facet.
-const dummyCodexOptions: Record<
-  FacetName,
-  {
-    id: string;
-    name: string;
-    facetScores: Partial<Record<FacetName, number>>;
-  }[]
-> = {
-  Ontology: [
-    {
-      id: "ontology_materialism",
-      name: "Materialism",
-      facetScores: {
-        Ontology: 0.9,
-        Epistemology: 0.7,
-        Praxeology: 0.5,
-        Axiology: 0.4,
-        Mythology: 0.2,
-        Cosmology: 0.8,
-        Teleology: 0.3,
-      },
-    },
-    {
-      id: "ontology_idealism",
-      name: "Idealism",
-      facetScores: {
-        Ontology: 0.2,
-        Epistemology: 0.4,
-        Praxeology: 0.6,
-        Axiology: 0.7,
-        Mythology: 0.8,
-        Cosmology: 0.3,
-        Teleology: 0.7,
-      },
-    },
-  ],
-  Epistemology: [
-    {
-      id: "epistemology_empiricism",
-      name: "Empiricism",
-      facetScores: {
-        Ontology: 0.6,
-        Epistemology: 0.9,
-        Praxeology: 0.7,
-        Axiology: 0.5,
-        Mythology: 0.3,
-        Cosmology: 0.6,
-        Teleology: 0.4,
-      },
-    },
-    {
-      id: "epistemology_rationalism",
-      name: "Rationalism",
-      facetScores: {
-        Ontology: 0.4,
-        Epistemology: 0.2,
-        Praxeology: 0.5,
-        Axiology: 0.6,
-        Mythology: 0.7,
-        Cosmology: 0.4,
-        Teleology: 0.6,
-      },
-    },
-  ],
-  Praxeology: [
-    {
-      id: "praxeology_consequentialism",
-      name: "Consequentialism",
-      facetScores: {
-        Ontology: 0.5,
-        Epistemology: 0.6,
-        Praxeology: 0.9,
-        Axiology: 0.8,
-        Mythology: 0.4,
-        Cosmology: 0.5,
-        Teleology: 0.7,
-      },
-    },
-    {
-      id: "praxeology_deontology",
-      name: "Deontology",
-      facetScores: {
-        Ontology: 0.6,
-        Epistemology: 0.5,
-        Praxeology: 0.2,
-        Axiology: 0.3,
-        Mythology: 0.6,
-        Cosmology: 0.6,
-        Teleology: 0.4,
-      },
-    },
-  ],
-  Axiology: [
-    {
-      id: "axiology_hedonism",
-      name: "Hedonism",
-      facetScores: {
-        Ontology: 0.4,
-        Epistemology: 0.3,
-        Praxeology: 0.7,
-        Axiology: 0.9,
-        Mythology: 0.5,
-        Cosmology: 0.4,
-        Teleology: 0.8,
-      },
-    },
-    {
-      id: "axiology_eudaimonism",
-      name: "Eudaimonism",
-      facetScores: {
-        Ontology: 0.7,
-        Epistemology: 0.6,
-        Praxeology: 0.4,
-        Axiology: 0.2,
-        Mythology: 0.7,
-        Cosmology: 0.7,
-        Teleology: 0.3,
-      },
-    },
-  ],
-  Mythology: [
-    {
-      id: "mythology_monotheism",
-      name: "Monotheism",
-      facetScores: {
-        Ontology: 0.8,
-        Epistemology: 0.7,
-        Praxeology: 0.6,
-        Axiology: 0.7,
-        Mythology: 0.9,
-        Cosmology: 0.8,
-        Teleology: 0.9,
-      },
-    },
-    {
-      id: "mythology_polytheism",
-      name: "Polytheism",
-      facetScores: {
-        Ontology: 0.3,
-        Epistemology: 0.4,
-        Praxeology: 0.5,
-        Axiology: 0.4,
-        Mythology: 0.2,
-        Cosmology: 0.3,
-        Teleology: 0.2,
-      },
-    },
-  ],
-  Cosmology: [
-    {
-      id: "cosmology_bigbang",
-      name: "Big Bang Theory",
-      facetScores: {
-        Ontology: 0.7,
-        Epistemology: 0.8,
-        Praxeology: 0.4,
-        Axiology: 0.3,
-        Mythology: 0.1,
-        Cosmology: 0.9,
-        Teleology: 0.2,
-      },
-    },
-    {
-      id: "cosmology_steadystate",
-      name: "Steady State Theory",
-      facetScores: {
-        Ontology: 0.4,
-        Epistemology: 0.3,
-        Praxeology: 0.6,
-        Axiology: 0.5,
-        Mythology: 0.4,
-        Cosmology: 0.2,
-        Teleology: 0.5,
-      },
-    },
-  ],
-  Teleology: [
-    {
-      id: "teleology_nihilism",
-      name: "Nihilism",
-      facetScores: {
-        Ontology: 0.1,
-        Epistemology: 0.2,
-        Praxeology: 0.1,
-        Axiology: 0.1,
-        Mythology: 0.1,
-        Cosmology: 0.1,
-        Teleology: 0.1,
-      },
-    },
-    {
-      id: "teleology_existentialpurpose",
-      name: "Existential Purpose",
-      facetScores: {
-        Ontology: 0.6,
-        Epistemology: 0.7,
-        Praxeology: 0.8,
-        Axiology: 0.8,
-        Mythology: 0.7,
-        Cosmology: 0.6,
-        Teleology: 0.9,
-      },
-    },
-  ],
-};
+import { codexBuilderOptions } from "@/data/codex-builder-options";
 
 export default function BuilderPage() {
   const {
@@ -243,12 +41,13 @@ export default function BuilderPage() {
     addSavedWorldview,
     savedWorldviews,
   } = useWorldview();
+  const { toast } = useToast();
   const [worldviewTitle, setWorldviewTitle] = useState(
     activeProfile?.title || "My Custom Worldview"
   );
 
   // Ensure we have valid FACET_NAMES before proceeding
-  if (!FACET_NAMES || !Array.isArray(FACET_NAMES) || FACET_NAMES.length === 0) {
+  if (!isValidFacetNames()) {
     return (
       <div className="container mx-auto px-4 py-8">
         <Card>
@@ -268,8 +67,8 @@ export default function BuilderPage() {
       const selectedOptId = facetSelections?.[name];
       let score = 0.5; // Default neutral score
 
-      if (selectedOptId && dummyCodexOptions && name in dummyCodexOptions) {
-        const facetOptions = dummyCodexOptions[name];
+      if (selectedOptId && codexBuilderOptions && name in codexBuilderOptions) {
+        const facetOptions = codexBuilderOptions[name];
         if (Array.isArray(facetOptions)) {
           const selectedOptionData = facetOptions.find(
             (opt) => opt?.id === selectedOptId
@@ -314,13 +113,19 @@ export default function BuilderPage() {
           profile.title.toLowerCase() === worldviewTitle.toLowerCase().trim()
       )
     ) {
-      alert(
-        `A worldview profile named "${worldviewTitle.trim()}" already exists. Please choose a different title.`
-      );
+      toast({
+        title: "Duplicate Title",
+        description: `A worldview profile named "${worldviewTitle.trim()}" already exists. Please choose a different title.`,
+        variant: "destructive",
+      });
       return;
     }
     if (!worldviewTitle.trim()) {
-      alert("Please enter a title for your worldview.");
+      toast({
+        title: "Missing Title",
+        description: "Please enter a title for your worldview.",
+        variant: "destructive",
+      });
       return;
     }
 
@@ -334,17 +139,21 @@ export default function BuilderPage() {
       createdAt: new Date().toISOString(),
     };
     addSavedWorldview(newProfile);
-    alert(`Worldview "${worldviewTitle.trim()}" saved!`);
+    toast({
+      title: "Worldview Saved",
+      description: `Your worldview "${worldviewTitle.trim()}" has been saved to your library.`,
+      variant: "default",
+    });
   };
 
   const handleClearSelections = () => {
-    if (Array.isArray(FACET_NAMES) && FACET_NAMES.length > 0) {
-      FACET_NAMES.forEach((name) => {
+    withValidFacetNames((facetNames) => {
+      facetNames.forEach((name) => {
         if (name && clearFacetSelection) {
           clearFacetSelection(name);
         }
       });
-    }
+    });
     setWorldviewTitle("My Custom Worldview");
   };
 
@@ -364,7 +173,7 @@ export default function BuilderPage() {
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-              {FACET_NAMES && Array.isArray(FACET_NAMES) ? (
+              {isValidFacetNames() ? (
                 FACET_NAMES.map((facetName) => {
                   const facet = FACETS?.[facetName];
                   if (!facet) {
@@ -380,7 +189,7 @@ export default function BuilderPage() {
                     );
                   }
 
-                  const options = dummyCodexOptions?.[facetName] || [];
+                  const options = codexBuilderOptions?.[facetName] || [];
                   return (
                     <div
                       key={facetName}

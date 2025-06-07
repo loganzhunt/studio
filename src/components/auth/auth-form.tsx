@@ -17,6 +17,7 @@ import { Label } from "@/components/ui/label";
 import { useWorldview } from "@/hooks/use-worldview";
 import { useToast } from "@/hooks/use-toast";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { isFirebaseAuthError } from "@/types/errors";
 
 export function AuthForm() {
   const {
@@ -58,7 +59,7 @@ export function AuthForm() {
       setIsSubmitting(true);
       try {
         await sendPasswordReset(email);
-      } catch (error: any) {
+      } catch (error: unknown) {
         console.error("Password reset error:", error);
       }
       setIsSubmitting(false);
@@ -88,7 +89,7 @@ export function AuthForm() {
       } else {
         await signInWithEmail(email, password);
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Email auth error:", error);
     }
     setIsSubmitting(false);
@@ -98,7 +99,7 @@ export function AuthForm() {
     setIsSubmitting(true);
     try {
       await signInWithGoogle();
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Google sign-in error:", error);
     }
     setIsSubmitting(false);

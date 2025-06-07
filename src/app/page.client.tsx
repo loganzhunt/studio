@@ -17,7 +17,7 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 import { Icons } from "@/components/icons";
-import { FACETS, FACET_NAMES } from "@/config/facets";
+import { FACETS, FACET_NAMES, isValidFacetNames } from "@/config/facets";
 import { FacetIcon } from "@/components/facet-icon";
 import TriangleChart from "@/components/visualization/TriangleChart";
 import type { DomainScore } from "@/types";
@@ -45,119 +45,7 @@ import {
 } from "@/components/glass-components";
 import { FacetClassForcer } from "@/components/force-facet-classes";
 import { Sparkles, ArrowRight } from "lucide-react";
-
-// Data for Featured Worldviews
-const featuredWorldviewsData: Array<{
-  id: string;
-  title: string;
-  icon?: string;
-  summary: string;
-  category: string;
-  domainScores: DomainScore[];
-}> = [
-  {
-    id: "stoicism",
-    title: "Stoicism",
-    icon: "\u221D",
-    summary:
-      "A philosophy of rational resilience and self-mastery, emphasizing virtue and acceptance of nature.",
-    category: "Philosophical",
-    domainScores: [
-      { facetName: "Ontology", score: 0.3 },
-      { facetName: "Epistemology", score: 0.2 },
-      { facetName: "Praxeology", score: 0.65 },
-      { facetName: "Axiology", score: 0.75 },
-      { facetName: "Mythology", score: 0.3 },
-      { facetName: "Cosmology", score: 0.4 },
-      { facetName: "Teleology", score: 0.3 },
-    ],
-  },
-  {
-    id: "buddhism",
-    title: "Buddhism",
-    icon: "\u2638",
-    summary:
-      "A spiritual philosophy emphasizing awakening, impermanence, and the end of suffering.",
-    category: "Spiritual",
-    domainScores: [
-      { facetName: "Ontology", score: 0.55 },
-      { facetName: "Epistemology", score: 0.55 },
-      { facetName: "Praxeology", score: 0.6 },
-      { facetName: "Axiology", score: 0.7 },
-      { facetName: "Mythology", score: 0.7 },
-      { facetName: "Cosmology", score: 0.6 },
-      { facetName: "Teleology", score: 0.7 },
-    ],
-  },
-  {
-    id: "existentialism",
-    title: "Existentialism",
-    icon: "\u2203",
-    summary:
-      "Focuses on authentic existence, choice, and the creation of meaning in an indifferent universe.",
-    category: "Philosophical",
-    domainScores: [
-      { facetName: "Ontology", score: 0.3 },
-      { facetName: "Epistemology", score: 0.3 },
-      { facetName: "Praxeology", score: 0.55 },
-      { facetName: "Axiology", score: 0.35 },
-      { facetName: "Mythology", score: 0.25 },
-      { facetName: "Cosmology", score: 0.25 },
-      { facetName: "Teleology", score: 0.05 },
-    ],
-  },
-  {
-    id: "animism",
-    title: "Animism",
-    icon: "\u273F",
-    summary:
-      "Sees spirit or consciousness present in all beings, places, and phenomena, emphasizing reciprocity.",
-    category: "Indigenous",
-    domainScores: [
-      { facetName: "Ontology", score: 0.8 },
-      { facetName: "Epistemology", score: 0.7 },
-      { facetName: "Praxeology", score: 0.4 },
-      { facetName: "Axiology", score: 0.7 },
-      { facetName: "Mythology", score: 0.8 },
-      { facetName: "Cosmology", score: 0.9 },
-      { facetName: "Teleology", score: 0.8 },
-    ],
-  },
-  {
-    id: "scientific_materialism",
-    title: "Scientific Materialism",
-    icon: "\u23DA",
-    summary:
-      "Grounded in physicalism and empirical science. Reality is ultimately material and measurable.",
-    category: "Scientific",
-    domainScores: [
-      { facetName: "Ontology", score: 0.05 },
-      { facetName: "Epistemology", score: 0.05 },
-      { facetName: "Praxeology", score: 0.35 },
-      { facetName: "Axiology", score: 0.2 },
-      { facetName: "Mythology", score: 0.05 },
-      { facetName: "Cosmology", score: 0.1 },
-      { facetName: "Teleology", score: 0.05 },
-    ],
-  },
-  {
-    id: "platonism",
-    title: "Platonism",
-    icon: "\u03A6",
-    summary:
-      "A philosophical tradition centered on transcendent forms and the pursuit of the Good.",
-    category: "Philosophical",
-    domainScores: [
-      { facetName: "Ontology", score: 0.9 },
-      { facetName: "Epistemology", score: 0.8 },
-      { facetName: "Praxeology", score: 0.45 },
-      { facetName: "Axiology", score: 0.65 },
-      { facetName: "Mythology", score: 0.7 },
-      { facetName: "Cosmology", score: 0.8 },
-      { facetName: "Teleology", score: 0.75 },
-    ],
-  },
-];
+import { featuredWorldviewsData } from "@/data/featured-worldviews";
 
 export default function HomePage() {
   const howItWorksSteps = [
@@ -223,6 +111,7 @@ export default function HomePage() {
 
               <Link href="/assessment">
                 <PrismButton
+                  variant="secondary"
                   className="h-12 px-8 text-sm sm:text-base font-semibold shadow-[0_4px_20px_rgba(0,0,0,0.2)] group transition-all duration-300 hover:scale-105 hover:shadow-[0_6px_25px_rgba(0,0,0,0.3)]"
                   size="lg"
                 >
@@ -412,7 +301,7 @@ export default function HomePage() {
                 </CarouselContent>
                 <CarouselPrevious className="hidden sm:flex absolute left-[-50px] top-1/2 -translate-y-1/2">
                   <GlassCard className="p-2 rounded-full shadow-md bg-card/80 border border-border/30">
-                    <Icons.chevronLeft className="h-5 w-5 text-primary" />
+                    <Icons.arrowLeft className="h-5 w-5 text-primary" />
                   </GlassCard>
                 </CarouselPrevious>
                 <CarouselNext className="hidden sm:flex absolute right-[-50px] top-1/2 -translate-y-1/2">
@@ -461,7 +350,7 @@ export default function HomePage() {
               collapsible
               className="w-full max-w-3xl mx-auto"
             >
-              {Array.isArray(FACET_NAMES) && FACET_NAMES.length > 0
+              {isValidFacetNames()
                 ? FACET_NAMES.map((facetName) => {
                     const facet = FACETS[facetName];
                     const facetKey = facetName.toLowerCase() as FacetName;
@@ -542,7 +431,7 @@ export default function HomePage() {
                           >
                             <Link href={`/facet/${facet.name.toLowerCase()}`}>
                               Deep Dive into {facet.name}{" "}
-                              <Icons.ArrowRight className="ml-2 h-4 w-4" />
+                              <Icons.arrowRight className="ml-2 h-4 w-4" />
                             </Link>
                           </PrismButton>
                         </AccordionContent>
