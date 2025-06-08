@@ -10,6 +10,7 @@ import { Label } from "@/components/ui/label";
 import { FACETS } from "@/config/facets";
 import { useFacetNames } from "@/providers/facet-provider";
 import type { FacetName } from "@/types";
+import { buildLikertOptions } from "@/lib/assessment-likert";
 import { Icons } from "@/components/icons";
 import { useWorldview } from "@/hooks/use-worldview";
 import { useRouter } from "next/navigation";
@@ -24,21 +25,13 @@ import {
 } from "@/components/glass-components";
 import { LiveRegion } from "@/components/accessibility";
 
-const LIKERT_SCALE_OPTIONS = [
-  { value: 1, label: "Strongly Disagree", color: "bg-red-500" },
-  { value: 2, label: "Disagree", color: "bg-orange-500" },
-  { value: 3, label: "Neutral", color: "bg-yellow-500" },
-  { value: 4, label: "Agree", color: "bg-green-500" },
-  { value: 5, label: "Strongly Agree", color: "bg-blue-500" },
-];
-
 const ONBOARDING_STORAGE_KEY = "metaPrismOnboardingSeen_neutral_v1";
 
 export default function AssessmentPage() {
   const [currentFacetIndex, setCurrentFacetIndex] = useState(0);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [animationDirection, setAnimationDirection] = useState<"next" | "prev">(
-    "next"
+    "next",
   );
   const [announceMessage, setAnnounceMessage] = useState("");
   const { assessmentAnswers, updateAssessmentAnswer, calculateDomainScores } =
@@ -78,11 +71,14 @@ export default function AssessmentPage() {
     facetNames[currentFacetIndex] || facetNames[0] || null;
   const currentFacet = currentFacetName ? FACETS[currentFacetName] : null;
   const totalFacets = facetNames.length;
-  const progress = ((currentFacetIndex + 1) / totalFacets) * 100;
+
+  const likertOptions = useMemo(
+    () => buildLikertOptions(currentFacetName),
+    [currentFacetName],
+  );
 
   // Calculate how many questions are in the current facet
   const totalQuestions = currentFacet?.questions?.length || 0;
-  const questionProgress = ((currentQuestionIndex + 1) / totalQuestions) * 100;
 
   // Calculate overall progress
   const completedQuestions = useMemo(() => {
@@ -169,7 +165,7 @@ export default function AssessmentPage() {
     if (currentQuestionIndex < totalQuestions - 1) {
       setCurrentQuestionIndex(currentQuestionIndex + 1);
       setAnnounceMessage(
-        `Question ${currentQuestionIndex + 2} of ${totalQuestions}`
+        `Question ${currentQuestionIndex + 2} of ${totalQuestions}`,
       );
       setTimeout(() => setIsProcessing(false), 300);
     } else {
@@ -180,7 +176,7 @@ export default function AssessmentPage() {
         setAnnounceMessage(
           `Section ${currentFacetIndex + 2}: ${
             facetNames[currentFacetIndex + 1]
-          }, Question 1`
+          }, Question 1`,
         );
         setTimeout(() => setIsProcessing(false), 300);
       } else {
@@ -196,7 +192,7 @@ export default function AssessmentPage() {
           } catch (error) {
             console.error(
               "Error during background score calculation/saving:",
-              error
+              error,
             );
             toast({
               title: "Scoring Error",
@@ -217,7 +213,7 @@ export default function AssessmentPage() {
     if (currentQuestionIndex > 0) {
       setCurrentQuestionIndex(currentQuestionIndex - 1);
       setAnnounceMessage(
-        `Question ${currentQuestionIndex} of ${totalQuestions}`
+        `Question ${currentQuestionIndex} of ${totalQuestions}`,
       );
     } else {
       // Move to previous facet
@@ -228,7 +224,7 @@ export default function AssessmentPage() {
         setCurrentFacetIndex(currentFacetIndex - 1);
         setCurrentQuestionIndex(prevFacetQuestions.length - 1);
         setAnnounceMessage(
-          `Section ${currentFacetIndex}: ${prevFacetName}, Question ${prevFacetQuestions.length}`
+          `Section ${currentFacetIndex}: ${prevFacetName}, Question ${prevFacetQuestions.length}`,
         );
       }
     }
@@ -250,7 +246,7 @@ export default function AssessmentPage() {
     setCurrentFacetIndex(facetIndex);
     setCurrentQuestionIndex(0);
     setAnnounceMessage(
-      `Jumped to section ${facetIndex + 1}: ${facetNames[facetIndex]}`
+      `Jumped to section ${facetIndex + 1}: ${facetNames[facetIndex]}`,
     );
     setTimeout(() => setIsProcessing(false), 300);
   };
@@ -377,8 +373,8 @@ export default function AssessmentPage() {
               facetCompletionPercent === 100
                 ? "complete"
                 : facetCompletionPercent > 0
-                ? "in-progress"
-                : "not-started";
+                  ? "in-progress"
+                  : "not-started";
 
             return (
               <button
@@ -392,14 +388,14 @@ export default function AssessmentPage() {
                   completionStatus === "complete" &&
                     "border-l-4 border-green-500",
                   completionStatus === "in-progress" &&
-                    "border-l-4 border-yellow-500"
+                    "border-l-4 border-yellow-500",
                 )}
                 disabled={isProcessing}
                 style={
                   isCurrent
                     ? {
                         borderColor: `hsl(var(${facet.colorVariable.slice(
-                          2
+                          2,
                         )}))`,
                       }
                     : {}
@@ -409,7 +405,7 @@ export default function AssessmentPage() {
                   <span
                     className={cn(
                       "font-medium",
-                      isCurrent ? "text-white" : "text-muted-foreground"
+                      isCurrent ? "text-white" : "text-muted-foreground",
                     )}
                   >
                     {facet.name}
@@ -517,7 +513,7 @@ export default function AssessmentPage() {
                           className={cn(
                             "p-1 rounded-full hover:bg-white/10",
                             !isCurrentQuestionAnswered &&
-                              "opacity-50 cursor-not-allowed"
+                              "opacity-50 cursor-not-allowed",
                           )}
                           aria-label="Next question"
                         >
@@ -538,7 +534,7 @@ export default function AssessmentPage() {
                         onValueChange={handleAnswerChange}
                         className="space-y-4"
                       >
-                        {LIKERT_SCALE_OPTIONS.map((option) => (
+                        {likertOptions.map((option) => (
                           <div
                             key={option.value}
                             className={cn(
@@ -546,18 +542,18 @@ export default function AssessmentPage() {
                               currentAnswer === option.value
                                 ? "bg-white/20 border-white/40 shadow-lg transform scale-[1.02]"
                                 : "hover:bg-white/10",
-                              "focus-within:ring-2 focus-within:ring-white/30"
+                              "focus-within:ring-2 focus-within:ring-white/30",
                             )}
                           >
                             <div className="flex items-center flex-1">
                               <div
                                 className={cn(
                                   "w-5 h-5 mr-4 rounded-full",
-                                  option.color,
                                   currentAnswer === option.value
                                     ? "ring-4 ring-white/30"
-                                    : ""
+                                    : "",
                                 )}
+                                style={{ backgroundColor: option.color }}
                                 aria-hidden="true"
                               />
                               <Label
@@ -566,7 +562,7 @@ export default function AssessmentPage() {
                                   "flex-1 text-lg font-medium cursor-pointer",
                                   currentAnswer === option.value
                                     ? "text-white"
-                                    : "text-white/80"
+                                    : "text-white/80",
                                 )}
                               >
                                 {option.label}
@@ -607,7 +603,7 @@ export default function AssessmentPage() {
               disabled={!isCurrentQuestionAnswered || isProcessing}
               className={cn(
                 !isCurrentQuestionAnswered && "opacity-60 cursor-not-allowed",
-                isProcessing && "opacity-70"
+                isProcessing && "opacity-70",
               )}
             >
               {isProcessing && (

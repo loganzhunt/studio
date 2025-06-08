@@ -17,4 +17,10 @@ module.exports = {
   Globe: createMockIcon('Globe'),
   Target: createMockIcon('Target'),
   HelpCircle: createMockIcon('HelpCircle'),
+  Loader2: createMockIcon('Loader2'),
+  AlertTriangle: createMockIcon('AlertTriangle'),
+  RefreshCw: createMockIcon('RefreshCw'),
+  ArrowLeft: createMockIcon('ArrowLeft'),
+  ArrowRight: createMockIcon('ArrowRight'),
+  ChevronLeft: createMockIcon('ChevronLeft'),
 };

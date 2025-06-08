@@ -37,7 +37,7 @@ function reportMetric(metric: Metric) {
   };
 
   // Log to console in development
-  if (process.env.NODE_ENV === "development") {
+  if (process.env.NODE_ENV !== "production") {
     console.log("Web Vital:", {
       name: performanceMetric.name,
       value: Math.round(performanceMetric.value),
@@ -48,10 +48,10 @@ function reportMetric(metric: Metric) {
 
   // Store metric in window for testing
   if (typeof window !== "undefined") {
-    if (!(window as any).__webVitals) {
-      (window as any).__webVitals = [];
+    if (!(window as any).__performanceMetrics) {
+      (window as any).__performanceMetrics = [];
     }
-    (window as any).__webVitals.push(performanceMetric);
+    (window as any).__performanceMetrics.push(performanceMetric);
   }
 
   // Send to analytics in production
@@ -85,7 +85,7 @@ export function initPerformanceMonitoring() {
     onLCP(reportMetric);
     onTTFB(reportMetric);
 
-    if (process.env.NODE_ENV === "development") {
+    if (process.env.NODE_ENV !== "production") {
       console.log("🚀 Performance monitoring initialized");
     }
   } catch (error) {
@@ -105,7 +105,7 @@ export function trackCustomMetric(
   const customMetric = {
     name,
     value,
-    timestamp: Date.now(),
+    timestamp: typeof performance !== "undefined" ? performance.now() : Date.now(),
     metadata: metadata || {},
   };
 
@@ -132,7 +132,7 @@ export function trackCustomMetric(
 export function getPerformanceMetrics(includeCustom = false): any[] {
   if (typeof window === "undefined") return [];
 
-  const webVitals = (window as any).__webVitals || [];
+  const webVitals = (window as any).__performanceMetrics || [];
   const customMetrics = includeCustom
     ? (window as any).__customMetrics || []
     : [];

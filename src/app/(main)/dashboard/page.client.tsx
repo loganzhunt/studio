@@ -903,8 +903,8 @@ export default function DashboardPage() {
                         <SheetTitle
                           className={`text-3xl mb-1 ${getFacetClass(
                             "text",
-                            getDominantFacet(
-                              selectedArchetypeForDrawer.domainScores
+                          getDominantFacet(
+                              selectedArchetypeForDrawer.domainScores ?? []
                             ).toLowerCase() as any,
                             "700"
                           )}`}
@@ -929,7 +929,7 @@ export default function DashboardPage() {
                           if (!selectedArchetypeForDrawer.domainScores)
                             return null;
                           const scoreObj =
-                            selectedArchetypeForDrawer.domainScores.find(
+                            selectedArchetypeForDrawer.domainScores?.find(
                               (ds) => ds.facetName === facetName
                             );
                           const score = scoreObj ? scoreObj.score : 0;

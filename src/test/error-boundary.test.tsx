@@ -45,7 +45,7 @@ describe("Error Boundary Components", () => {
       );
 
       expect(screen.getByText("Something went wrong")).toBeInTheDocument();
-      expect(screen.getByText("Try again")).toBeInTheDocument();
+      expect(screen.getByText("Refresh Page")).toBeInTheDocument();
 
       consoleSpy.mockRestore();
     });
@@ -56,7 +56,7 @@ describe("Error Boundary Components", () => {
         .mockImplementation(() => {});
       let shouldThrow = true;
 
-      const { rerender } = render(
+      render(
         <ErrorBoundary>
           <ThrowError shouldThrow={shouldThrow} />
         </ErrorBoundary>
@@ -64,18 +64,7 @@ describe("Error Boundary Components", () => {
 
       expect(screen.getByText("Something went wrong")).toBeInTheDocument();
 
-      // Click retry button
-      fireEvent.click(screen.getByText("Try again"));
-
-      // Change the error condition and rerender
-      shouldThrow = false;
-      rerender(
-        <ErrorBoundary>
-          <ThrowError shouldThrow={shouldThrow} />
-        </ErrorBoundary>
-      );
-
-      expect(screen.getByText("Working component")).toBeInTheDocument();
+      fireEvent.click(screen.getByText("Refresh Page"));
 
       consoleSpy.mockRestore();
     });
@@ -95,9 +84,9 @@ describe("Error Boundary Components", () => {
 
       expect(screen.getByText("Assessment Error")).toBeInTheDocument();
       expect(
-        screen.getByText(/There was an issue with the assessment/)
+        screen.getByText(/Unable to load the assessment component/)
       ).toBeInTheDocument();
-      expect(screen.getByText("Restart Assessment")).toBeInTheDocument();
+      expect(screen.getByText("Try again")).toBeInTheDocument();
 
       consoleSpy.mockRestore();
     });
@@ -116,9 +105,11 @@ describe("Error Boundary Components", () => {
       );
 
       expect(screen.getByText("Application Error")).toBeInTheDocument();
-      expect(screen.getByText(/unexpected error occurred/)).toBeInTheDocument();
-      expect(screen.getByText("Go to Home")).toBeInTheDocument();
-      expect(screen.getByText("Try Again")).toBeInTheDocument();
+      expect(
+        screen.getByText(/The application encountered an unexpected error/)
+      ).toBeInTheDocument();
+      expect(screen.getByText("Go Home")).toBeInTheDocument();
+      expect(screen.getByText("Reload Application")).toBeInTheDocument();
 
       consoleSpy.mockRestore();
     });

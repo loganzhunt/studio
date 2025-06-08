@@ -1,40 +1,41 @@
 "use client";
 
-import { useState, useMemo, useEffect } from 'react';
-import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
-import { Button } from '@/components/ui/button';
-import { Progress } from '@/components/ui/progress';
-import { Card, CardContent } from '@/components/ui/card';
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import { Label } from '@/components/ui/label';
-import { FACETS } from '@/config/facets';
-import { useFacetNames } from '@/providers/facet-provider';
-import type { FacetName } from '@/types';
-import { Icons } from '@/components/icons';
-import { useWorldview } from '@/hooks/use-worldview';
-import { useRouter } from 'next/navigation';
-import { useToast } from '@/hooks/use-toast';
+import { useState, useMemo, useEffect } from "react";
+import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
+import { Button } from "@/components/ui/button";
+import { Progress } from "@/components/ui/progress";
+import { Card, CardContent } from "@/components/ui/card";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Label } from "@/components/ui/label";
+import { FACETS } from "@/config/facets";
+import { useFacetNames } from "@/providers/facet-provider";
+import type { FacetName } from "@/types";
+import { buildLikertOptions } from "@/lib/assessment-likert";
+import { Icons } from "@/components/icons";
+import { useWorldview } from "@/hooks/use-worldview";
+import { useRouter } from "next/navigation";
+import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
-import { OnboardingModal } from '@/components/onboarding/onboarding-modal';
-import { GlassCard, PrismButton, SpectrumBar, GlassPanel } from '@/components/glass-components';
-import { LiveRegion } from '@/components/accessibility';
+import { OnboardingModal } from "@/components/onboarding/onboarding-modal";
+import {
+  GlassCard,
+  PrismButton,
+  SpectrumBar,
+  GlassPanel,
+} from "@/components/glass-components";
+import { LiveRegion } from "@/components/accessibility";
 
-const LIKERT_SCALE_OPTIONS = [
-  { value: 1, label: "Strongly Disagree", color: "bg-red-500" },
-  { value: 2, label: "Disagree", color: "bg-orange-500" },
-  { value: 3, label: "Neutral", color: "bg-yellow-500" },
-  { value: 4, label: "Agree", color: "bg-green-500" },
-  { value: 5, label: "Strongly Agree", color: "bg-blue-500" },
-];
-
-const ONBOARDING_STORAGE_KEY = 'metaPrismOnboardingSeen_neutral_v1';
+const ONBOARDING_STORAGE_KEY = "metaPrismOnboardingSeen_neutral_v1";
 
 export default function AssessmentPage() {
   const [currentFacetIndex, setCurrentFacetIndex] = useState(0);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
-  const [animationDirection, setAnimationDirection] = useState<'next' | 'prev'>('next');
-  const [announceMessage, setAnnounceMessage] = useState('');
-  const { assessmentAnswers, updateAssessmentAnswer, calculateDomainScores } = useWorldview();
+  const [animationDirection, setAnimationDirection] = useState<"next" | "prev">(
+    "next",
+  );
+  const [announceMessage, setAnnounceMessage] = useState("");
+  const { assessmentAnswers, updateAssessmentAnswer, calculateDomainScores } =
+    useWorldview();
   const facetNames = useFacetNames();
   const router = useRouter();
   const { toast } = useToast();
@@ -52,7 +53,7 @@ export default function AssessmentPage() {
       }
     } catch (error) {
       console.error("Error accessing localStorage for onboarding:", error);
-      setShowOnboardingModal(true); 
+      setShowOnboardingModal(true);
     }
     setOnboardingChecked(true);
   }, []);
@@ -66,10 +67,16 @@ export default function AssessmentPage() {
     setShowOnboardingModal(false);
   };
 
-  const currentFacetName = facetNames[currentFacetIndex] || facetNames[0] || null;
+  const currentFacetName =
+    facetNames[currentFacetIndex] || facetNames[0] || null;
   const currentFacet = currentFacetName ? FACETS[currentFacetName] : null;
   const totalFacets = facetNames.length;
   const progress = ((currentFacetIndex + 1) / totalFacets) * 100;
+
+  const likertOptions = useMemo(
+    () => buildLikertOptions(currentFacetName),
+    [currentFacetName],
+  );
 
   // Calculate how many questions are in the current facet
   const totalQuestions = currentFacet?.questions?.length || 0;
@@ -78,7 +85,7 @@ export default function AssessmentPage() {
   // Calculate overall progress
   const completedQuestions = useMemo(() => {
     let count = 0;
-    
+
     // Count questions answered in previous facets
     for (let i = 0; i < currentFacetIndex; i++) {
       const facetName = facetNames[i];
@@ -86,7 +93,7 @@ export default function AssessmentPage() {
         count += FACETS[facetName].questions.length;
       }
     }
-    
+
     // Count questions answered in current facet
     if (currentFacetName) {
       for (let i = 0; i <= currentQuestionIndex; i++) {
@@ -96,16 +103,22 @@ export default function AssessmentPage() {
         }
       }
     }
-    
+
     return count;
-  }, [currentFacetIndex, currentQuestionIndex, currentFacetName, facetNames, assessmentAnswers]);
-  
+  }, [
+    currentFacetIndex,
+    currentQuestionIndex,
+    currentFacetName,
+    facetNames,
+    assessmentAnswers,
+  ]);
+
   const totalAllQuestions = useMemo(() => {
     return facetNames.reduce((total, facetName) => {
       return total + (FACETS[facetName]?.questions?.length || 0);
     }, 0);
   }, [facetNames]);
-  
+
   const overallProgress = (completedQuestions / totalAllQuestions) * 100;
 
   useEffect(() => {
@@ -113,13 +126,25 @@ export default function AssessmentPage() {
   }, [currentFacetName, currentQuestionIndex]);
 
   const currentQuestion = currentFacet?.questions?.[currentQuestionIndex];
-  const currentQuestionId = currentFacetName ? `${currentFacetName}_q${currentQuestionIndex}` : null;
-  const currentAnswer = currentQuestionId ? assessmentAnswers[currentQuestionId] : undefined;
+  const currentQuestionId = currentFacetName
+    ? `${currentFacetName}_q${currentQuestionIndex}`
+    : null;
+  const currentAnswer = currentQuestionId
+    ? assessmentAnswers[currentQuestionId]
+    : undefined;
 
-  const isCurrentQuestionAnswered = currentQuestionId !== null && assessmentAnswers[currentQuestionId] !== undefined;
-  
+  const isCurrentQuestionAnswered =
+    currentQuestionId !== null &&
+    assessmentAnswers[currentQuestionId] !== undefined;
+
   const areAllCurrentFacetQuestionsAnswered = useMemo(() => {
-    if (!currentFacet || !currentFacet.questions || !Array.isArray(currentFacet.questions) || !currentFacetName) return false;
+    if (
+      !currentFacet ||
+      !currentFacet.questions ||
+      !Array.isArray(currentFacet.questions) ||
+      !currentFacetName
+    )
+      return false;
     return currentFacet.questions.every((_, index) => {
       const questionId = `${currentFacetName}_q${index}`;
       return assessmentAnswers[questionId] !== undefined;
@@ -137,22 +162,26 @@ export default function AssessmentPage() {
     }
 
     setIsProcessing(true);
-    setAnimationDirection('next');
+    setAnimationDirection("next");
 
     if (currentQuestionIndex < totalQuestions - 1) {
       setCurrentQuestionIndex(currentQuestionIndex + 1);
-      setAnnounceMessage(`Question ${currentQuestionIndex + 2} of ${totalQuestions}`);
+      setAnnounceMessage(
+        `Question ${currentQuestionIndex + 2} of ${totalQuestions}`,
+      );
       setTimeout(() => setIsProcessing(false), 300);
     } else {
       // Move to next facet
       if (currentFacetIndex < totalFacets - 1) {
         setCurrentFacetIndex(currentFacetIndex + 1);
         setCurrentQuestionIndex(0);
-        setAnnounceMessage(`Section ${currentFacetIndex + 2}: ${facetNames[currentFacetIndex + 1]}, Question 1`);
+        setAnnounceMessage(
+          `Section ${currentFacetIndex + 2}: ${facetNames[currentFacetIndex + 1]}, Question 1`,
+        );
         setTimeout(() => setIsProcessing(false), 300);
       } else {
         // Assessment complete - navigate to results
-        router.push('/results');
+        router.push("/results");
         setTimeout(() => {
           try {
             calculateDomainScores();
@@ -161,10 +190,14 @@ export default function AssessmentPage() {
               description: "Your worldview signature is being generated.",
             });
           } catch (error) {
-            console.error("Error during background score calculation/saving:", error);
+            console.error(
+              "Error during background score calculation/saving:",
+              error,
+            );
             toast({
               title: "Scoring Error",
-              description: "There was an issue calculating your scores. Your answers are saved; you can try viewing results later or retaking.",
+              description:
+                "There was an issue calculating your scores. Your answers are saved; you can try viewing results later or retaking.",
               variant: "destructive",
             });
           }
@@ -175,20 +208,24 @@ export default function AssessmentPage() {
 
   const handlePreviousQuestion = () => {
     setIsProcessing(true);
-    setAnimationDirection('prev');
+    setAnimationDirection("prev");
 
     if (currentQuestionIndex > 0) {
       setCurrentQuestionIndex(currentQuestionIndex - 1);
-      setAnnounceMessage(`Question ${currentQuestionIndex} of ${totalQuestions}`);
+      setAnnounceMessage(
+        `Question ${currentQuestionIndex} of ${totalQuestions}`,
+      );
     } else {
       // Move to previous facet
       if (currentFacetIndex > 0) {
         const prevFacetName = facetNames[currentFacetIndex - 1];
         const prevFacetQuestions = FACETS[prevFacetName]?.questions || [];
-        
+
         setCurrentFacetIndex(currentFacetIndex - 1);
         setCurrentQuestionIndex(prevFacetQuestions.length - 1);
-        setAnnounceMessage(`Section ${currentFacetIndex}: ${prevFacetName}, Question ${prevFacetQuestions.length}`);
+        setAnnounceMessage(
+          `Section ${currentFacetIndex}: ${prevFacetName}, Question ${prevFacetQuestions.length}`,
+        );
       }
     }
     setTimeout(() => setIsProcessing(false), 300);
@@ -196,31 +233,36 @@ export default function AssessmentPage() {
 
   const handleAnswerChange = (value: string) => {
     if (!currentFacetName || currentQuestionIndex === null) return;
-    
+
     const questionId = `${currentFacetName}_q${currentQuestionIndex}`;
     updateAssessmentAnswer(questionId, parseInt(value, 10));
   };
 
   const handleFacetJump = (facetIndex: number) => {
     if (facetIndex === currentFacetIndex) return;
-    
+
     setIsProcessing(true);
-    setAnimationDirection(facetIndex > currentFacetIndex ? 'next' : 'prev');
+    setAnimationDirection(facetIndex > currentFacetIndex ? "next" : "prev");
     setCurrentFacetIndex(facetIndex);
     setCurrentQuestionIndex(0);
-    setAnnounceMessage(`Jumped to section ${facetIndex + 1}: ${facetNames[facetIndex]}`);
+    setAnnounceMessage(
+      `Jumped to section ${facetIndex + 1}: ${facetNames[facetIndex]}`,
+    );
     setTimeout(() => setIsProcessing(false), 300);
   };
 
   const toggleCompleteFacet = () => {
-    if (areAllCurrentFacetQuestionsAnswered && currentFacetIndex < totalFacets - 1) {
+    if (
+      areAllCurrentFacetQuestionsAnswered &&
+      currentFacetIndex < totalFacets - 1
+    ) {
       handleFacetJump(currentFacetIndex + 1);
     }
   };
 
   const cardVariants = {
     initial: (direction: string) => ({
-      x: direction === 'next' ? '100%' : '-100%',
+      x: direction === "next" ? "100%" : "-100%",
       opacity: 0,
       scale: 0.8,
     }),
@@ -229,17 +271,17 @@ export default function AssessmentPage() {
       opacity: 1,
       scale: 1,
       transition: {
-        type: 'spring',
+        type: "spring",
         stiffness: 300,
         damping: 30,
       },
     },
     exit: (direction: string) => ({
-      x: direction === 'next' ? '-100%' : '100%',
+      x: direction === "next" ? "-100%" : "100%",
       opacity: 0,
       scale: 0.8,
       transition: {
-        type: 'spring',
+        type: "spring",
         stiffness: 300,
         damping: 30,
       },
@@ -271,9 +313,14 @@ export default function AssessmentPage() {
       </div>
     );
   }
-  
+
   if (showOnboardingModal) {
-    return <OnboardingModal isOpen={showOnboardingModal} onClose={handleCloseOnboarding} />;
+    return (
+      <OnboardingModal
+        isOpen={showOnboardingModal}
+        onClose={handleCloseOnboarding}
+      />
+    );
   }
 
   if (!currentFacet || !currentFacetName || facetNames.length === 0) {
@@ -287,39 +334,47 @@ export default function AssessmentPage() {
         <div className="mb-6">
           <h2 className="text-xl font-bold mb-2">Your Progress</h2>
           <div className="flex items-center justify-between mb-2">
-            <span className="text-sm text-muted-foreground">{Math.round(overallProgress)}% Complete</span>
-            <span className="text-sm text-muted-foreground">{completedQuestions}/{totalAllQuestions}</span>
+            <span className="text-sm text-muted-foreground">
+              {Math.round(overallProgress)}% Complete
+            </span>
+            <span className="text-sm text-muted-foreground">
+              {completedQuestions}/{totalAllQuestions}
+            </span>
           </div>
           <Progress value={overallProgress} className="w-full h-2" />
           <SpectrumBar className="mt-2" />
         </div>
 
         <div className="space-y-3">
-          <h3 className="text-sm font-medium text-muted-foreground mb-2">Assessment Sections</h3>
+          <h3 className="text-sm font-medium text-muted-foreground mb-2">
+            Assessment Sections
+          </h3>
           {facetNames.map((facetName, index) => {
             const facet = FACETS[facetName];
             const isCurrent = index === currentFacetIndex;
-            
+
             // Calculate completion for this facet
             const totalFacetQuestions = facet.questions?.length || 0;
             let answeredQuestions = 0;
-            
+
             for (let i = 0; i < totalFacetQuestions; i++) {
               const qId = `${facetName}_q${i}`;
               if (assessmentAnswers[qId] !== undefined) {
                 answeredQuestions++;
               }
             }
-            
-            const facetCompletionPercent = totalFacetQuestions > 0 
-              ? (answeredQuestions / totalFacetQuestions) * 100 
-              : 0;
-            
-            const completionStatus = facetCompletionPercent === 100 
-              ? 'complete' 
-              : facetCompletionPercent > 0 
-                ? 'in-progress' 
-                : 'not-started';
+
+            const facetCompletionPercent =
+              totalFacetQuestions > 0
+                ? (answeredQuestions / totalFacetQuestions) * 100
+                : 0;
+
+            const completionStatus =
+              facetCompletionPercent === 100
+                ? "complete"
+                : facetCompletionPercent > 0
+                  ? "in-progress"
+                  : "not-started";
 
             return (
               <button
@@ -328,19 +383,27 @@ export default function AssessmentPage() {
                 className={cn(
                   "w-full text-left p-2 rounded-md transition-all duration-200 flex items-center",
                   isCurrent ? "bg-white/20 shadow-inner" : "hover:bg-white/10",
-                  completionStatus === 'complete' && "border-l-4 border-green-500",
-                  completionStatus === 'in-progress' && "border-l-4 border-yellow-500",
+                  completionStatus === "complete" &&
+                    "border-l-4 border-green-500",
+                  completionStatus === "in-progress" &&
+                    "border-l-4 border-yellow-500",
                 )}
                 disabled={isProcessing}
-                style={isCurrent ? {
-                  borderColor: `hsl(var(${facet.colorVariable.slice(2)}))`
-                } : {}}
+                style={
+                  isCurrent
+                    ? {
+                        borderColor: `hsl(var(${facet.colorVariable.slice(2)}))`,
+                      }
+                    : {}
+                }
               >
                 <div className="flex flex-col flex-1">
-                  <span className={cn(
-                    "font-medium", 
-                    isCurrent ? "text-white" : "text-muted-foreground"
-                  )}>
+                  <span
+                    className={cn(
+                      "font-medium",
+                      isCurrent ? "text-white" : "text-muted-foreground",
+                    )}
+                  >
                     {facet.name}
                   </span>
                   <div className="flex items-center mt-1">
@@ -352,9 +415,10 @@ export default function AssessmentPage() {
                         className="h-full bg-white/30 rounded-full"
                         style={{
                           width: `${facetCompletionPercent}%`,
-                          backgroundColor: facetCompletionPercent === 100 
-                            ? 'hsl(var(--success))' 
-                            : `hsl(var(${facet.colorVariable.slice(2)}))`
+                          backgroundColor:
+                            facetCompletionPercent === 100
+                              ? "hsl(var(--success))"
+                              : `hsl(var(${facet.colorVariable.slice(2)}))`,
                         }}
                       />
                     </div>
@@ -385,13 +449,17 @@ export default function AssessmentPage() {
         <div className="max-w-2xl mx-auto">
           {/* Current Facet Header */}
           <div className="mb-6">
-            <h1 
+            <h1
               className="text-3xl font-bold tracking-tight"
-              style={{ color: `hsl(var(${currentFacet.colorVariable.slice(2)}))` }}
+              style={{
+                color: `hsl(var(${currentFacet.colorVariable.slice(2)}))`,
+              }}
             >
               {currentFacet.name}
             </h1>
-            <p className="text-lg text-muted-foreground">{currentFacet.tagline}</p>
+            <p className="text-lg text-muted-foreground">
+              {currentFacet.tagline}
+            </p>
           </div>
 
           {/* Question Cards */}
@@ -403,10 +471,16 @@ export default function AssessmentPage() {
                 initial="initial"
                 animate="animate"
                 exit="exit"
-                variants={shouldReduceMotion ? reducedMotionCardVariants : cardVariants}
+                variants={
+                  shouldReduceMotion ? reducedMotionCardVariants : cardVariants
+                }
                 className="w-full"
               >
-                <GlassCard className="w-full" variant="large" animated={!shouldReduceMotion}>
+                <GlassCard
+                  className="w-full"
+                  variant="large"
+                  animated={!shouldReduceMotion}
+                >
                   <CardContent className="p-6">
                     {/* Question number and navigation */}
                     <div className="flex justify-between items-center mb-6">
@@ -416,19 +490,26 @@ export default function AssessmentPage() {
                       <div className="flex items-center space-x-2">
                         <button
                           onClick={handlePreviousQuestion}
-                          disabled={currentFacetIndex === 0 && currentQuestionIndex === 0 || isProcessing}
+                          disabled={
+                            (currentFacetIndex === 0 &&
+                              currentQuestionIndex === 0) ||
+                            isProcessing
+                          }
                           className="p-1 rounded-full hover:bg-white/10"
                           aria-label="Previous question"
                         >
-                          <Icons.chevronLeft className="h-5 w-5" />
+                          <Icons.arrowLeft className="h-5 w-5" />
                         </button>
-                        <span className="text-sm">{currentQuestionIndex + 1}/{totalQuestions}</span>
+                        <span className="text-sm">
+                          {currentQuestionIndex + 1}/{totalQuestions}
+                        </span>
                         <button
                           onClick={handleNextQuestion}
                           disabled={!isCurrentQuestionAnswered || isProcessing}
                           className={cn(
                             "p-1 rounded-full hover:bg-white/10",
-                            !isCurrentQuestionAnswered && "opacity-50 cursor-not-allowed"
+                            !isCurrentQuestionAnswered &&
+                              "opacity-50 cursor-not-allowed",
                           )}
                           aria-label="Next question"
                         >
@@ -449,38 +530,42 @@ export default function AssessmentPage() {
                         onValueChange={handleAnswerChange}
                         className="space-y-4"
                       >
-                        {LIKERT_SCALE_OPTIONS.map((option) => (
-                          <div 
-                            key={option.value} 
+                        {likertOptions.map((option) => (
+                          <div
+                            key={option.value}
                             className={cn(
                               "flex items-center p-4 rounded-lg transition-all border-2 border-transparent",
-                              currentAnswer === option.value 
-                                ? "bg-white/20 border-white/40 shadow-lg transform scale-[1.02]" 
+                              currentAnswer === option.value
+                                ? "bg-white/20 border-white/40 shadow-lg transform scale-[1.02]"
                                 : "hover:bg-white/10",
-                              "focus-within:ring-2 focus-within:ring-white/30"
+                              "focus-within:ring-2 focus-within:ring-white/30",
                             )}
                           >
                             <div className="flex items-center flex-1">
-                              <div 
+                              <div
                                 className={cn(
-                                  "w-5 h-5 mr-4 rounded-full", 
-                                  option.color,
-                                  currentAnswer === option.value ? "ring-4 ring-white/30" : ""
-                                )} 
+                                  "w-5 h-5 mr-4 rounded-full",
+                                  currentAnswer === option.value
+                                    ? "ring-4 ring-white/30"
+                                    : "",
+                                )}
+                                style={{ backgroundColor: option.color }}
                                 aria-hidden="true"
                               />
-                              <Label 
-                                htmlFor={`option-${option.value}`} 
+                              <Label
+                                htmlFor={`option-${option.value}`}
                                 className={cn(
                                   "flex-1 text-lg font-medium cursor-pointer",
-                                  currentAnswer === option.value ? "text-white" : "text-white/80"
+                                  currentAnswer === option.value
+                                    ? "text-white"
+                                    : "text-white/80",
                                 )}
                               >
                                 {option.label}
                               </Label>
-                              <RadioGroupItem 
-                                id={`option-${option.value}`} 
-                                value={option.value.toString()} 
+                              <RadioGroupItem
+                                id={`option-${option.value}`}
+                                value={option.value.toString()}
                                 className="h-5 w-5"
                               />
                             </div>
@@ -496,47 +581,57 @@ export default function AssessmentPage() {
 
           {/* Footer navigation */}
           <div className="flex justify-between mt-8">
-            <PrismButton 
-              variant="secondary" 
-              size="large" 
+            <PrismButton
+              variant="secondary"
+              size="large"
               onClick={handlePreviousQuestion}
-              disabled={currentFacetIndex === 0 && currentQuestionIndex === 0 || isProcessing}
+              disabled={
+                (currentFacetIndex === 0 && currentQuestionIndex === 0) ||
+                isProcessing
+              }
             >
-              <Icons.chevronRight className="mr-2 h-5 w-5 rotate-180" /> Previous
+              <Icons.chevronRight className="mr-2 h-5 w-5 rotate-180" />{" "}
+              Previous
             </PrismButton>
 
-            <PrismButton 
+            <PrismButton
               size="large"
               onClick={handleNextQuestion}
               disabled={!isCurrentQuestionAnswered || isProcessing}
               className={cn(
-                (!isCurrentQuestionAnswered) && "opacity-60 cursor-not-allowed",
-                isProcessing && "opacity-70"
+                !isCurrentQuestionAnswered && "opacity-60 cursor-not-allowed",
+                isProcessing && "opacity-70",
               )}
             >
-              {isProcessing && <Icons.loader className="mr-2 h-5 w-5 animate-spin" />}
-              {currentFacetIndex === totalFacets - 1 && currentQuestionIndex === totalQuestions - 1 
-                ? 'Complete Assessment' 
-                : 'Next'}
-              {!(currentFacetIndex === totalFacets - 1 && currentQuestionIndex === totalQuestions - 1) && 
-                <Icons.chevronRight className="ml-2 h-5 w-5" />}
+              {isProcessing && (
+                <Icons.loader className="mr-2 h-5 w-5 animate-spin" />
+              )}
+              {currentFacetIndex === totalFacets - 1 &&
+              currentQuestionIndex === totalQuestions - 1
+                ? "Complete Assessment"
+                : "Next"}
+              {!(
+                currentFacetIndex === totalFacets - 1 &&
+                currentQuestionIndex === totalQuestions - 1
+              ) && <Icons.chevronRight className="ml-2 h-5 w-5" />}
             </PrismButton>
           </div>
 
           {/* Complete facet button (only if all questions in current facet are answered) */}
-          {areAllCurrentFacetQuestionsAnswered && currentQuestionIndex < totalQuestions - 1 && (
-            <div className="mt-4 flex justify-center">
-              <Button
-                variant="link"
-                onClick={toggleCompleteFacet}
-                disabled={isProcessing}
-                className="text-sm text-white/70 hover:text-white/90"
-              >
-                Skip to next section
-                <Icons.arrowRight className="ml-2 h-4 w-4" />
-              </Button>
-            </div>
-          )}
+          {areAllCurrentFacetQuestionsAnswered &&
+            currentQuestionIndex < totalQuestions - 1 && (
+              <div className="mt-4 flex justify-center">
+                <Button
+                  variant="link"
+                  onClick={toggleCompleteFacet}
+                  disabled={isProcessing}
+                  className="text-sm text-white/70 hover:text-white/90"
+                >
+                  Skip to next section
+                  <Icons.arrowRight className="ml-2 h-4 w-4" />
+                </Button>
+              </div>
+            )}
         </div>
       </main>
 

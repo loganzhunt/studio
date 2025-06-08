@@ -1,0 +1,7 @@
+src/app/(main)/assessment/page.client.backup.tsx
+src/app/(main)/assessment/page.client.new.tsx
+src/app/(main)/archetypes/
+src/app/(main)/builder/page.tsx
+src/app/(main)/codex/[worldviewName]/
+src/stories/
+src/test/

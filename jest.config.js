@@ -49,6 +49,10 @@ const config = {
     "<rootDir>/dist/",
     "<rootDir>/build/",
     "<rootDir>/out/",
+    "<rootDir>/studio/",
+  ],
+  modulePathIgnorePatterns: [
+    "<rootDir>/studio/",
   ],
   // Fast mode optimizations
   bail: false,

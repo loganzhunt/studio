@@ -198,7 +198,15 @@ export default function CodexPage() {
       });
       return;
     }
-    addSavedWorldview({ ...entryToSave });
+    addSavedWorldview({
+      id: entryToSave.id,
+      title: entryToSave.title,
+      domainScores: entryToSave.domainScores ?? [],
+      summary: entryToSave.summary ?? entryToSave.description,
+      icon: entryToSave.icon,
+      type: entryToSave.type || "codex",
+      createdAt: new Date().toISOString(),
+    });
     toast({
       title: "Saved to Library",
       description: `"${entryToSave.title}" has been added to your saved worldviews.`,
@@ -206,7 +214,7 @@ export default function CodexPage() {
   };
 
   const CodexCard = ({ entry }: { entry: CodexEntry }) => {
-    const dominantFacet = getDominantFacet(entry.domainScores);
+    const dominantFacet = getDominantFacet(entry.domainScores ?? []);
 
     return (
       <Card className="flex flex-col overflow-hidden glassmorphic-card hover:shadow-primary/20 transition-all duration-300 ease-in-out h-full hover:scale-[1.02] hover:shadow-[0_4px_20px_rgba(0,0,0,0.2)] hover:border-white/30 group">
@@ -239,7 +247,7 @@ export default function CodexPage() {
         </CardHeader>
         <CardContent className="flex-grow flex flex-col justify-center items-center pt-2 pb-4">
           <TriangleChart
-            scores={entry.domainScores}
+            scores={entry.domainScores ?? []}
             worldviewName={entry.title}
             width={180}
             height={156}
@@ -378,7 +386,7 @@ export default function CodexPage() {
                             className={`text-4xl ${getFacetClass(
                               "text",
                               getDominantFacet(
-                                selectedEntry.domainScores
+                                selectedEntry.domainScores ?? []
                               ).toLowerCase() as any,
                               "600"
                             )}`}
@@ -391,7 +399,7 @@ export default function CodexPage() {
                             className={`text-3xl mb-2 ${getFacetClass(
                               "text",
                               getDominantFacet(
-                                selectedEntry.domainScores
+                                selectedEntry.domainScores ?? []
                               ).toLowerCase() as any,
                               "700"
                             )}`}
@@ -408,7 +416,7 @@ export default function CodexPage() {
 
                   <div className="mb-8 flex justify-center">
                     <TriangleChart
-                      scores={selectedEntry.domainScores}
+                      scores={selectedEntry.domainScores ?? []}
                       worldviewName={selectedEntry.title}
                       width={250}
                       height={217}
@@ -460,7 +468,7 @@ export default function CodexPage() {
                       Facet Breakdown
                     </h3>
                     {FACET_NAMES.map((facetName) => {
-                      const scoreObj = selectedEntry.domainScores.find(
+                      const scoreObj = selectedEntry.domainScores?.find(
                         (ds) => ds.facetName === facetName
                       );
                       const score = scoreObj ? scoreObj.score : 0.5;
